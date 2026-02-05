@@ -1,0 +1,212 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================
+// USERS & AUTHENTICATION
+// ============================================
+
+model User {
+  id                   String         @id @default(uuid())
+  email                String         @unique
+  passwordHash         String?        @map("password_hash")
+  password             String?        // Pour compatibilité
+  name                 String?
+  plan                 Plan           @default(STARTER)
+  credits              Int            @default(0)
+  conversionsThisMonth Int            @default(0) @map("conversions_this_month")
+  stripeCustomerId     String?        @map("stripe_customer_id")
+  emailVerified        DateTime?      @map("email_verified")
+  resetToken           String?        @map("reset_token")
+  resetTokenExpiry     DateTime?      @map("reset_token_expiry")
+  lastLogin            DateTime?      @map("last_login")
+  acceptMarketing      Boolean        @default(false) @map("accept_marketing")
+  role                 String         @default("USER")
+  createdAt            DateTime       @default(now()) @map("created_at")
+  updatedAt            DateTime       @updatedAt @map("updated_at")
+  
+  // Relations
+  conversions          Conversion[]
+  creditPacks          CreditPack[]
+  subscriptions        Subscription[]
+  apiKeys              ApiKey[]
+  blogPosts            BlogPost[]
+
+  @@map("users")
+}
+
+enum Plan {
+  STARTER
+  PROFESSIONAL
+  BUSINESS
+  ENTERPRISE
+}
+
+// ============================================
+// CONVERSIONS
+// ============================================
+
+model Conversion {
+  id             String           @id @default(uuid())
+  userId         String?          @map("user_id")
+  inputFileName  String           @map("input_file_name")
+  inputFormat    String           @map("input_format")
+  outputFormat   String           @map("output_format")
+  fileSizeMb     Float?           @map("file_size_mb")
+  status         ConversionStatus @default(PENDING)
+  inputFileUrl   String?          @map("input_file_url")
+  outputFileUrl  String?          @map("output_file_url")
+  creditsUsed    Int              @default(1) @map("credits_used")
+  deleteAt       DateTime?        @map("delete_at")
+  errorMessage   String?          @map("error_message")
+  createdAt      DateTime         @default(now()) @map("created_at")
+  completedAt    DateTime?        @map("completed_at")
+  
+  // Relations
+  user           User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([deleteAt])
+  @@index([status])
+  @@map("conversions")
+}
+
+enum ConversionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+// ============================================
+// CREDITS
+// ============================================
+
+model CreditPack {
+  id              String    @id @default(uuid())
+  userId          String    @map("user_id")
+  creditsAmount   Int       @map("credits_amount")
+  priceUsd        Float     @map("price_usd")
+  stripePaymentId String?   @map("stripe_payment_id")
+  expiresAt       DateTime  @map("expires_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  
+  // Relations
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("credit_packs")
+}
+
+// ============================================
+// SUBSCRIPTIONS
+// ============================================
+
+model Subscription {
+  id                    String             @id @default(uuid())
+  userId                String             @map("user_id")
+  plan                  Plan
+  status                SubscriptionStatus @default(ACTIVE)
+  stripeSubscriptionId  String?            @map("stripe_subscription_id")
+  monthlyLimit          Int                @map("monthly_limit")
+  currentPeriodStart    DateTime           @map("current_period_start")
+  currentPeriodEnd      DateTime           @map("current_period_end")
+  cancelAtPeriodEnd     Boolean            @default(false) @map("cancel_at_period_end")
+  createdAt             DateTime           @default(now()) @map("created_at")
+  updatedAt             DateTime           @updatedAt @map("updated_at")
+  
+  // Relations
+  user                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  PAST_DUE
+}
+
+// ============================================
+// API KEYS
+// ============================================
+
+model ApiKey {
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id")
+  keyHash     String    @map("key_hash")
+  name        String?
+  lastUsedAt  DateTime? @map("last_used_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  
+  // Relations
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("api_keys")
+}
+
+// ============================================
+// SECURITY & LOGS
+// ============================================
+
+model SecurityEvent {
+  id          String   @id @default(uuid())
+  userId      String?  @map("user_id")
+  eventType   String   @map("event_type")
+  ipAddress   String?  @map("ip_address")
+  userAgent   String?  @map("user_agent")
+  country     String?
+  details     Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@map("security_events")
+}
+
+// ============================================
+// BLOG (PUBLIC + ADMIN)
+// ============================================
+
+enum BlogStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model BlogPost {
+  id          String     @id @default(uuid())
+  slug        String     @unique
+  title       String
+  excerpt     String?
+  content     String     // Markdown/MDX (stocké brut)
+  coverImage  String?    @map("cover_image")
+  status      BlogStatus @default(DRAFT)
+  publishedAt DateTime?  @map("published_at")
+  authorId    String?    @map("author_id")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  author      User?      @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([publishedAt])
+  @@index([createdAt])
+  @@map("blog_posts")
+}

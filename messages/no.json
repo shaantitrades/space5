@@ -1,0 +1,75 @@
+{
+  "common": {
+    "appName": "Multi Convert",
+    "slogan": "The Universal Conversion Suite - All formats, one platform",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "upload": "Upload",
+    "download": "Download",
+    "convert": "Convert",
+    "close": "Close"
+  },
+  "nav": {
+    "home": "Home",
+    "convert": "Convert",
+    "pricing": "Pricing",
+    "features": "Features",
+    "api": "API",
+    "enterprise": "Enterprise",
+    "login": "Login",
+    "signup": "Sign Up",
+    "dashboard": "Dashboard"
+  },
+  "pricing": {
+    "title": "Choose Your Plan",
+    "subtitle": "Flexible pricing for every need",
+    "plans": {
+      "starter": "Starter",
+      "professional": "Professional",
+      "business": "Business",
+      "enterprise": "Enterprise"
+    },
+    "features": {
+      "conversions": "Conversions",
+      "maxSize": "Max File Size",
+      "watermark": "Watermark",
+      "speed": "Speed",
+      "support": "Support",
+      "batch": "Batch Processing",
+      "api": "API Requests",
+      "ai": "AI Features",
+      "whiteLabel": "White Label",
+      "sso": "SSO",
+      "sla": "SLA",
+      "accountManager": "Account Manager"
+    },
+    "perMonth": "per month",
+    "unlimited": "Unlimited",
+    "custom": "Custom",
+    "popular": "Most Popular",
+    "getStarted": "Get Started",
+    "contactSales": "Contact Sales"
+  },
+  "security": {
+    "blocked": "Access Denied",
+    "blockedMessage": "Your request has been blocked for security reasons.",
+    "verify": "Verification Required",
+    "verifyMessage": "Please complete the verification to continue."
+  },
+  "convert": {
+    "title": "Convert Your Files",
+    "subtitle": "Upload files and convert between formats instantly",
+    "selectFormat": "Select Output Format",
+    "uploadFile": "Upload File",
+    "dragDrop": "Drag and drop files here, or click to select",
+    "processing": "Processing...",
+    "completed": "Conversion Completed",
+    "download": "Download Converted File"
+  }
+}

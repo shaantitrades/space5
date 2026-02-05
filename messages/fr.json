@@ -1,0 +1,80 @@
+{
+  "common": {
+    "appName": "Multi Convert",
+    "slogan": "La Suite de Conversion Universelle - Tous les formats, une plateforme",
+    "hero_title": "Suite de conversion universelle",
+    "hero_subtitle": "Convertissez tous vos fichiers en local, vite et en sécurité.",
+    "start_converting": "Commencer la conversion",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "upload": "Téléverser",
+    "download": "Télécharger",
+    "convert": "Convertir",
+    "close": "Fermer"
+  },
+  "nav": {
+    "home": "Accueil",
+    "tools": "Outils",
+    "convert": "Convertir",
+    "archive": "Archive",
+    "pricing": "Tarifs",
+    "features": "Fonctionnalités",
+    "api": "API",
+    "enterprise": "Entreprise",
+    "login": "Connexion",
+    "signup": "S'inscrire",
+    "dashboard": "Tableau de bord"
+  },
+  "pricing": {
+    "title": "Choisissez Votre Plan",
+    "subtitle": "Tarification flexible pour tous les besoins",
+    "plans": {
+      "starter": "Starter",
+      "professional": "Professionnel",
+      "business": "Business",
+      "enterprise": "Enterprise"
+    },
+    "features": {
+      "conversions": "Conversions",
+      "maxSize": "Taille Max",
+      "watermark": "Filigrane",
+      "speed": "Vitesse",
+      "support": "Support",
+      "batch": "Traitement par lot",
+      "api": "Requêtes API",
+      "ai": "Fonctionnalités IA",
+      "whiteLabel": "Marque blanche",
+      "sso": "SSO",
+      "sla": "SLA",
+      "accountManager": "Gestionnaire de compte"
+    },
+    "perMonth": "par mois",
+    "unlimited": "Illimité",
+    "custom": "Sur mesure",
+    "popular": "Le Plus Populaire",
+    "getStarted": "Commencer",
+    "contactSales": "Contacter les ventes"
+  },
+  "security": {
+    "blocked": "Accès Refusé",
+    "blockedMessage": "Votre demande a été bloquée pour des raisons de sécurité.",
+    "verify": "Vérification Requise",
+    "verifyMessage": "Veuillez compléter la vérification pour continuer."
+  },
+  "convert": {
+    "title": "Convertir Vos Fichiers",
+    "subtitle": "Téléversez des fichiers et convertissez entre formats instantanément",
+    "selectFormat": "Sélectionner le Format de Sortie",
+    "uploadFile": "Téléverser un Fichier",
+    "dragDrop": "Glissez-déposez les fichiers ici, ou cliquez pour sélectionner",
+    "processing": "Traitement en cours...",
+    "completed": "Conversion Terminée",
+    "download": "Télécharger le Fichier Converti"
+  }
+}

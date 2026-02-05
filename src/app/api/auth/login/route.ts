@@ -1,0 +1,139 @@
+/**
+ * Multi Convert - API Login
+ * Route de connexion
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { DevAuth, isDevMode, createDevToken } from '@/lib/dev-auth';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this';
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { email, password, rememberMe } = body;
+
+    // Validation
+    if (!email || !password) {
+      return NextResponse.json(
+        { message: 'Email et mot de passe requis' },
+        { status: 400 }
+      );
+    }
+
+    // 🔧 MODE DEV: Sans base de données
+    if (isDevMode()) {
+      console.log('🔧 [DEV MODE] Login sans base de données');
+      
+      const user = DevAuth.verifyCredentials(email, password);
+      
+      if (!user) {
+        return NextResponse.json(
+          { message: 'Email ou mot de passe incorrect' },
+          { status: 401 }
+        );
+      }
+
+      const token = createDevToken(user);
+
+      return NextResponse.json({
+        success: true,
+        message: '✅ Connexion réussie (mode dev)',
+        user: {
+          id: user.id,
+          email: user.email,
+          fullName: user.fullName,
+        },
+        token,
+        devMode: true,
+      });
+    }
+
+    // Trouver l'utilisateur
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+    });
+
+    if (!user || !user.password) {
+      return NextResponse.json(
+        { message: 'Email ou mot de passe incorrect' },
+        { status: 401 }
+      );
+    }
+
+    // Vérifier le mot de passe
+    const isValidPassword = await bcrypt.compare(password, user.password);
+
+    if (!isValidPassword) {
+      return NextResponse.json(
+        { message: 'Email ou mot de passe incorrect' },
+        { status: 401 }
+      );
+    }
+
+    // Vérifier si l'email est vérifié
+    if (!user.emailVerified) {
+      return NextResponse.json(
+        { 
+          message: 'Veuillez vérifier votre email avant de vous connecter',
+          requiresVerification: true 
+        },
+        { status: 403 }
+      );
+    }
+
+    // Créer le token JWT
+    const token = jwt.sign(
+      { 
+        userId: user.id, 
+        email: user.email,
+        role: user.role 
+      },
+      JWT_SECRET,
+      { expiresIn: rememberMe ? '30d' : '7d' }
+    );
+
+    // Mettre à jour la dernière connexion
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { lastLogin: new Date() },
+    });
+
+    // Créer la réponse avec le cookie
+    const response = NextResponse.json(
+      {
+        message: 'Connexion réussie',
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        },
+      },
+      { status: 200 }
+    );
+
+    // Définir le cookie
+    response.cookies.set('auth-token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: rememberMe ? 30 * 24 * 60 * 60 : 7 * 24 * 60 * 60,
+      path: '/',
+    });
+
+    return response;
+  } catch (error) {
+    console.error('Erreur login:', error);
+    return NextResponse.json(
+      { message: 'Erreur lors de la connexion' },
+      { status: 500 }
+    );
+  }
+}

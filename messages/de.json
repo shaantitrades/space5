@@ -1,0 +1,75 @@
+{
+  "common": {
+    "appName": "Multi Convert",
+    "slogan": "Die Universelle Konvertierungs-Suite - Alle Formate, eine Plattform",
+    "loading": "Lädt...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "cancel": "Abbrechen",
+    "confirm": "Bestätigen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "upload": "Hochladen",
+    "download": "Herunterladen",
+    "convert": "Konvertieren",
+    "close": "Schließen"
+  },
+  "nav": {
+    "home": "Startseite",
+    "convert": "Konvertieren",
+    "pricing": "Preise",
+    "features": "Funktionen",
+    "api": "API",
+    "enterprise": "Unternehmen",
+    "login": "Anmelden",
+    "signup": "Registrieren",
+    "dashboard": "Dashboard"
+  },
+  "pricing": {
+    "title": "Wählen Sie Ihren Plan",
+    "subtitle": "Flexible Preisgestaltung für jeden Bedarf",
+    "plans": {
+      "starter": "Starter",
+      "professional": "Professional",
+      "business": "Business",
+      "enterprise": "Enterprise"
+    },
+    "features": {
+      "conversions": "Konvertierungen",
+      "maxSize": "Max. Dateigröße",
+      "watermark": "Wasserzeichen",
+      "speed": "Geschwindigkeit",
+      "support": "Support",
+      "batch": "Stapelverarbeitung",
+      "api": "API-Anfragen",
+      "ai": "KI-Funktionen",
+      "whiteLabel": "White Label",
+      "sso": "SSO",
+      "sla": "SLA",
+      "accountManager": "Account Manager"
+    },
+    "perMonth": "pro Monat",
+    "unlimited": "Unbegrenzt",
+    "custom": "Individuell",
+    "popular": "Beliebtester",
+    "getStarted": "Loslegen",
+    "contactSales": "Verkauf kontaktieren"
+  },
+  "security": {
+    "blocked": "Zugriff Verweigert",
+    "blockedMessage": "Ihre Anfrage wurde aus Sicherheitsgründen blockiert.",
+    "verify": "Überprüfung Erforderlich",
+    "verifyMessage": "Bitte schließen Sie die Überprüfung ab, um fortzufahren."
+  },
+  "convert": {
+    "title": "Konvertieren Sie Ihre Dateien",
+    "subtitle": "Dateien hochladen und sofort zwischen Formaten konvertieren",
+    "selectFormat": "Ausgabeformat Auswählen",
+    "uploadFile": "Datei Hochladen",
+    "dragDrop": "Dateien hier ablegen oder klicken zum Auswählen",
+    "processing": "Wird verarbeitet...",
+    "completed": "Konvertierung Abgeschlossen",
+    "download": "Konvertierte Datei Herunterladen"
+  }
+}

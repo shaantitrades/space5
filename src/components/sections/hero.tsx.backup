@@ -1,0 +1,1124 @@
+'use client';
+
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/routing';
+import { useSearchParams } from 'next/navigation';
+import { ArrowRight, Upload, Check, Shield, Zap, Cloud, Link2, ChevronDown, File, X, RotateCw, Plus, Edit } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { getToolInfoFromParams } from '@/lib/tools-mapping';
+import { PDFEditor } from '@/components/editors/pdf-editor';
+
+export function Hero() {
+  const t = useTranslations('common');
+  const searchParams = useSearchParams();
+  const [isDragging, setIsDragging] = useState(false);
+  const [inputFormat, setInputFormat] = useState<string>('');
+  const [outputFormat, setOutputFormat] = useState<string>('');
+  const [showInputDropdown, setShowInputDropdown] = useState(false);
+  const [showOutputDropdown, setShowOutputDropdown] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [fileOutputFormats, setFileOutputFormats] = useState<Record<string, string>>({});
+  const [showFileOutputDropdowns, setShowFileOutputDropdowns] = useState<Record<string, boolean>>({});
+  const [showBrowseDropdown, setShowBrowseDropdown] = useState(false);
+  const [showEditor, setShowEditor] = useState(false);
+  const [processedFile, setProcessedFile] = useState<File | null>(null);
+  const [showFileActions, setShowFileActions] = useState<Record<string, boolean>>({});
+  const inputDropdownRef = useRef<HTMLDivElement>(null);
+  const outputDropdownRef = useRef<HTMLDivElement>(null);
+  const fileOutputDropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const fileActionDropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const browseDropdownRef = useRef<HTMLDivElement>(null);
+  const prevToolKeyRef = useRef<string>('');
+
+  // Génération pro d'un PDF vierge (mode "Créer PDF")
+  const createBlankPdfFile = async (opts?: {
+    page?: 'A4' | 'LETTER';
+    orientation?: 'portrait' | 'landscape';
+    name?: string;
+    pages?: number;
+    template?: 'blank' | 'letter' | 'invoice' | 'report';
+  }) => {
+    const { PDFDocument, PageSizes, StandardFonts, rgb } = await import('pdf-lib');
+    const pdfDoc = await PDFDocument.create();
+    const pagePreset = opts?.page || 'A4';
+    const orientation = opts?.orientation || 'portrait';
+    const pageCount = Math.min(20, Math.max(1, Math.floor(opts?.pages || 1)));
+    const template = opts?.template || 'blank';
+    const size = pagePreset === 'LETTER' ? PageSizes.Letter : PageSizes.A4;
+    const w = orientation === 'landscape' ? size[1] : size[0];
+    const h = orientation === 'landscape' ? size[0] : size[1];
+    for (let i = 0; i < pageCount; i++) pdfDoc.addPage([w, h]);
+
+    // Métadonnées (entreprise / pro)
+    pdfDoc.setTitle('Nouveau document');
+    pdfDoc.setAuthor('OMNIVERSA');
+    pdfDoc.setProducer('OMNIVERSA');
+    pdfDoc.setCreator('OMNIVERSA');
+    pdfDoc.setCreationDate(new Date());
+    pdfDoc.setModificationDate(new Date());
+
+    // Modèles pro (starter content léger, non intrusif)
+    if (template !== 'blank') {
+      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+      const p0 = pdfDoc.getPage(0);
+      const margin = 56;
+      const top = h - margin;
+
+      const drawHr = (y: number) => {
+        p0.drawLine({
+          start: { x: margin, y },
+          end: { x: w - margin, y },
+          thickness: 1,
+          color: rgb(0.85, 0.87, 0.9),
+        });
+      };
+
+      if (template === 'letter') {
+        p0.drawText('Lettre', { x: margin, y: top, size: 20, font: bold, color: rgb(0.1, 0.12, 0.16) });
+        drawHr(top - 18);
+        p0.drawText('Objet :', { x: margin, y: top - 44, size: 12, font: bold, color: rgb(0.2, 0.24, 0.3) });
+        p0.drawText('[Votre objet ici]', { x: margin + 54, y: top - 44, size: 12, font, color: rgb(0.35, 0.4, 0.48) });
+        p0.drawText('Bonjour,', { x: margin, y: top - 90, size: 12, font, color: rgb(0.1, 0.12, 0.16) });
+        p0.drawText('[Votre contenu ici…]', { x: margin, y: top - 120, size: 12, font, color: rgb(0.35, 0.4, 0.48) });
+      } else if (template === 'invoice') {
+        p0.drawText('FACTURE', { x: margin, y: top, size: 22, font: bold, color: rgb(0.1, 0.12, 0.16) });
+        p0.drawText('N°:', { x: w - margin - 120, y: top, size: 12, font: bold, color: rgb(0.2, 0.24, 0.3) });
+        p0.drawText('[0001]', { x: w - margin - 90, y: top, size: 12, font, color: rgb(0.35, 0.4, 0.48) });
+        drawHr(top - 18);
+        p0.drawText('Client:', { x: margin, y: top - 44, size: 12, font: bold, color: rgb(0.2, 0.24, 0.3) });
+        p0.drawText('[Nom du client]', { x: margin + 48, y: top - 44, size: 12, font, color: rgb(0.35, 0.4, 0.48) });
+        p0.drawText('Date:', { x: w - margin - 120, y: top - 44, size: 12, font: bold, color: rgb(0.2, 0.24, 0.3) });
+        p0.drawText('[JJ/MM/AAAA]', { x: w - margin - 70, y: top - 44, size: 12, font, color: rgb(0.35, 0.4, 0.48) });
+        p0.drawText('Désignation', { x: margin, y: top - 100, size: 11, font: bold, color: rgb(0.2, 0.24, 0.3) });
+        p0.drawText('Qté', { x: w - margin - 200, y: top - 100, size: 11, font: bold, color: rgb(0.2, 0.24, 0.3) });
+        p0.drawText('Prix', { x: w - margin - 140, y: top - 100, size: 11, font: bold, color: rgb(0.2, 0.24, 0.3) });
+        p0.drawText('Total', { x: w - margin - 70, y: top - 100, size: 11, font: bold, color: rgb(0.2, 0.24, 0.3) });
+        drawHr(top - 110);
+        p0.drawText('[Ligne 1…]', { x: margin, y: top - 140, size: 11, font, color: rgb(0.35, 0.4, 0.48) });
+      } else if (template === 'report') {
+        p0.drawText('Compte-rendu', { x: margin, y: top, size: 20, font: bold, color: rgb(0.1, 0.12, 0.16) });
+        drawHr(top - 18);
+        p0.drawText('Date :', { x: margin, y: top - 44, size: 12, font: bold, color: rgb(0.2, 0.24, 0.3) });
+        p0.drawText('[JJ/MM/AAAA]', { x: margin + 46, y: top - 44, size: 12, font, color: rgb(0.35, 0.4, 0.48) });
+        p0.drawText('Participants :', { x: margin, y: top - 70, size: 12, font: bold, color: rgb(0.2, 0.24, 0.3) });
+        p0.drawText('[Noms…]', { x: margin + 86, y: top - 70, size: 12, font, color: rgb(0.35, 0.4, 0.48) });
+        p0.drawText('Notes :', { x: margin, y: top - 110, size: 12, font: bold, color: rgb(0.2, 0.24, 0.3) });
+        p0.drawText('[Votre contenu ici…]', { x: margin, y: top - 140, size: 12, font, color: rgb(0.35, 0.4, 0.48) });
+      }
+    }
+
+    const bytes = await pdfDoc.save({ useObjectStreams: true });
+    const name = opts?.name || 'Nouveau document.pdf';
+    return new File([bytes], name, { type: 'application/pdf' });
+  };
+
+  // Mode entreprise "Créer PDF" (assistant de création)
+  const [createPdfPage, setCreatePdfPage] = useState<'A4' | 'LETTER'>('A4');
+  const [createPdfOrientation, setCreatePdfOrientation] = useState<'portrait' | 'landscape'>('portrait');
+  const [createPdfPages, setCreatePdfPages] = useState<number>(1);
+  const [createPdfName, setCreatePdfName] = useState<string>('Nouveau document.pdf');
+  const [createPdfTemplate, setCreatePdfTemplate] = useState<'blank' | 'letter' | 'invoice' | 'report'>('blank');
+  const [createPdfError, setCreatePdfError] = useState<string | null>(null);
+  const [isCreatingPdf, setIsCreatingPdf] = useState(false);
+  const createPdfAutoAttemptedRef = useRef(false);
+
+  // Formats disponibles - Basé sur les conversions populaires
+  const allFormats = {
+    pdf: ['PDF'],
+    documents: ['DOC', 'DOCX', 'XLS', 'XLSX', 'PPT', 'PPTX', 'WORD', 'EXCEL'],
+    images: ['PNG', 'JPG', 'JPEG', 'WEBP', 'GIF', 'SVG', 'BMP', 'TIFF', 'HEIC'],
+    video: ['MP4', 'AVI', 'MOV', 'WebM', 'MKV', 'FLV', 'WEBM'],
+    audio: ['MP3', 'WAV', 'FLAC', 'AAC', 'OGG', 'M4A'],
+    ebooks: ['EPUB', 'MOBI'],
+    other: ['DJVU'],
+  };
+
+  // Tous les formats d'entrée - Tous formats disponibles (sans ICO qui est un format de sortie)
+  const inputFormats = [
+    ...allFormats.pdf,
+    ...allFormats.documents,
+    ...allFormats.images,
+    'IMAGE', // Option générique pour les images
+    ...allFormats.video,
+    ...allFormats.audio,
+    ...allFormats.ebooks,
+    ...allFormats.other,
+  ];
+
+  // Formats de sortie disponibles selon le format d'entrée - Basé sur conversions populaires
+  const getOutputFormats = (input: string) => {
+    if (!input) return [];
+    
+    const inputUpper = input.toUpperCase();
+    
+    // PDF → Documents + Images
+    if (inputUpper === 'PDF') {
+      return ['WORD', 'DOC', 'DOCX', 'EXCEL', 'XLS', 'XLSX', 'PPT', 'PPTX', 'PNG', 'JPG', 'JPEG'];
+    }
+    
+    // Documents → PDF + Autres documents
+    if (['DOC', 'DOCX', 'WORD'].includes(inputUpper)) {
+      return ['PDF', 'DOC', 'DOCX', 'WORD'];
+    }
+    if (['XLS', 'XLSX', 'EXCEL'].includes(inputUpper)) {
+      return ['PDF', 'XLS', 'XLSX', 'EXCEL'];
+    }
+    if (['PPT', 'PPTX'].includes(inputUpper)) {
+      return ['PDF', 'PPT', 'PPTX'];
+    }
+    
+    // Format IMAGE générique → Tous formats images de sortie incluant ICO
+    if (inputUpper === 'IMAGE') {
+      return ['PDF', 'PNG', 'JPG', 'JPEG', 'WEBP', 'GIF', 'BMP', 'ICO', 'TIFF'];
+    }
+    
+    // Images → PDF + Autres images + ICO
+    if (['JPG', 'JPEG'].includes(inputUpper)) {
+      return ['PDF', 'PNG', 'JPG', 'JPEG', 'WEBP', 'GIF', 'BMP', 'ICO'];
+    }
+    if (inputUpper === 'PNG') {
+      return ['PDF', 'JPG', 'JPEG', 'PNG', 'WEBP', 'GIF', 'ICO', 'BMP'];
+    }
+    if (inputUpper === 'HEIC') {
+      return ['JPG', 'JPEG', 'PNG', 'ICO'];
+    }
+    if (['GIF', 'WEBP', 'BMP', 'TIFF', 'SVG'].includes(inputUpper)) {
+      return ['PNG', 'JPG', 'JPEG', 'PDF', 'WEBP', 'GIF', 'ICO'];
+    }
+    
+    // Vidéo → MP4 + Audio + GIF
+    if (['MP4', 'MOV', 'MKV', 'FLV', 'WEBM', 'AVI'].includes(inputUpper)) {
+      return ['MP4', 'MOV', 'MKV', 'AVI', 'MP3', 'WAV', 'GIF'];
+    }
+    
+    // Audio → Autres audio formats
+    if (['WAV'].includes(inputUpper)) {
+      return ['MP3', 'WAV', 'AAC', 'OGG', 'M4A', 'FLAC'];
+    }
+    if (['MP3'].includes(inputUpper)) {
+      return ['WAV', 'MP3', 'AAC', 'OGG', 'M4A'];
+    }
+    if (['M4A'].includes(inputUpper)) {
+      return ['MP3', 'WAV', 'AAC', 'OGG'];
+    }
+    if (['AAC', 'OGG', 'FLAC'].includes(inputUpper)) {
+      return ['MP3', 'WAV', 'AAC', 'OGG', 'M4A'];
+    }
+    
+    // Ebooks → PDF + MOBI
+    if (inputUpper === 'EPUB') {
+      return ['PDF', 'MOBI'];
+    }
+    if (inputUpper === 'MOBI') {
+      return ['PDF', 'EPUB'];
+    }
+    
+    // Autres formats
+    if (inputUpper === 'DJVU') {
+      return ['PDF'];
+    }
+    
+    // Par défaut, retourner tous les formats
+    return inputFormats;
+  };
+
+  // Fermer les dropdowns au clic extérieur
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (inputDropdownRef.current && !inputDropdownRef.current.contains(event.target as Node)) {
+        setShowInputDropdown(false);
+      }
+      if (outputDropdownRef.current && !outputDropdownRef.current.contains(event.target as Node)) {
+        setShowOutputDropdown(false);
+      }
+      
+      // Fermer les dropdowns des fichiers
+      Object.keys(fileOutputDropdownRefs.current).forEach((fileName) => {
+        const ref = fileOutputDropdownRefs.current[fileName];
+        if (ref && !ref.contains(event.target as Node)) {
+          setShowFileOutputDropdowns((prev) => ({
+            ...prev,
+            [fileName]: false,
+          }));
+        }
+      });
+
+      // Fermer le menu d'actions par fichier
+      Object.keys(fileActionDropdownRefs.current).forEach((fileName) => {
+        const ref = fileActionDropdownRefs.current[fileName];
+        if (ref && !ref.contains(event.target as Node)) {
+          setShowFileActions((prev) => ({
+            ...prev,
+            [fileName]: false,
+          }));
+        }
+      });
+      
+      // Fermer le dropdown "Parcourir fichiers"
+      if (browseDropdownRef.current && !browseDropdownRef.current.contains(event.target as Node)) {
+        setShowBrowseDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [uploadedFiles]);
+
+  // Lire les paramètres d'URL et initialiser les formats
+  useEffect(() => {
+    const urlInput = searchParams.get('input');
+    const urlOutput = searchParams.get('output');
+    
+    if (urlInput) {
+      setInputFormat(urlInput.toUpperCase());
+    }
+    if (urlOutput) {
+      setOutputFormat(urlOutput.toUpperCase());
+    }
+  }, [searchParams]);
+
+  // Si l'utilisateur change d'outil (via URL: tool/input/output), vider automatiquement les fichiers déjà uploadés
+  useEffect(() => {
+    const toolKey = `${searchParams.get('tool') || ''}|${searchParams.get('input') || ''}|${searchParams.get('output') || ''}`;
+
+    // Ne pas reset au tout premier rendu
+    if (prevToolKeyRef.current && prevToolKeyRef.current !== toolKey) {
+      setUploadedFiles([]);
+      setFileOutputFormats({});
+      setShowFileOutputDropdowns({});
+      setShowFileActions({});
+      setShowEditor(false);
+      setProcessedFile(null);
+      setIsDragging(false);
+    }
+
+    prevToolKeyRef.current = toolKey;
+  }, [searchParams]);
+
+  // Réinitialiser le format de sortie si le format d'entrée change (seulement si pas depuis URL)
+  useEffect(() => {
+    const urlInput = searchParams.get('input');
+    if (!urlInput && inputFormat) {
+      const available = getOutputFormats(inputFormat);
+      if (available.length > 0 && !available.includes(outputFormat)) {
+        setOutputFormat('');
+      }
+    }
+  }, [inputFormat, searchParams]);
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = Array.from(e.dataTransfer.files);
+    // Remplacer les fichiers existants (pas d'ajout)
+    setUploadedFiles(files);
+    // Réinitialiser les formats de sortie associés
+    setFileOutputFormats({});
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      // Remplacer les fichiers existants (pas d'ajout)
+      setUploadedFiles(files);
+      // Réinitialiser les formats de sortie associés
+      setFileOutputFormats({});
+    }
+    // Réinitialiser l'input pour permettre de sélectionner le même fichier à nouveau
+    e.target.value = '';
+  };
+
+  const handleAddMoreFiles = () => {
+    // Créer un input temporaire pour ajouter des fichiers sans remplacer
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.multiple = true;
+    input.onchange = (event: Event) => {
+      const target = event.target as HTMLInputElement;
+      if (target.files) {
+        const files = Array.from(target.files);
+        // Ajouter les nouveaux fichiers à la liste existante
+        setUploadedFiles((prev) => [...prev, ...files]);
+      }
+    };
+    input.click();
+  };
+
+  const handleRemoveFile = (fileName: string) => {
+    setUploadedFiles((prev) => prev.filter((f) => f.name !== fileName));
+    setFileOutputFormats((prev) => {
+      const newFormats = { ...prev };
+      delete newFormats[fileName];
+      return newFormats;
+    });
+  };
+
+  const getFileFormat = (fileName: string): string => {
+    const extension = fileName.split('.').pop()?.toUpperCase() || '';
+    return extension;
+  };
+
+  const getOutputFormatsForFile = (fileName: string) => {
+    const inputFormat = getFileFormat(fileName);
+    return getOutputFormats(inputFormat);
+  };
+
+  const handleFileOutputFormatChange = (fileName: string, format: string) => {
+    setFileOutputFormats((prev) => ({
+      ...prev,
+      [fileName]: format,
+    }));
+    setShowFileOutputDropdowns((prev) => ({
+      ...prev,
+      [fileName]: false,
+    }));
+  };
+
+  const handleConvertFile = (file: File) => {
+    // TODO: Implémenter la conversion/traitement par fichier
+    const fileName = file.name;
+    const chosenOutput = hasGlobalFormats ? outputFormat : (fileOutputFormats[fileName] || '');
+
+    console.log('Conversion demandée (fichier):', {
+      fileName,
+      tool: searchParams.get('tool'),
+      input: searchParams.get('input'),
+      output: searchParams.get('output'),
+      inputFormat,
+      outputFormat: chosenOutput,
+    });
+    alert('Fonctionnalité de conversion par fichier à implémenter');
+  };
+
+  const handleOpenEditorForFile = (file: File) => {
+    // Ouvrir l'éditeur avec ce fichier
+    if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+      setProcessedFile(file);
+      setShowEditor(true);
+    } else {
+      alert("L'éditeur PDF est uniquement disponible pour les fichiers PDF");
+    }
+  };
+
+  const handleEditorClose = () => {
+    setShowEditor(false);
+    setProcessedFile(null);
+  };
+
+  const handleEditorSave = (editedFile: File) => {
+    // Télécharger le fichier édité
+    const url = URL.createObjectURL(editedFile);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = editedFile.name;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    setProcessedFile(editedFile);
+  };
+
+  // Récupérer les infos de l'outil depuis les paramètres URL
+  const toolInfo = getToolInfoFromParams(
+    searchParams.get('tool'),
+    searchParams.get('input'),
+    searchParams.get('output')
+  );
+
+  // Vérifier si l'outil nécessite un fichier PDF (pour l'éditeur)
+  const currentTool = searchParams.get('tool') || '';
+  const currentInput = searchParams.get('input') || '';
+  const isCreatePdfTool = currentTool.toLowerCase() === 'create-pdf';
+  const isPDFTool =
+    currentInput === 'PDF' ||
+    (currentTool &&
+      [
+        'split',
+        'merge',
+        'organize',
+        'edit',
+        'sign',
+        'annotate',
+        'compress',
+        'watermark',
+        'protect',
+        'unlock',
+        'crop',
+        'rotate',
+        'extract',
+        'extract-sections',
+        'mix-pages',
+        'add-pages',
+        'create-form',
+        'bookmarks',
+        'headers',
+        'page-numbers',
+        'metadata',
+        'extract-images',
+        'n-up',
+        'bates',
+        'flatten',
+        'repair',
+        'rename',
+        'optimize-structure',
+        'straighten',
+        'grayscale',
+        'clean-annotations',
+        'prepare-print',
+        'create-pdf',
+      ].includes(currentTool.toLowerCase()));
+
+  const createPdfFromConfig = async (opts?: { auto?: boolean }) => {
+    try {
+      setCreatePdfError(null);
+      setIsCreatingPdf(true);
+      const blank = await createBlankPdfFile({
+        page: createPdfPage,
+        orientation: createPdfOrientation,
+        name: createPdfName?.trim() ? createPdfName.trim() : 'Nouveau document.pdf',
+        pages: createPdfPages,
+        template: createPdfTemplate,
+      });
+      setProcessedFile(blank);
+      setShowEditor(true);
+    } catch (e) {
+      console.error('Erreur création PDF vierge:', e);
+      setCreatePdfError('Impossible de créer le PDF vierge. Vérifiez la console et réessayez.');
+      if (opts?.auto) {
+        // En mode auto, on laisse l'utilisateur via l'assistant
+      }
+    } finally {
+      setIsCreatingPdf(false);
+    }
+  };
+
+  // Mode "Créer PDF" : tentative auto (pour ouvrir directement) + fallback assistant entreprise
+  useEffect(() => {
+    if (!isCreatePdfTool) return;
+    if (showEditor || processedFile) return;
+    if (createPdfAutoAttemptedRef.current) return;
+    createPdfAutoAttemptedRef.current = true;
+    void createPdfFromConfig({ auto: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCreatePdfTool, showEditor, processedFile]);
+
+  const isConversionContext = Boolean(searchParams.get('output')) || currentTool.toLowerCase() === 'convert';
+  const hasGlobalFormats = Boolean(inputFormat && outputFormat);
+  const requiresOutputFormat = isConversionContext;
+  const allFilesHaveFormat = !hasGlobalFormats && 
+    (!requiresOutputFormat || 
+      (uploadedFiles.length > 0 && 
+        uploadedFiles.every((file) => fileOutputFormats[file.name])));
+
+  if (showEditor && processedFile) {
+    return <PDFEditor file={processedFile} onSave={handleEditorSave} onClose={handleEditorClose} />;
+  }
+
+  const heroContent = (
+    <section className="relative overflow-hidden bg-gradient-to-b from-primary/10 via-background to-background">
+      <div className="container mx-auto px-4 py-8 md:py-12">
+        <div className="max-w-5xl mx-auto">
+          {/* Titre principal - Affichage conditionnel selon l'outil sélectionné */}
+          <div className="text-center mb-8">
+            {toolInfo ? (
+              <>
+                <h1 className="text-4xl md:text-5xl font-bold mb-3 text-foreground">
+                  {toolInfo.title}
+                </h1>
+                <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
+                  {toolInfo.description}
+                </p>
+              </>
+            ) : (
+              <>
+                <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                  OMNIVERSA
+                </h1>
+                <p className="text-xl md:text-2xl text-muted-foreground mb-3">
+                  La Suite de Conversion Universelle – Tous les formats, une plateforme
+                </p>
+                <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto">
+                  Convertissez instantanément PDF, images, vidéos, audio et documents avec une qualité optimale, 
+                  un traitement par lot et une sécurité de niveau militaire. Propulsé par l'IA.
+                </p>
+              </>
+            )}
+          </div>
+
+          {/* Zone de dépôt de fichiers / Assistant "Créer PDF" */}
+          <div className="mb-6">
+            {isCreatePdfTool ? (
+              <div className="relative border border-border rounded-xl p-6 md:p-8 bg-background/70 backdrop-blur">
+                <div className="flex flex-col md:flex-row md:items-start gap-6">
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-lg md:text-xl font-bold text-foreground">Nouveau document</h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Choisis un format, un modèle, et ouvre directement l’éditeur.
+                        </p>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Max 20 pages • A4/Lettre
+                      </div>
+                    </div>
+
+                    <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <div className="text-sm font-semibold">Modèle</div>
+                        <div className="grid grid-cols-2 gap-2">
+                          {[
+                            { k: 'blank', label: 'Vierge' },
+                            { k: 'letter', label: 'Lettre' },
+                            { k: 'invoice', label: 'Facture' },
+                            { k: 'report', label: 'Compte-rendu' },
+                          ].map((tpl) => (
+                            <button
+                              key={tpl.k}
+                              onClick={() => setCreatePdfTemplate(tpl.k as any)}
+                              className={`px-3 py-2 rounded-lg border text-sm transition-colors ${
+                                createPdfTemplate === (tpl.k as any)
+                                  ? 'border-primary bg-primary/10 text-primary'
+                                  : 'border-border hover:bg-muted'
+                              }`}
+                            >
+                              {tpl.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="text-sm font-semibold">Nom du fichier</div>
+                        <input
+                          value={createPdfName}
+                          onChange={(e) => setCreatePdfName(e.target.value)}
+                          placeholder="Nouveau document.pdf"
+                          className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                        />
+                        <div className="text-xs text-muted-foreground">
+                          Astuce: ajoute “.pdf” à la fin (sinon on le garde quand même).
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="text-sm font-semibold">Format</div>
+                        <div className="flex gap-2">
+                          {(['A4', 'LETTER'] as const).map((p) => (
+                            <button
+                              key={p}
+                              onClick={() => setCreatePdfPage(p)}
+                              className={`px-3 py-2 rounded-lg border text-sm transition-colors ${
+                                createPdfPage === p ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:bg-muted'
+                              }`}
+                            >
+                              {p === 'A4' ? 'A4' : 'Lettre'}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="text-sm font-semibold">Orientation</div>
+                        <div className="flex gap-2">
+                          {(['portrait', 'landscape'] as const).map((o) => (
+                            <button
+                              key={o}
+                              onClick={() => setCreatePdfOrientation(o)}
+                              className={`px-3 py-2 rounded-lg border text-sm transition-colors ${
+                                createPdfOrientation === o
+                                  ? 'border-primary bg-primary/10 text-primary'
+                                  : 'border-border hover:bg-muted'
+                              }`}
+                            >
+                              {o === 'portrait' ? 'Portrait' : 'Paysage'}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="text-sm font-semibold">Pages</div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setCreatePdfPages((n) => Math.max(1, n - 1))}
+                            className="w-10 h-10 rounded-lg border border-border hover:bg-muted transition-colors"
+                            aria-label="Réduire"
+                          >
+                            −
+                          </button>
+                          <div className="min-w-[56px] text-center text-sm font-semibold">{createPdfPages}</div>
+                          <button
+                            onClick={() => setCreatePdfPages((n) => Math.min(20, n + 1))}
+                            className="w-10 h-10 rounded-lg border border-border hover:bg-muted transition-colors"
+                            aria-label="Augmenter"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {createPdfError && (
+                      <div className="mt-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+                        {createPdfError}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="w-full md:w-[280px] space-y-3">
+                    <button
+                      onClick={() => void createPdfFromConfig()}
+                      disabled={isCreatingPdf}
+                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Edit className="w-4 h-4" />
+                      {isCreatingPdf ? 'Création…' : 'Créer & ouvrir l’éditeur'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = '.pdf,application/pdf';
+                        input.onchange = (ev) => {
+                          const t = ev.target as HTMLInputElement;
+                          const f = t.files?.[0];
+                          if (f) handleOpenEditorForFile(f);
+                        };
+                        input.click();
+                      }}
+                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold border border-border rounded-lg hover:bg-muted transition-colors"
+                    >
+                      <Upload className="w-4 h-4" />
+                      Importer un PDF existant
+                    </button>
+                    <div className="text-xs text-muted-foreground">
+                      Conseil entreprise: crée ton document ici, puis utilise “Remplir & Signer” et “Finaliser & Valider”.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`relative border-2 border-dashed rounded-xl p-8 md:p-12 mb-4 transition-all cursor-pointer hover:border-primary/50 hover:bg-primary/5 ${
+                  isDragging ? 'border-primary bg-primary/10 scale-105' : 'border-border'
+                }`}
+              >
+                <div className="text-center">
+                  <Upload className="w-12 h-12 md:w-16 md:h-16 text-primary mx-auto mb-4" />
+                  <h3 className="text-xl md:text-2xl font-bold mb-4">Déposez votre fichier ici</h3>
+                
+                {/* Sélecteurs de format - Cachés si un outil est sélectionné via URL */}
+                {!toolInfo && (
+                  <div className="flex items-center justify-center gap-3 mb-6 flex-wrap">
+                    <div className="relative" ref={inputDropdownRef}>
+                      <button
+                        onClick={() => {
+                          setShowInputDropdown(!showInputDropdown);
+                          setShowOutputDropdown(false);
+                        }}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-background border border-border rounded-lg hover:border-primary transition-colors min-w-[150px] justify-between"
+                      >
+                        <span className="text-sm font-medium text-muted-foreground">
+                          {inputFormat || 'Format d\'entrée'}
+                        </span>
+                        <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${showInputDropdown ? 'rotate-180' : ''}`} />
+                      </button>
+                      {showInputDropdown && (
+                        <div className="absolute top-full left-0 mt-2 w-[200px] bg-background border border-border rounded-lg shadow-lg z-50 max-h-[300px] overflow-y-auto">
+                          <div className="p-2 space-y-1">
+                            {inputFormats.map((format) => (
+                              <button
+                                key={format}
+                                onClick={() => {
+                                  setInputFormat(format);
+                                  setShowInputDropdown(false);
+                                }}
+                                className={`w-full text-left px-3 py-2 rounded hover:bg-muted text-sm transition-colors ${
+                                  inputFormat === format ? 'bg-primary/10 text-primary' : ''
+                                }`}
+                              >
+                                {format}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <span className="text-muted-foreground font-medium">vers</span>
+                    
+                    <div className="relative" ref={outputDropdownRef}>
+                      <button
+                        onClick={() => {
+                          if (!inputFormat) return;
+                          setShowOutputDropdown(!showOutputDropdown);
+                          setShowInputDropdown(false);
+                        }}
+                        disabled={!inputFormat}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-background border border-border rounded-lg hover:border-primary transition-colors min-w-[150px] justify-between disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <span className="text-sm font-medium text-muted-foreground">
+                          {outputFormat || 'Format de sortie'}
+                        </span>
+                        <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${showOutputDropdown ? 'rotate-180' : ''}`} />
+                      </button>
+                      {showOutputDropdown && inputFormat && (
+                        <div className="absolute top-full left-0 mt-2 w-[200px] bg-background border border-border rounded-lg shadow-lg z-50 max-h-[300px] overflow-y-auto">
+                          <div className="p-2 space-y-1">
+                            {getOutputFormats(inputFormat).map((format) => (
+                              <button
+                                key={format}
+                                onClick={() => {
+                                  setOutputFormat(format);
+                                  setShowOutputDropdown(false);
+                                }}
+                                className={`w-full text-left px-3 py-2 rounded hover:bg-muted text-sm transition-colors ${
+                                  outputFormat === format ? 'bg-primary/10 text-primary' : ''
+                                }`}
+                              >
+                                {format}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                <input
+                  type="file"
+                  multiple
+                  className="hidden"
+                  id="file-upload"
+                  onChange={handleFileSelect}
+                />
+                
+                {/* Bouton "Parcourir fichiers" avec dropdown */}
+                <div className="relative inline-block" ref={browseDropdownRef}>
+                  <div className="flex items-center">
+                    <label
+                      htmlFor="file-upload"
+                      className="inline-flex items-center justify-center px-4 py-3 text-sm font-semibold text-white bg-primary rounded-l-lg hover:bg-primary/90 transition-colors cursor-pointer"
+                    >
+                      <File className="w-4 h-4 mr-2" />
+                      <span>Parcourir fichiers</span>
+                    </label>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setShowBrowseDropdown(!showBrowseDropdown);
+                      }}
+                      className="inline-flex items-center justify-center px-2 py-3 text-sm font-semibold text-white bg-primary/80 hover:bg-primary/70 rounded-r-lg transition-colors border-l border-primary/50"
+                    >
+                      <ChevronDown className={`w-4 h-4 transition-transform ${showBrowseDropdown ? 'rotate-180' : ''}`} />
+                    </button>
+                  </div>
+                  
+                  {/* Dropdown menu */}
+                  {showBrowseDropdown && (
+                    <div className="absolute top-full left-0 mt-2 w-[250px] bg-background border border-border rounded-lg shadow-lg z-50">
+                      <div className="p-2 space-y-1">
+                        <button
+                          onClick={() => {
+                            document.getElementById('file-upload')?.click();
+                            setShowBrowseDropdown(false);
+                          }}
+                          className="w-full text-left px-3 py-2 rounded hover:bg-muted text-sm transition-colors flex items-center gap-2"
+                        >
+                          <File className="w-4 h-4" />
+                          <span>Depuis l'appareil</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            console.log('Importer depuis Google Drive');
+                            setShowBrowseDropdown(false);
+                          }}
+                          className="w-full text-left px-3 py-2 rounded hover:bg-muted text-sm transition-colors flex items-center gap-2"
+                        >
+                          <Cloud className="w-4 h-4" style={{ color: '#4285F4' }} />
+                          <span>Importer depuis Google Drive</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            console.log('Importer depuis Dropbox');
+                            setShowBrowseDropdown(false);
+                          }}
+                          className="w-full text-left px-3 py-2 rounded hover:bg-muted text-sm transition-colors flex items-center gap-2"
+                        >
+                          <Cloud className="w-4 h-4" style={{ color: '#0061FF' }} />
+                          <span>Importer depuis Dropbox</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            console.log('Importer depuis OneDrive');
+                            setShowBrowseDropdown(false);
+                          }}
+                          className="w-full text-left px-3 py-2 rounded hover:bg-muted text-sm transition-colors flex items-center gap-2"
+                        >
+                          <Cloud className="w-4 h-4" style={{ color: '#0078D4' }} />
+                          <span>Importer depuis OneDrive</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            const url = prompt('Entrez l\'URL du fichier :');
+                            if (url) {
+                              console.log('Importer depuis URL:', url);
+                            }
+                            setShowBrowseDropdown(false);
+                          }}
+                          className="w-full text-left px-3 py-2 rounded hover:bg-muted text-sm transition-colors flex items-center gap-2"
+                        >
+                          <Link2 className="w-4 h-4 text-red-500" />
+                          <span>Adresse web (URL)</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Liste des fichiers uploadés - Affichée dans la carte */}
+                {uploadedFiles.length > 0 && (
+                  <div className="mt-6 pt-6 border-t border-border/50">
+                    <div className="space-y-3">
+                      {uploadedFiles.map((file) => {
+                        const fileName = file.name;
+                        const fileOutputFormat = hasGlobalFormats ? outputFormat : (fileOutputFormats[fileName] || '');
+                        const showDropdown = showFileOutputDropdowns[fileName] || false;
+                        const showActions = showFileActions[fileName] || false;
+                        const availableOutputFormats = hasGlobalFormats 
+                          ? getOutputFormats(inputFormat) 
+                          : getOutputFormatsForFile(fileName);
+                        const isFileReadyToConvert = !requiresOutputFormat || hasGlobalFormats || Boolean(fileOutputFormat);
+                        const defaultActionLabel = isConversionContext ? 'Convert' : (isPDFTool ? 'Espace éditeur' : 'Convert');
+
+                        return (
+                          <div
+                            key={fileName}
+                            className="flex items-center gap-3 p-4 bg-background/50 border border-border/50 rounded-lg hover:shadow-md transition-shadow"
+                          >
+                            <File className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                            <span className="flex-1 text-sm font-medium truncate">{fileName}</span>
+                            
+                            {/* Afficher "Convert to" seulement si les formats globaux ne sont pas définis et format requis */}
+                            {!hasGlobalFormats && requiresOutputFormat && (
+                              <div className="flex items-center gap-2">
+                                <RotateCw className="w-4 h-4 text-muted-foreground" />
+                                <span className="text-sm text-muted-foreground">Convert to</span>
+                                
+                                <div className="relative" ref={(el) => {
+                                  if (el) fileOutputDropdownRefs.current[fileName] = el;
+                                }}>
+                                  <button
+                                    onClick={() => {
+                                      setShowFileOutputDropdowns((prev) => ({
+                                        ...prev,
+                                        [fileName]: !prev[fileName],
+                                      }));
+                                    }}
+                                    className={`flex items-center gap-2 px-3 py-2 bg-background border rounded hover:border-primary transition-colors min-w-[100px] justify-between ${
+                                      !fileOutputFormat ? 'border-red-500 border-2' : 'border-border'
+                                    }`}
+                                  >
+                                    <span className={`text-sm font-medium ${!fileOutputFormat ? 'text-red-500' : ''}`}>
+                                      {fileOutputFormat || 'Sélectionner...'}
+                                    </span>
+                                    <ChevronDown className={`w-3 h-3 text-muted-foreground transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+                                  </button>
+                                  {showDropdown && (
+                                    <div className="absolute bottom-full right-0 mb-2 w-[150px] bg-background border border-border rounded-lg shadow-lg z-50 max-h-[200px] overflow-y-auto">
+                                      <div className="p-2 space-y-1">
+                                        {availableOutputFormats.map((format) => (
+                                          <button
+                                            key={format}
+                                            onClick={() => handleFileOutputFormatChange(fileName, format)}
+                                            className={`w-full text-left px-3 py-2 rounded hover:bg-muted text-sm transition-colors ${
+                                              fileOutputFormat === format ? 'bg-primary/10 text-primary' : ''
+                                            }`}
+                                          >
+                                            {format}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Afficher le format de sortie si les formats globaux sont définis */}
+                            {hasGlobalFormats && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm text-muted-foreground">
+                                  → {outputFormat}
+                                </span>
+                              </div>
+                            )}
+
+                            {/* Action unique par fichier + menu (ne plus afficher 2 boutons) */}
+                            <div
+                              className="relative flex items-center"
+                              ref={(el) => {
+                                if (el) fileActionDropdownRefs.current[fileName] = el;
+                              }}
+                            >
+                              <button
+                                onClick={() => {
+                                  // Action par défaut (selon l'outil)
+                                  if (isConversionContext) {
+                                    handleConvertFile(file);
+                                    return;
+                                  }
+                                  if (isPDFTool) {
+                                    handleOpenEditorForFile(file);
+                                    return;
+                                  }
+                                  handleConvertFile(file);
+                                }}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                  isConversionContext
+                                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                                    : (isPDFTool ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-green-600 hover:bg-green-700 text-white')
+                                }`}
+                                title="Action principale"
+                              >
+                                {isConversionContext ? <RotateCw className="w-4 h-4" /> : (isPDFTool ? <Edit className="w-4 h-4" /> : <RotateCw className="w-4 h-4" />)}
+                                <span className="hidden md:inline">{defaultActionLabel}</span>
+                              </button>
+
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShowFileActions((prev) => ({ ...prev, [fileName]: !prev[fileName] }));
+                                }}
+                                className="ml-2 inline-flex items-center justify-center px-2 py-2 rounded-lg border border-border hover:bg-muted transition-colors"
+                                title="Choisir une action"
+                              >
+                                <ChevronDown
+                                  className={`w-4 h-4 text-muted-foreground transition-transform ${
+                                    showActions ? 'rotate-180' : ''
+                                  }`}
+                                />
+                              </button>
+
+                              {showActions && (
+                                <div className="absolute right-0 top-full mt-2 w-[230px] bg-background border border-border rounded-lg shadow-lg z-50">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setShowFileActions((prev) => ({ ...prev, [fileName]: false }));
+                                      handleOpenEditorForFile(file);
+                                    }}
+                                    disabled={!isPDFTool}
+                                    className={`w-full text-left px-3 py-2 rounded-t-lg hover:bg-muted text-sm transition-colors flex items-center gap-2 ${
+                                      !isPDFTool ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                    <span>Ouvrir dans l’espace éditeur</span>
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setShowFileActions((prev) => ({ ...prev, [fileName]: false }));
+                                      handleConvertFile(file);
+                                    }}
+                                    disabled={!isFileReadyToConvert}
+                                    className={`w-full text-left px-3 py-2 rounded-b-lg hover:bg-muted text-sm transition-colors flex items-center gap-2 ${
+                                      !isFileReadyToConvert ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
+                                  >
+                                    <RotateCw className="w-4 h-4" />
+                                    <span>Convertir ce fichier</span>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                            
+                            <button
+                              onClick={() => handleRemoveFile(fileName)}
+                              className="p-1 hover:bg-red-100 rounded text-red-500 transition-colors"
+                              title="Supprimer le fichier"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    
+                    {/* Add more files (garde l'ancien + ajoute) */}
+                    <div className="flex items-center justify-between pt-4 mt-4 border-t border-border/50">
+                      <button
+                        onClick={handleAddMoreFiles}
+                        className="flex items-center gap-2 px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm font-medium transition-colors"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <File className="w-4 h-4" />
+                        <span>Add more Files</span>
+                      </button>
+                      <div />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Boutons CTA */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+            <Link
+              href="/convert"
+              className="inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
+            >
+              🎯 Commencer gratuitement
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Link>
+            <Link
+              href="/pricing"
+              className="inline-flex items-center justify-center px-8 py-4 text-base font-semibold border-2 border-primary text-primary rounded-lg hover:bg-primary/10 transition-colors"
+            >
+              👁 Voir les tarifs
+            </Link>
+          </div>
+
+          {/* Badges de confiance */}
+          <div className="text-center space-y-2">
+            <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Check className="w-4 h-4 text-green-500" />
+                Aucun filigrane
+              </span>
+              <span className="flex items-center gap-1">
+                <Check className="w-4 h-4 text-green-500" />
+                Traitement par lot
+              </span>
+              <span className="flex items-center gap-1">
+                <Check className="w-4 h-4 text-green-500" />
+                API incluse
+              </span>
+            </div>
+            <div className="flex flex-wrap justify-center gap-4 text-sm font-semibold">
+              <span>🎯 2M+ fichiers convertis</span>
+              <span>⭐ 4.9/5</span>
+              <span>🔐 Certifié GDPR</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

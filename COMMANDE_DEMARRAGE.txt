@@ -1,0 +1,12 @@
+Commande à exécuter dans PowerShell pour démarrer le serveur :
+
+cd "E:\space 5"
+$env:NEXT_DISABLE_TURBO='1'
+npx next dev --no-turbo
+
+OU simplement :
+
+npm run dev
+
+Attendez 1-2 minutes que la compilation se termine.
+Une fois "Ready on http://localhost:3000" affiché, ouvrez votre navigateur.
