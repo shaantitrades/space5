@@ -1,12 +1,9 @@
 # Firebase App Hosting configuration for Next.js
 runConfig:
-  # Run-time CPU and memory allocation
   cpu: 1
   memoryMiB: 512
-  # Minimum and maximum instances
   minInstances: 0
   maxInstances: 4
-  # Concurrency (requests per instance)
   concurrency: 80
 
 env:
@@ -16,169 +13,235 @@ env:
     availability:
       - RUNTIME
       - BUILD
-  
+
   - variable: DEV_MODE
     value: "false"
     availability:
       - RUNTIME
       - BUILD
-  
+
   - variable: SKIP_DB
     value: "false"
     availability:
       - RUNTIME
       - BUILD
-  
+
   # ========== SUPABASE DATABASE ==========
-  # ⚠️ À CONFIGURER DANS FIREBASE CONSOLE > SECRETS
-  # Ces variables contiennent vos identifiants de base de données
+  # ⚠️ Configurer dans Firebase Console > Secrets
   - variable: DATABASE_URL
     secret: DATABASE_URL
     availability:
       - RUNTIME
       - BUILD
-  
+
   - variable: DIRECT_URL
     secret: DIRECT_URL
     availability:
       - BUILD
-  
-  # ========== SUPABASE PUBLIC (Safe - URLs publiques) ==========
+
+  # ========== SUPABASE PUBLIC ==========
   - variable: NEXT_PUBLIC_SUPABASE_URL
     value: "https://poilochddyciosejieyy.supabase.co"
     availability:
       - RUNTIME
       - BUILD
-  
+
   - variable: NEXT_PUBLIC_SUPABASE_ANON_KEY
     value: "sb_publishable_rgBxmtPL9rU2iNk6EaggrA_VvmJ8XXf"
     availability:
       - RUNTIME
       - BUILD
-  
-  # ⚠️ SUPABASE SERVICE ROLE - À CONFIGURER EN SECRET
+
+  # Service role (secret)
   - variable: SUPABASE_SERVICE_ROLE_KEY
     secret: SUPABASE_SERVICE_ROLE_KEY
     availability:
       - RUNTIME
-  
+
   # ========== REDIS ==========
-  # ⚠️ À CONFIGURER EN SECRET (remplacer par votre URL Redis Cloud/Upstash)
   - variable: REDIS_URL
     secret: REDIS_URL
     availability:
       - RUNTIME
-  
+
   # ========== APP URL ==========
-  # Modifier après le premier déploiement avec votre vraie URL Firebase
   - variable: NEXT_PUBLIC_APP_URL
     value: "https://space5-XXXXXX.web.app"
     availability:
       - RUNTIME
       - BUILD
-  
-  # ========== STRIPE PAYMENTS ==========
-  # ⚠️ À CONFIGURER EN SECRET - Clés de production Stripe
+
+  # ========== STRIPE ==========
   - variable: STRIPE_SECRET_KEY
     secret: STRIPE_SECRET_KEY
     availability:
       - RUNTIME
-  
+
   - variable: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
     secret: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
     availability:
       - RUNTIME
       - BUILD
-  
+
   # ========== UPLOADTHING ==========
-  # ⚠️ À CONFIGURER EN SECRET
   - variable: UPLOADTHING_SECRET
     secret: UPLOADTHING_SECRET
     availability:
       - RUNTIME
-  
+
   - variable: UPLOADTHING_APP_ID
     secret: UPLOADTHING_APP_ID
     availability:
       - RUNTIME
       - BUILD
-  
+
   # ========== SECURITY KEYS ==========
-  # ⚠️ IMPORTANT : GÉNÉRER DES CLÉS SÉCURISÉES EN PRODUCTION !
-  # Utilisez : openssl rand -base64 32
   - variable: ENCRYPTION_KEY
     secret: ENCRYPTION_KEY
     availability:
       - RUNTIME
-  
+
   - variable: JWT_SECRET
     secret: JWT_SECRET
     availability:
       - RUNTIME
-  
+
   - variable: NEXTAUTH_SECRET
     secret: NEXTAUTH_SECRET
     availability:
       - RUNTIME
-  
-  # ========== GOOGLE OAUTH (si utilisé) ==========
-  # ⚠️ À CONFIGURER EN SECRET
+
+  # ========== GOOGLE OAUTH ==========
   - variable: GOOGLE_CLIENT_ID
     secret: GOOGLE_CLIENT_ID
     availability:
       - RUNTIME
-  
+
   - variable: GOOGLE_CLIENT_SECRET
     secret: GOOGLE_CLIENT_SECRET
     availability:
       - RUNTIME
-  
-  # ========== AWS S3 (si utilisé pour stockage) ==========
-  # ⚠️ À CONFIGURER EN SECRET
-  # - variable: AWS_ACCESS_KEY_ID
-  #   secret: AWS_ACCESS_KEY_ID
-  #   availability:
-  #     - RUNTIME
-  # 
-  # - variable: AWS_SECRET_ACCESS_KEY
-  #   secret: AWS_SECRET_ACCESS_KEY
-  #   availability:
-  #     - RUNTIME
-  # 
-  # - variable: AWS_REGION
-  #   value: "us-east-1"
-  #   availability:
-  #     - RUNTIME
-  # 
-  # - variable: AWS_S3_BUCKET
-  #   secret: AWS_S3_BUCKET
-  #   availability:
-  #     - RUNTIME
-  
-  # ========== EMAIL SMTP (si utilisé) ==========
-  # ⚠️ À CONFIGURER EN SECRET
-  # - variable: SMTP_HOST
-  #   secret: SMTP_HOST
-  #   availability:
-  #     - RUNTIME
-  # 
-  # - variable: SMTP_PORT
-  #   value: "587"
-  #   availability:
-  #     - RUNTIME
-  # 
-  # - variable: SMTP_USER
-  #   secret: SMTP_USER
-  #   availability:
-  #     - RUNTIME
-  # 
-  # - variable: SMTP_PASSWORD
-  #   secret: SMTP_PASSWORD
-  #   availability:
-  #     - RUNTIME
 
-# Configuration du build
+  # ========== CLOUDFLARE (optionnel) ==========
+  - variable: CLOUDFLARE_API_TOKEN
+    secret: CLOUDFLARE_API_TOKEN
+    availability:
+      - RUNTIME
+
+  - variable: CLOUDFLARE_ZONE_ID
+    secret: CLOUDFLARE_ZONE_ID
+    availability:
+      - RUNTIME
+
+  # ========== AWS S3 (si utilisé) ==========
+  - variable: AWS_ACCESS_KEY_ID
+    secret: AWS_ACCESS_KEY_ID
+    availability:
+      - RUNTIME
+
+  - variable: AWS_SECRET_ACCESS_KEY
+    secret: AWS_SECRET_ACCESS_KEY
+    availability:
+      - RUNTIME
+
+  - variable: AWS_REGION
+    value: "us-east-1"
+    availability:
+      - RUNTIME
+
+  - variable: AWS_S3_BUCKET
+    secret: AWS_S3_BUCKET
+    availability:
+      - RUNTIME
+
+  # ========== EMAIL SMTP (si utilisé) ==========
+  - variable: SMTP_HOST
+    secret: SMTP_HOST
+    availability:
+      - RUNTIME
+
+  - variable: SMTP_PORT
+    value: "587"
+    availability:
+      - RUNTIME
+
+  - variable: SMTP_USER
+    secret: SMTP_USER
+    availability:
+      - RUNTIME
+
+  - variable: SMTP_PASSWORD
+    secret: SMTP_PASSWORD
+    availability:
+      - RUNTIME
+
+  # ========== MONITORING (optionnel) ==========
+  - variable: SENTRY_DSN
+    secret: SENTRY_DSN
+    availability:
+      - RUNTIME
+
 buildConfig:
   runtime: nodejs22
   environmentVariables:
-    NODE_OPTIONS: "--max-old-space-size=4096"
+    NODE_OPTIONS: "--max-old-space-size=4096"# ========== MODE DEV LOCAL ==========
+DEV_MODE=true
+SKIP_DB=true
+
+# --- Supabase / PostgreSQL (Prisma) ---
+# Connexion POOLER pour l'app Next.js (évite "too many connections" en serverless)
+# → Récupère l'URL dans Supabase : Project Settings → Database → Connection pooling → Transaction (port 6543)
+#    Colle l'URI et ajoute ?pgbouncer=true à la fin. Si ta région n'est pas eu-central-1, remplace dans l'hôte.
+DATABASE_URL="postgresql://postgres.poilochddyciosejieyy:Hababaumri11@aws-0-eu-central-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
+
+# Connexion DIRECTE pour les migrations (prisma migrate, db push)
+DIRECT_URL="postgresql://postgres:Hababaumri11@db.poilochddyciosejieyy.supabase.co:5432/postgres"
+
+# --- Supabase (URL + clés API, si tu utilises le client Supabase plus tard) ---
+NEXT_PUBLIC_SUPABASE_URL="https://poilochddyciosejieyy.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="sb_publishable_rgBxmtPL9rU2iNk6EaggrA_VvmJ8XXf"
+# Clé secrète (service_role) : à ajouter ici, jamais la commiter
+SUPABASE_SERVICE_ROLE_KEY="sb_secret_0HZWpwOmvkBRUeOiRWHcXw_yM6EBTgz"
+
+# Redis
+REDIS_URL="redis://localhost:6379"
+
+# Next.js
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+
+# Stripe (à remplacer par vos vraies clés)
+STRIPE_SECRET_KEY="sk_test_..."
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
+
+# UploadThing (à remplacer par vos vraies clés)
+UPLOADTHING_SECRET="sk_live_..."
+UPLOADTHING_APP_ID="..."
+
+# Security - GÉNÉRER DES CLÉS SÉCURISÉES EN PRODUCTION !
+ENCRYPTION_KEY="dev-encryption-key-32chars-minimum-local!!"
+JWT_SECRET="dev-jwt-secret-32chars-minimum-local-dev-only!!"
+NEXTAUTH_SECRET="dev-secret-key-32chars-minimum-local-dev-only!!"
+GOOGLE_CLIENT_ID="dev-google-client-id"
+GOOGLE_CLIENT_SECRET="dev-google-client-secret"
+
+# Cloudflare (optionnel pour le développement local)
+CLOUDFLARE_API_TOKEN=""
+CLOUDFLARE_ZONE_ID=""
+
+# AWS S3 (optionnel pour le développement local)
+AWS_ACCESS_KEY_ID=""
+AWS_SECRET_ACCESS_KEY=""
+AWS_REGION="us-east-1"
+AWS_S3_BUCKET=""
+
+# Email (optionnel)
+SMTP_HOST=""
+SMTP_PORT="587"
+SMTP_USER=""
+SMTP_PASSWORD=""
+
+# Monitoring (optionnel)
+# SENTRY_DSN=
+
+# Node Environment
+NODE_ENV="development"
