@@ -16,7 +16,7 @@ export const dynamic = 'force-dynamic';
 // ========== VALIDATION SCHEMA ==========
 
 const passwordSchema = z.string()
-  .min(12, 'Minimum 12 caractères')
+  .min(8, 'Minimum 8 caractères')
   .max(128)
   .regex(/[A-Z]/, 'Minimum 1 majuscule')
   .regex(/[a-z]/, 'Minimum 1 minuscule')

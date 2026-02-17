@@ -8,28 +8,34 @@
 
 import { z } from 'zod';
 
+const isDevMode = process.env.DEV_MODE === 'true' || process.env.SKIP_DB === 'true';
+
 const envSchema = z.object({
-  // ========== REQUIS - LANCE UNE ERREUR SI MANQUANT ==========
+  // ========== REQUIS EN PROD - DEFAULTS EN DEV ==========
   
   // Base de données
-  DATABASE_URL: z.string().url('DATABASE_URL doit être une URL valide').min(1),
-  DIRECT_URL: z.string().url('DIRECT_URL doit être une URL valide').min(1),
+  DATABASE_URL: isDevMode ? z.string().default('postgresql://localhost:5432/dev') : z.string().url('DATABASE_URL doit être une URL valide').min(1),
+  DIRECT_URL: isDevMode ? z.string().default('postgresql://localhost:5432/dev') : z.string().url('DIRECT_URL doit être une URL valide').min(1),
   
   // Cache & Queues
-  REDIS_URL: z.string().url('REDIS_URL doit être une URL valide').min(1),
+  REDIS_URL: isDevMode ? z.string().default('redis://localhost:6379') : z.string().url('REDIS_URL doit être une URL valide').min(1),
   
   // Authentification
-  NEXTAUTH_SECRET: z.string().min(32, 'NEXTAUTH_SECRET doit faire 32+ caractères'),
-  JWT_SECRET: z.string().min(32, 'JWT_SECRET doit faire 32+ caractères'),
-  GOOGLE_CLIENT_ID: z.string().min(1, 'GOOGLE_CLIENT_ID manquant'),
-  GOOGLE_CLIENT_SECRET: z.string().min(1, 'GOOGLE_CLIENT_SECRET manquant'),
+  NEXTAUTH_SECRET: isDevMode ? z.string().default('dev-secret-key-32chars-minimum-local-dev-only!!') : z.string().min(32, 'NEXTAUTH_SECRET doit faire 32+ caractères'),
+  JWT_SECRET: isDevMode ? z.string().default('dev-jwt-secret-32chars-minimum-local-dev-only!!') : z.string().min(32, 'JWT_SECRET doit faire 32+ caractères'),
+  GOOGLE_CLIENT_ID: isDevMode ? z.string().default('dev-google-client-id') : z.string().min(1, 'GOOGLE_CLIENT_ID manquant'),
+  GOOGLE_CLIENT_SECRET: isDevMode ? z.string().default('dev-google-client-secret') : z.string().min(1, 'GOOGLE_CLIENT_SECRET manquant'),
   
   // Chiffrement
-  ENCRYPTION_KEY: z.string().min(32, 'ENCRYPTION_KEY doit faire 32+ caractères'),
+  ENCRYPTION_KEY: isDevMode ? z.string().default('dev-encryption-key-32chars-minimum-local!!') : z.string().min(32, 'ENCRYPTION_KEY doit faire 32+ caractères'),
   
   // ========== OPTIONNELS ==========
   
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('production'),
+  // Dev mode flags
+  DEV_MODE: z.string().optional(),
+  SKIP_DB: z.string().optional(),
+  
+  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   ADMIN_EMAILS: z.string().default(''),
   SENTRY_DSN: z.string().url().optional(),
   SENDGRID_API_KEY: z.string().optional(),
@@ -84,7 +90,32 @@ export function getEnv(): Env {
 }
 
 // Export direct pour convenience
-export const env = getEnv();
+export const env = (() => {
+  try {
+    return getEnv();
+  } catch (error) {
+    if (isDevMode) {
+      console.warn('⚠️  [DEV MODE] Env validation échouée, utilisation des valeurs par défaut');
+      // Return minimal defaults for dev mode
+      return {
+        DATABASE_URL: 'postgresql://localhost:5432/dev',
+        DIRECT_URL: 'postgresql://localhost:5432/dev',
+        REDIS_URL: 'redis://localhost:6379',
+        NEXTAUTH_SECRET: 'dev-secret-key-32chars-minimum-local-dev-only!!',
+        JWT_SECRET: 'dev-jwt-secret-32chars-minimum-local-dev-only!!',
+        GOOGLE_CLIENT_ID: 'dev-google-client-id',
+        GOOGLE_CLIENT_SECRET: 'dev-google-client-secret',
+        ENCRYPTION_KEY: 'dev-encryption-key-32chars-minimum-local!!',
+        NODE_ENV: 'development' as const,
+        ADMIN_EMAILS: '',
+        AWS_REGION: 'eu-west-1',
+        NEXT_PUBLIC_VERSION: '1.0.0',
+        ALLOWED_ORIGINS: 'http://localhost:3000',
+      } as Env;
+    }
+    throw error;
+  }
+})();
 
 // Valider au module load (non-blocking)
 if (process.env.NODE_ENV === 'production') {

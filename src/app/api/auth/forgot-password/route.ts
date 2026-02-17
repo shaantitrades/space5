@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
+import { isDevMode } from '@/lib/dev-auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -19,6 +20,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { message: 'Email requis' },
         { status: 400 }
+      );
+    }
+
+    // 🔧 MODE DEV: réponse simulée
+    if (isDevMode()) {
+      console.log(`🔧 [DEV MODE] Forgot password pour ${email}`);
+      return NextResponse.json(
+        { message: 'Si un compte existe avec cet email, un lien de réinitialisation a été envoyé' },
+        { status: 200 }
       );
     }
 

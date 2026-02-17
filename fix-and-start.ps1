@@ -1,43 +1,66 @@
-# Script de reparation et demarrage automatique - OMNIVERSA
-# Executez ce script dans PowerShell : .\fix-and-start.ps1
+# Script de reparation et demarrage - Multi Convert
+# Executez : .\fix-and-start.ps1
 
 Write-Host ""
-Write-Host "Reparation et demarrage d'OMNIVERSA..." -ForegroundColor Cyan
+Write-Host "===================================" -ForegroundColor Cyan
+Write-Host "  REPARATION ET DEMARRAGE SERVEUR" -ForegroundColor Cyan  
+Write-Host "===================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Arreter tous les processus Node.js
-Write-Host "1. Arret des processus Node.js..." -ForegroundColor Yellow
-Get-Process -Name node -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-Start-Sleep -Seconds 3
+Set-Location "e:\space 5"
 
-# Supprimer node_modules completement
-Write-Host "2. Suppression de node_modules..." -ForegroundColor Yellow
-if (Test-Path "node_modules") {
-    Remove-Item -Recurse -Force "node_modules" -ErrorAction SilentlyContinue
-    Start-Sleep -Seconds 2
+# 1. Arreter processus
+Write-Host "1. Arret des processus Node..." -ForegroundColor Yellow
+Get-Process node, npm -ErrorAction SilentlyContinue | Stop-Process -Force
+Start-Sleep -Seconds 2
+
+# 2. Nettoyer caches
+Write-Host "2. Nettoyage des caches..." -ForegroundColor Yellow
+if (Test-Path ".next") {
+    Remove-Item -Recurse -Force .next
+    Write-Host "   [OK] Cache .next supprime" -ForegroundColor Green
+}
+if (Test-Path "node_modules\.cache") {
+    Remove-Item -Recurse -Force node_modules\.cache  
+    Write-Host "   [OK] Cache node_modules supprime" -ForegroundColor Green
 }
 
-# Supprimer package-lock.json
-Write-Host "3. Suppression de package-lock.json..." -ForegroundColor Yellow
-if (Test-Path "package-lock.json") {
-    Remove-Item -Force "package-lock.json" -ErrorAction SilentlyContinue
-}
-
-# Reinstaller Next.js proprement
-Write-Host "4. Reinstallation de Next.js 14.2.0..." -ForegroundColor Yellow
-npm install next@14.2.0 react@18.3.0 react-dom@18.3.0 --legacy-peer-deps --save-exact
-
-if ($LASTEXITCODE -ne 0) {
+# 3. Verifier next-intl (LE PROBLEME PRINCIPAL)
+Write-Host "3. Verification de next-intl..." -ForegroundColor Yellow
+if (-not (Test-Path "node_modules\next-intl")) {
+    Write-Host "   [ATTENTION] next-intl MANQUANT - Installation..." -ForegroundColor Red
     Write-Host ""
-    Write-Host "Erreur lors de l'installation. Essayez manuellement:" -ForegroundColor Red
-    Write-Host "npm install --legacy-peer-deps" -ForegroundColor Yellow
-    Write-Host ""
-    exit 1
+    Write-Host "   Ceci peut prendre quelques minutes..." -ForegroundColor Cyan
+    npm install
+    
+    if (Test-Path "node_modules\next-intl") {
+        Write-Host "   [OK] next-intl installe avec succes" -ForegroundColor Green
+    } else {
+        Write-Host "   [ERREUR] ECHEC installation next-intl" -ForegroundColor Red
+        Write-Host "   Essayez manuellement: npm install" -ForegroundColor Yellow
+        exit 1
+    }
+} else {
+    Write-Host "   [OK] next-intl present" -ForegroundColor Green
 }
 
-# Demarrer le serveur avec Turbopack desactive
+# 4. Diagnostic
 Write-Host ""
-Write-Host "5. Demarrage du serveur (sans Turbopack)..." -ForegroundColor Yellow
+Write-Host "4. Diagnostic..." -ForegroundColor Yellow
+if (Test-Path "diagnose.js") {
+    node diagnose.js
+}
+
+# 5. Demarrer serveur
 Write-Host ""
-$env:NEXT_DISABLE_TURBO = '1'
-npx next dev --no-turbo
+Write-Host "5. Demarrage du serveur..." -ForegroundColor Cyan
+Write-Host ""
+Write-Host "   ====================================" -ForegroundColor Green
+Write-Host "   Serveur disponible sur:" -ForegroundColor Green  
+Write-Host "   http://localhost:3000" -ForegroundColor Green
+Write-Host "   ====================================" -ForegroundColor Green
+Write-Host ""
+Write-Host "   Appuyez sur CTRL+C pour arreter" -ForegroundColor Yellow
+Write-Host ""
+
+npm run dev

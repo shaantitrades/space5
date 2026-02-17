@@ -93,7 +93,7 @@ export function Navbar() {
                 <span className="uppercase">{locale}</span>
               </button>
               {langOpen && (
-                <div className="absolute right-0 top-full mt-2 w-44 max-h-80 overflow-y-auto bg-background border border-border rounded-xl shadow-lg z-[100]">
+                <div className="absolute right-0 top-full mt-2 w-44 max-h-80 overflow-y-auto bg-background border border-border rounded-xl shadow-lg z-[9999]">
                   {languages.map((code) => (
                     <button
                       key={code}

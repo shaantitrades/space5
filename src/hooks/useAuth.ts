@@ -16,6 +16,28 @@ export function useAuth() {
     const currentUser = ClientAuth.getUser();
     setUser(currentUser);
     setIsLoading(false);
+
+    // Écouter les changements de localStorage (pour les autres onglets)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'dev_user' || e.key === 'dev_token') {
+        const updatedUser = ClientAuth.getUser();
+        setUser(updatedUser);
+      }
+    };
+
+    // Écouter les événements personnalisés de connexion/déconnexion
+    const handleAuthChange = () => {
+      const updatedUser = ClientAuth.getUser();
+      setUser(updatedUser);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('authChange', handleAuthChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('authChange', handleAuthChange);
+    };
   }, []);
 
   const logout = () => {

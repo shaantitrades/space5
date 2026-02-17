@@ -76,5 +76,12 @@
     "processing": "Traitement en cours...",
     "completed": "Conversion Terminée",
     "download": "Télécharger le Fichier Converti"
+  },
+  "pdf": {
+    "title": "Outils PDF",
+    "description": "Convertissez, fusionnez, compressez et modifiez vos fichiers PDF",
+    "upload": "Glissez-déposez vos fichiers PDF ici",
+    "processing": "Traitement en cours...",
+    "download": "Télécharger"
   }
 }

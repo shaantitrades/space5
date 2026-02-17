@@ -20,7 +20,9 @@
     "db:generate": "prisma generate",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
-    "docker:logs": "docker-compose logs -f"
+    "docker:logs": "docker-compose logs -f",
+    "firebase:deploy": "firebase apphosting:backends:create",
+    "firebase:rollout": "firebase apphosting:rollouts:create"
   },
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",

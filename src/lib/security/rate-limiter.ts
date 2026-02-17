@@ -10,23 +10,33 @@ import { RATE_LIMITS } from '@/config/security';
 // Fallback en mémoire si Redis non disponible
 let rateLimiter: RateLimiterRedis | RateLimiterMemory;
 
-// Initialiser le rate limiter
-try {
-  const Redis = require('ioredis');
-  const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+const isDevMode = process.env.DEV_MODE === 'true' || process.env.SKIP_DB === 'true';
 
-  rateLimiter = new RateLimiterRedis({
-    storeClient: redis,
-    keyPrefix: 'Multi Convert_rate_limit',
-    points: 100, // Nombre de requêtes
-    duration: 60, // Par 60 secondes
-  });
-} catch {
-  // Fallback en mémoire
+// Initialiser le rate limiter
+if (isDevMode) {
+  // 🔧 MODE DEV: utiliser uniquement le rate limiter en mémoire
   rateLimiter = new RateLimiterMemory({
     points: 100,
     duration: 60,
   });
+} else {
+  try {
+    const Redis = require('ioredis');
+    const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+
+    rateLimiter = new RateLimiterRedis({
+      storeClient: redis,
+      keyPrefix: 'Multi Convert_rate_limit',
+      points: 100, // Nombre de requêtes
+      duration: 60, // Par 60 secondes
+    });
+  } catch {
+    // Fallback en mémoire
+    rateLimiter = new RateLimiterMemory({
+      points: 100,
+      duration: 60,
+    });
+  }
 }
 
 /**

@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { isDevMode } from '@/lib/dev-auth';
 
 export type CreditFileType = 'pdf' | 'image' | 'audio' | 'video';
 
@@ -63,6 +64,12 @@ export async function reserveCreditsOrThrow(params: { userId?: string; credits: 
   const { userId, credits } = params;
   if (!credits || credits <= 0) return;
 
+  // 🔧 MODE DEV: toujours autoriser
+  if (isDevMode()) {
+    console.log(`🔧 [DEV MODE] Crédits réservés: ${credits} pour ${userId}`);
+    return;
+  }
+
   if (!userId) {
     const err = new Error('AUTH_REQUIRED');
     (err as any).status = 401;
@@ -96,6 +103,13 @@ export async function reserveCreditsOrThrow(params: { userId?: string; credits: 
 export async function refundCredits(params: { userId?: string; credits: number }) {
   const { userId, credits } = params;
   if (!userId || !credits || credits <= 0) return;
+  
+  // 🔧 MODE DEV: no-op
+  if (isDevMode()) {
+    console.log(`🔧 [DEV MODE] Crédits remboursés: ${credits} pour ${userId}`);
+    return;
+  }
+
   await prisma.user.update({ where: { id: userId }, data: { credits: { increment: credits } } }).catch(() => null);
 }
 

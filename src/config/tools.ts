@@ -510,3 +510,6 @@ export const categoryLabels: Record<Tool['category'], string> = {
   production: 'Production & Impression',
   reparation: 'Réparation & Récupération',
 };
+
+// Alias pour compatibilité
+export const tools = toolsConfig;

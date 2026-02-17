@@ -9,6 +9,7 @@ import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import { env } from '@/lib/env-validation';
 import { prisma } from '@/lib/prisma';
+import { isDevMode } from '@/lib/dev-auth';
 
 // ========== CONFIGURATION ==========
 
@@ -60,6 +61,11 @@ export async function sendVerificationEmail(
   email: string,
   userId: string
 ): Promise<boolean> {
+  // 🔧 MODE DEV: pas d'envoi d'email réel
+  if (isDevMode()) {
+    console.log(`🔧 [DEV MODE] Email de vérification simulé pour ${email}`);
+    return true;
+  }
   try {
     const token = generateSecureToken();
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h

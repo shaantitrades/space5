@@ -18,6 +18,7 @@ export const ClientAuth = {
     if (typeof window !== 'undefined') {
       localStorage.setItem('dev_token', token);
       localStorage.setItem('dev_user', JSON.stringify(user));
+      window.dispatchEvent(new CustomEvent('authChange'));
     }
   },
 
@@ -59,6 +60,7 @@ export const ClientAuth = {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('dev_token');
       localStorage.removeItem('dev_user');
+      window.dispatchEvent(new CustomEvent('authChange'));
       window.location.href = '/';
     }
   },

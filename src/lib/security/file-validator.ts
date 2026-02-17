@@ -6,7 +6,8 @@
 
 import { ALLOWED_FILE_TYPES, MAX_FILE_SIZES } from '@/config/security';
 import { fileTypeFromBuffer } from 'file-type';
-import { detect } from 'magic-bytes.js';
+// @ts-ignore - magic-bytes.js has inconsistent types
+import * as magicBytes from 'magic-bytes.js';
 
 export interface ValidationResult {
   valid: boolean;
@@ -51,7 +52,7 @@ export async function validateFile(
     result.checksPassed++;
 
     // 2. Vérification signature magique (magic bytes)
-    const magicBytesResult = detect(fileData);
+    const magicBytesResult = (magicBytes as any).filetypeinfo?.(fileData) || [];
     if (!magicBytesResult || magicBytesResult.length === 0) {
       result.errors.push('Unable to detect file type from magic bytes');
       if (options.strictMode) {

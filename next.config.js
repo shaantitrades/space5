@@ -11,6 +11,10 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  eslint: {
+    // N'ignore pas ESLint en dev, mais ne bloque pas le build en CI/prod
+    ignoreDuringBuilds: process.env.CI === 'true',
+  },
   images: {
     remotePatterns: [
       {

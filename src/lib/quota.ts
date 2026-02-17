@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth';
 import { MEDIA_QUOTAS, parseSizeToBytes, pricing, type PricingTier } from '@/config/pricing';
 import { getUserId } from '@/lib/auth-utils';
 import type { CustomSession } from '@/lib/types/auth';
+import { isDevMode } from '@/lib/dev-auth';
 
 type Tier = 'free' | 'pro' | 'business' | 'enterprise';
 type MediaKind = 'audio' | 'video';
@@ -24,6 +25,10 @@ function tierToPricingTier(tier: Tier): PricingTier {
 }
 
 export async function getSessionTierAndUserId(): Promise<{ tier: Tier; userId?: string }> {
+  // 🔧 MODE DEV: retourner un utilisateur dev par défaut
+  if (isDevMode()) {
+    return { tier: 'pro', userId: 'dev-user-1' };
+  }
   const session = await getServerSession(authOptions);
   const customSession = session as CustomSession | null;
   const userId = customSession?.userId || getUserId(session);
@@ -59,6 +64,12 @@ export async function assertMonthlyQuotaOrThrow(params: {
 }) {
   const { userId, tier, kind } = params;
   if (!userId) return; // pas de quota mensuel fiable sans user
+
+  // 🔧 MODE DEV: pas de vérification de quota
+  if (isDevMode()) {
+    console.log('🔧 [DEV MODE] Quota check skipped');
+    return;
+  }
 
   const pt = tierToPricingTier(tier);
   const { start, end } = monthRange();
@@ -155,6 +166,13 @@ export async function recordConversion(params: {
   errorMessage?: string;
 }) {
   if (!params.userId) return;
+
+  // 🔧 MODE DEV: pas d'enregistrement en DB
+  if (isDevMode()) {
+    console.log(`🔧 [DEV MODE] Conversion enregistrée: ${params.inputFileName} → ${params.outputFormat} (${params.status})`);
+    return;
+  }
+
   const fileSizeMb = typeof params.fileSizeBytes === 'number' ? params.fileSizeBytes / (1024 * 1024) : null;
   await prisma.conversion
     .create({
