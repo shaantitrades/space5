@@ -34,6 +34,13 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_VERSION=$NEXT_PUBLIC_VERSION
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV CI=true
+# Valeurs factices pour éviter les erreurs de validation au build
+ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
+ENV NEXTAUTH_SECRET="build-secret-placeholder"
+ENV JWT_SECRET="build-jwt-placeholder"
+ENV ENCRYPTION_KEY="0000000000000000000000000000000000000000000000000000000000000000"
+# Augmenter la mémoire Node.js pour éviter les OOM pendant le build
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 RUN npm run build
 
