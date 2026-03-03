@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { ReactNode } from 'react';
 import { requireAdmin } from '@/lib/admin';
 import { Link } from '@/i18n/routing';

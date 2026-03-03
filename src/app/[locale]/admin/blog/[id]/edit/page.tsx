@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { requireAdmin } from '@/lib/admin';
 import { AdminBlogEditor } from '@/components/blog/admin-blog-editor';
 
