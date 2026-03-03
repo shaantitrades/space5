@@ -1,0 +1,69 @@
+# ── Node ──────────────────────────────────────────────────────
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── Next.js ───────────────────────────────────────────────────
+.next
+out
+build
+dist
+
+# ── Git ───────────────────────────────────────────────────────
+.git
+.gitignore
+.gitattributes
+
+# ── Env / secrets ─────────────────────────────────────────────
+.env
+.env*.local
+.env.production
+.env.yaml
+.env.development
+
+# ── Docs & scripts locaux ─────────────────────────────────────
+*.md
+docs/
+scripts/
+*.ps1
+*.sh
+*.bat
+!docker-entrypoint.sh
+
+# ── CI / cloud configs ────────────────────────────────────────
+.github/
+.firebase/
+.firebaserc
+firebase.json
+apphosting.yaml
+*.firebaserc*
+deploy-*.ps1
+deploy-*.sh
+init-firebase.*
+setup-*.*
+configure-*.*
+
+# ── Outils de dev ─────────────────────────────────────────────
+.vscode/
+.idea/
+.DS_Store
+*.pem
+*.log
+*.tsbuildinfo
+
+# ── Tests ─────────────────────────────────────────────────────
+coverage/
+__tests__/
+*.test.ts
+*.spec.ts
+
+# ── Divers ────────────────────────────────────────────────────
+uploads/
+temp/
+diagnose.js
+test-routes.js
+_*.js
+docker-compose.yml
+docker-compose.coolify.yml
+Dockerfile.dev
