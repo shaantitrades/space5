@@ -9,25 +9,26 @@
 import { z } from 'zod';
 
 const isDevMode = process.env.DEV_MODE === 'true' || process.env.SKIP_DB === 'true';
+const isBuildPhase = process.env.NEXT_BUILD_PHASE === '1' || process.env.NEXT_PHASE === 'phase-production-build';
 
 const envSchema = z.object({
   // ========== REQUIS EN PROD - DEFAULTS EN DEV ==========
   
   // Base de données
-  DATABASE_URL: isDevMode ? z.string().default('postgresql://localhost:5432/dev') : z.string().url('DATABASE_URL doit être une URL valide').min(1),
-  DIRECT_URL: isDevMode ? z.string().default('postgresql://localhost:5432/dev') : z.string().url('DIRECT_URL doit être une URL valide').min(1),
+  DATABASE_URL: (isDevMode || isBuildPhase) ? z.string().default('postgresql://localhost:5432/dev') : z.string().url('DATABASE_URL doit être une URL valide').min(1),
+  DIRECT_URL: (isDevMode || isBuildPhase) ? z.string().default('postgresql://localhost:5432/dev') : z.string().url('DIRECT_URL doit être une URL valide').min(1),
   
   // Cache & Queues
-  REDIS_URL: isDevMode ? z.string().default('redis://localhost:6379') : z.string().url('REDIS_URL doit être une URL valide').min(1),
+  REDIS_URL: (isDevMode || isBuildPhase) ? z.string().default('redis://localhost:6379') : z.string().url('REDIS_URL doit être une URL valide').min(1),
   
   // Authentification
-  NEXTAUTH_SECRET: isDevMode ? z.string().default('dev-secret-key-32chars-minimum-local-dev-only!!') : z.string().min(32, 'NEXTAUTH_SECRET doit faire 32+ caractères'),
-  JWT_SECRET: isDevMode ? z.string().default('dev-jwt-secret-32chars-minimum-local-dev-only!!') : z.string().min(32, 'JWT_SECRET doit faire 32+ caractères'),
-  GOOGLE_CLIENT_ID: isDevMode ? z.string().default('dev-google-client-id') : z.string().min(1, 'GOOGLE_CLIENT_ID manquant'),
-  GOOGLE_CLIENT_SECRET: isDevMode ? z.string().default('dev-google-client-secret') : z.string().min(1, 'GOOGLE_CLIENT_SECRET manquant'),
+  NEXTAUTH_SECRET: (isDevMode || isBuildPhase) ? z.string().default('dev-secret-key-32chars-minimum-local-dev-only!!') : z.string().min(32, 'NEXTAUTH_SECRET doit faire 32+ caractères'),
+  JWT_SECRET: (isDevMode || isBuildPhase) ? z.string().default('dev-jwt-secret-32chars-minimum-local-dev-only!!') : z.string().min(32, 'JWT_SECRET doit faire 32+ caractères'),
+  GOOGLE_CLIENT_ID: (isDevMode || isBuildPhase) ? z.string().default('dev-google-client-id') : z.string().min(1, 'GOOGLE_CLIENT_ID manquant'),
+  GOOGLE_CLIENT_SECRET: (isDevMode || isBuildPhase) ? z.string().default('dev-google-client-secret') : z.string().min(1, 'GOOGLE_CLIENT_SECRET manquant'),
   
   // Chiffrement
-  ENCRYPTION_KEY: isDevMode ? z.string().default('dev-encryption-key-32chars-minimum-local!!') : z.string().min(32, 'ENCRYPTION_KEY doit faire 32+ caractères'),
+  ENCRYPTION_KEY: (isDevMode || isBuildPhase) ? z.string().default('dev-encryption-key-32chars-minimum-local!!') : z.string().min(32, 'ENCRYPTION_KEY doit faire 32+ caractères'),
   
   // ========== OPTIONNELS ==========
   
@@ -118,7 +119,7 @@ export const env = (() => {
 })();
 
 // Valider au module load (non-blocking)
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === 'production' && !isBuildPhase) {
   try {
     getEnv();
   } catch (error) {

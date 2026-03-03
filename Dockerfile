@@ -36,9 +36,15 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV CI=true
 # Valeurs factices pour éviter les erreurs de validation au build
 ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
-ENV NEXTAUTH_SECRET="build-secret-placeholder"
-ENV JWT_SECRET="build-jwt-placeholder"
+ENV DIRECT_URL="postgresql://build:build@localhost:5432/build"
+ENV REDIS_URL="redis://localhost:6379"
+ENV NEXTAUTH_SECRET="build-secret-placeholder-32chars-minimum-xx"
+ENV JWT_SECRET="build-jwt-secret-placeholder-32chars-minimumx"
 ENV ENCRYPTION_KEY="0000000000000000000000000000000000000000000000000000000000000000"
+ENV GOOGLE_CLIENT_ID="build-placeholder"
+ENV GOOGLE_CLIENT_SECRET="build-placeholder"
+# Skip env validation stricte pendant le build Next.js
+ENV NEXT_BUILD_PHASE=1
 # Augmenter la mémoire Node.js pour éviter les OOM pendant le build
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 
