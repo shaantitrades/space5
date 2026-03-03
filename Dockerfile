@@ -5,19 +5,19 @@ FROM node:20-alpine AS base
 
 # ---- Stage 1 : Dépendances ----
 FROM base AS deps
-RUN apk add --no-cache libc6-compat openssl
+RUN apk add --no-cache libc6-compat openssl python3 make g++ vips-dev
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma/
 
 # Installation + génération du client Prisma
-RUN npm install
+RUN npm install --legacy-peer-deps
 RUN npx prisma generate
 
 # ---- Stage 2 : Build ----
 FROM base AS builder
-RUN apk add --no-cache libc6-compat openssl
+RUN apk add --no-cache libc6-compat openssl vips-dev
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
@@ -39,7 +39,7 @@ RUN npm run build
 
 # ---- Stage 3 : Production ----
 FROM base AS runner
-RUN apk add --no-cache openssl
+RUN apk add --no-cache openssl vips
 WORKDIR /app
 
 ENV NODE_ENV=production
