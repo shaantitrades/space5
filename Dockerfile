@@ -12,7 +12,7 @@ COPY package.json package-lock.json* ./
 COPY prisma ./prisma/
 
 # Installation + génération du client Prisma
-RUN npm install --frozen-lockfile 2>/dev/null || npm install
+RUN npm install
 RUN npx prisma generate
 
 # ---- Stage 2 : Build ----
