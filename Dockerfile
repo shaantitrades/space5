@@ -52,8 +52,10 @@ ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 RUN npm run build > /tmp/nextbuild.log 2>&1; \
     BUILD_EXIT=$?; \
-    echo '=== NEXT.JS BUILD OUTPUT (LAST 100 LINES) ==='; \
-    tail -100 /tmp/nextbuild.log; \
+    echo '=== BUILD ERRORS ==='; \
+    grep -i "error\|failed\|cannot\|module not found\|cannot find" /tmp/nextbuild.log || true; \
+    echo '=== LAST 200 LINES ==='; \
+    tail -200 /tmp/nextbuild.log; \
     echo '=== END BUILD OUTPUT ==='; \
     exit $BUILD_EXIT
 

@@ -43,6 +43,8 @@ const nextConfig = {
       'magic-bytes.js',
       'geoip-lite',
       'ioredis',
+      '@prisma/client',
+      'prisma',
     ],
   },
   // Configuration webpack pour pdfjs-dist
