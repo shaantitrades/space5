@@ -50,13 +50,7 @@ ENV NEXT_BUILD_PHASE=1
 # Augmenter la mémoire Node.js pour éviter les OOM pendant le build
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 
-RUN npm run build > /tmp/build.log 2>&1 ; \
-    EXIT_CODE=$? ; \
-    if [ $EXIT_CODE -ne 0 ]; then \
-        echo "=== NEXT.JS BUILD FAILED ===" ; \
-        cat /tmp/build.log ; \
-        exit $EXIT_CODE ; \
-    fi
+RUN npm run build > /tmp/next-build.log 2>&1 || (tail -100 /tmp/next-build.log && exit 1)
 
 # ---- Stage 3 : Production ----
 FROM base AS runner
