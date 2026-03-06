@@ -1,9 +1,5 @@
-/**
- * 🗄️ SERVICE DE STOCKAGE - MinIO / S3
- *
- * Compatible MinIO (S3-compatible) via @aws-sdk/client-s3
- * Config via variables d'environnement :
- *   S3_ENDPOINT, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_BUCKET, AWS_REGION
+﻿/**
+ * SERVICE DE STOCKAGE - MinIO / S3
  */
 
 import {
@@ -23,7 +19,7 @@ function createS3Client(): S3Client {
     region,
     ...(endpoint && {
       endpoint,
-      forcePathStyle: true, // Requis pour MinIO
+      forcePathStyle: true,
     }),
     credentials: {
       accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
@@ -34,7 +30,7 @@ function createS3Client(): S3Client {
 
 function getBucket(): string {
   const bucket = process.env.S3_BUCKET;
-  if (!bucket) throw new Error('S3_BUCKET non configuré');
+  if (!bucket) throw new Error('S3_BUCKET non configure');
   return bucket;
 }
 
@@ -47,10 +43,6 @@ function isStorageConfigured(): boolean {
   );
 }
 
-/**
- * Upload un fichier dans le bucket MinIO
- * @returns la clé (chemin) du fichier
- */
 export async function uploadFile(
   key: string,
   body: Buffer | Uint8Array,
@@ -58,7 +50,7 @@ export async function uploadFile(
   metadata?: Record<string, string>
 ): Promise<string> {
   if (!isStorageConfigured()) {
-    throw new Error('Stockage non configuré (S3_ENDPOINT, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_BUCKET requis)');
+    throw new Error('Stockage non configure');
   }
 
   const client = createS3Client();
@@ -77,12 +69,9 @@ export async function uploadFile(
   return key;
 }
 
-/**
- * Génère une URL de téléchargement signée (expire dans 1h par défaut)
- */
 export async function getPresignedDownloadUrl(key: string, expiresInSeconds = 3600): Promise<string> {
   if (!isStorageConfigured()) {
-    throw new Error('Stockage non configuré');
+    throw new Error('Stockage non configure');
   }
 
   const client = createS3Client();
@@ -92,26 +81,18 @@ export async function getPresignedDownloadUrl(key: string, expiresInSeconds = 36
   return getSignedUrl(client, command, { expiresIn: expiresInSeconds });
 }
 
-/**
- * Génère une URL d'upload signée (expire dans 15 min par défaut)
- */
 export async function getPresignedUploadUrl(key: string, contentType: string, expiresInSeconds = 900): Promise<string> {
   if (!isStorageConfigured()) {
-    throw new Error('Stockage non configuré');
+    throw new Error('Stockage non configure');
   }
 
-  const { getSignedUrl: getSignedUrlUpload } = await import('@aws-sdk/s3-request-presigner');
   const client = createS3Client();
   const bucket = getBucket();
 
-  const { PutObjectCommand: PutCmd } = await import('@aws-sdk/client-s3');
-  const command = new PutCmd({ Bucket: bucket, Key: key, ContentType: contentType });
-  return getSignedUrlUpload(client, command, { expiresIn: expiresInSeconds });
+  const command = new PutObjectCommand({ Bucket: bucket, Key: key, ContentType: contentType });
+  return getSignedUrl(client, command, { expiresIn: expiresInSeconds });
 }
 
-/**
- * Supprime un fichier du bucket
- */
 export async function deleteFile(key: string): Promise<void> {
   if (!isStorageConfigured()) return;
 
@@ -121,9 +102,6 @@ export async function deleteFile(key: string): Promise<void> {
   await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
 }
 
-/**
- * Vérifie si un fichier existe
- */
 export async function fileExists(key: string): Promise<boolean> {
   if (!isStorageConfigured()) return false;
 
