@@ -44,8 +44,9 @@ const envSchema = z.object({
   STRIPE_PUBLISHABLE_KEY: z.string().optional(),
   AWS_ACCESS_KEY_ID: z.string().optional(),
   AWS_SECRET_ACCESS_KEY: z.string().optional(),
-  AWS_REGION: z.string().default('eu-west-1'),
+  AWS_REGION: z.string().default('us-east-1'),
   S3_BUCKET: z.string().optional(),
+  S3_ENDPOINT: z.string().url().optional(),
   
   // App URLs
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),

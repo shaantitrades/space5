@@ -45,6 +45,8 @@ const nextConfig = {
       'ioredis',
       '@prisma/client',
       'prisma',
+      '@aws-sdk/client-s3',
+      '@aws-sdk/s3-request-presigner',
     ],
   },
   // Configuration webpack pour pdfjs-dist
