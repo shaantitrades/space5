@@ -11,10 +11,11 @@ import { RATE_LIMITS } from '@/config/security';
 let rateLimiter: RateLimiterRedis | RateLimiterMemory;
 
 const isDevMode = process.env.DEV_MODE === 'true' || process.env.SKIP_DB === 'true';
+const isBuildPhase = process.env.NEXT_BUILD_PHASE === '1' || process.env.NEXT_PHASE === 'phase-production-build';
 
 // Initialiser le rate limiter
-if (isDevMode) {
-  // 🔧 MODE DEV: utiliser uniquement le rate limiter en mémoire
+if (isDevMode || isBuildPhase) {
+  // 🔧 MODE DEV / BUILD: utiliser uniquement le rate limiter en mémoire
   rateLimiter = new RateLimiterMemory({
     points: 100,
     duration: 60,
@@ -22,7 +23,13 @@ if (isDevMode) {
 } else {
   try {
     const Redis = require('ioredis');
-    const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+    const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
+      lazyConnect: true,
+      maxRetriesPerRequest: 1,
+      retryStrategy: () => null,
+    });
+    // Éviter les "unhandled error event" qui font crasher le process si Redis est indisponible
+    redis.on('error', () => {});
 
     rateLimiter = new RateLimiterRedis({
       storeClient: redis,
