@@ -73,9 +73,9 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Schéma Prisma + client généré pour les migrations runtime
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+# node_modules complet (inclut la CLI Prisma v5 + client + engines pour les migrations runtime)
+# IMPORTANT: sans la CLI locale, `npx prisma` télécharge Prisma v7 (incompatible avec ce schéma v5)
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --chown=nextjs:nodejs prisma ./prisma
 
 # Script de démarrage (migrations + lancement)

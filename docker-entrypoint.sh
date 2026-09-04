@@ -7,19 +7,27 @@ set -e
 
 echo "🚀 Démarrage de Multi Convert..."
 
-# Attendre que la base de données soit prête
+# CLI Prisma locale (v5) — évite que `npx prisma` télécharge Prisma v7 incompatible
+PRISMA="node ./node_modules/prisma/build/index.js"
+
+# Attendre que la base de données soit prête (max ~5 minutes)
 echo "⏳ Attente de la base de données..."
-until npx prisma db push --skip-generate 2>/dev/null || \
-      node -e "require('@prisma/client')" 2>/dev/null; do
-  echo "   La base de données n'est pas encore prête, nouvelle tentative dans 5s..."
+ATTEMPTS=0
+until $PRISMA db push --skip-generate >/dev/null 2>&1; do
+  ATTEMPTS=$((ATTEMPTS + 1))
+  if [ "$ATTEMPTS" -ge 60 ]; then
+    echo "❌ Base de données indisponible après 60 tentatives"
+    exit 1
+  fi
+  echo "   La base de données n'est pas encore prête, nouvelle tentative dans 5s... ($ATTEMPTS/60)"
   sleep 5
 done
 
 # Appliquer les migrations Prisma
 echo "📦 Application des migrations Prisma..."
-npx prisma migrate deploy || {
+$PRISMA migrate deploy || {
   echo "⚠️  migrate deploy a échoué, tentative avec db push..."
-  npx prisma db push --skip-generate
+  $PRISMA db push --skip-generate
 }
 
 echo "✅ Base de données prête"
