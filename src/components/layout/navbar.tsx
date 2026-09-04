@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { ToolsModal } from '@/components/modals/tools-modal';
 import { getAvailableLocales } from '@/config/i18n';
 import  UserMenu from '@/components/layout/user-menu';
+import { siteConfig } from '@/config/site';
 
 export function Navbar() {
   const t = useTranslations('nav');
@@ -23,10 +24,14 @@ export function Navbar() {
     { href: '/tools', label: t('tools') },
     { href: '/convert', label: t('convert') },
     { href: '/archive', label: t('archive') },
-    { href: '/pricing', label: t('pricing') },
+    ...(siteConfig.features.showPricing
+      ? [
+          { href: '/pricing', label: t('pricing') },
+          { href: '/enterprise', label: t('enterprise') },
+        ]
+      : []),
     { href: '/features', label: t('features') },
     { href: '/api', label: t('api') },
-    { href: '/enterprise', label: t('enterprise') },
   ];
 
   const languageOrder = ['en', 'fr', 'es', 'de', 'it', 'pt', 'hi', 'ru', 'sv', 'no'];

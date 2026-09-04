@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { BackButton } from '@/components/ui/back-button';
+import { siteConfig } from '@/config/site';
 
 export default function FeaturesPage() {
   const categories = [
@@ -268,12 +269,14 @@ export default function FeaturesPage() {
             >
               🚀 Essayer gratuitement
             </Link>
-            <Link
-              href="/pricing"
-              className="inline-flex items-center justify-center px-8 py-4 text-base font-semibold border-2 border-primary text-primary rounded-lg hover:bg-primary/10 transition-colors"
-            >
-              💎 Voir les tarifs
-            </Link>
+            {siteConfig.features.showPricing && (
+              <Link
+                href="/pricing"
+                className="inline-flex items-center justify-center px-8 py-4 text-base font-semibold border-2 border-primary text-primary rounded-lg hover:bg-primary/10 transition-colors"
+              >
+                💎 Voir les tarifs
+              </Link>
+            )}
           </div>
         </div>
       </section>

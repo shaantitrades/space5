@@ -26,6 +26,11 @@ export const siteConfig = {
   ],
   creator: 'Multi Convert Team',
   authors: [{ name: 'Multi Convert Team' }],
+  // Feature flags
+  features: {
+    // false = site gratuit : masque tous les tarifs (pricing, plans, entreprise)
+    showPricing: false,
+  },
 }
 
 export type SiteConfig = typeof siteConfig

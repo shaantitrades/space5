@@ -2,12 +2,13 @@
 
 import { Link } from '@/i18n/routing';
 import { Facebook, Twitter, Linkedin, Github, Youtube, Instagram } from 'lucide-react';
+import { siteConfig } from '@/config/site';
 
 export function Footer() {
   const footerLinks = {
     product: [
       { name: 'Fonctionnalités', href: '/features' },
-      { name: 'Tarifs', href: '/pricing' },
+      ...(siteConfig.features.showPricing ? [{ name: 'Tarifs', href: '/pricing' }] : []),
       { name: 'API', href: '/documentation' },
       { name: 'Applications', href: '/apps' },
       { name: 'Intégrations', href: '/integrations' },
