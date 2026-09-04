@@ -23,8 +23,7 @@ services:
         NEXT_PUBLIC_VERSION: ${NEXT_PUBLIC_VERSION:-1.0.0}
     image: multi-convert:latest
     restart: unless-stopped
-    ports:
-      - "${APP_PORT:-3000}:3000"
+    # Pas de binding de port hôte : le proxy Coolify route vers le conteneur (évite "port already allocated")
     environment:
       NODE_ENV: production
       NEXTAUTH_URL: ${NEXTAUTH_URL}
