@@ -32,7 +32,7 @@ const nextConfig = {
       bodySizeLimit: '50mb',
     },
     // Empêche webpack de bundler ces modules natifs/ESM-only côté serveur
-    serverExternalPackages: [
+    serverComponentsExternalPackages: [
       'sharp',
       '@ffmpeg-installer/ffmpeg',
       'fluent-ffmpeg',

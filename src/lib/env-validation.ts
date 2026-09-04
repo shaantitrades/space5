@@ -11,6 +11,13 @@ import { z } from 'zod';
 const isDevMode = process.env.DEV_MODE === 'true' || process.env.SKIP_DB === 'true';
 const isBuildPhase = process.env.NEXT_BUILD_PHASE === '1' || process.env.NEXT_PHASE === 'phase-production-build';
 
+// Traite les chaînes vides comme "non définies" : Coolify passe parfois des valeurs vides
+// pour les secrets optionnels, ce qui faisait échouer la validation `.url()`.
+const optionalUrl = z.preprocess(
+  (val) => (typeof val === 'string' && val.trim() === '' ? undefined : val),
+  z.string().url().optional()
+);
+
 const envSchema = z.object({
   // ========== REQUIS EN PROD - DEFAULTS EN DEV ==========
   
@@ -38,7 +45,7 @@ const envSchema = z.object({
   
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   ADMIN_EMAILS: z.string().default(''),
-  SENTRY_DSN: z.string().url().optional(),
+  SENTRY_DSN: optionalUrl,
   SENDGRID_API_KEY: z.string().optional(),
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_PUBLISHABLE_KEY: z.string().optional(),
@@ -46,11 +53,11 @@ const envSchema = z.object({
   AWS_SECRET_ACCESS_KEY: z.string().optional(),
   AWS_REGION: z.string().default('us-east-1'),
   S3_BUCKET: z.string().optional(),
-  S3_ENDPOINT: z.string().url().optional(),
+  S3_ENDPOINT: optionalUrl,
   
   // App URLs
-  NEXT_PUBLIC_APP_URL: z.string().url().optional(),
-  NEXT_PUBLIC_API_URL: z.string().url().optional(),
+  NEXT_PUBLIC_APP_URL: optionalUrl,
+  NEXT_PUBLIC_API_URL: optionalUrl,
   
   // Autres
   NEXT_PUBLIC_VERSION: z.string().default('1.0.0'),
