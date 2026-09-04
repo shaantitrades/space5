@@ -25,6 +25,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Générer le client Prisma pour le build (nécessaire pour les imports de types)
+RUN npx prisma generate
+
 # Variables d'environnement nécessaires au build (NEXT_PUBLIC_*)
 # Surchargeables via les build-args Coolify
 ARG NEXT_PUBLIC_APP_URL=http://localhost:3000

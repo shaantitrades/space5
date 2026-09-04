@@ -54,5 +54,6 @@ if (isDevMode) {
   if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prismaInstance;
 }
 
-export const prisma = prismaInstance as PrismaClient;
+// Utilisation d'un cast explicite car le mock dev ne satisfait pas complètement l'interface PrismaClient
+export const prisma = prismaInstance as unknown as PrismaClient;
 export default prisma;

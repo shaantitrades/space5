@@ -67,3 +67,4 @@ _*.js
 docker-compose.yml
 docker-compose.coolify.yml
 Dockerfile.dev
+causing*
