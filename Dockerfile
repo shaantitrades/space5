@@ -24,7 +24,15 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma/
 COPY --from=deps /app/node_modules ./node_modules
-RUN npm prune --omit=dev
+RUN rm -rf \
+  node_modules/@types/nodemailer \
+  node_modules/@typescript-eslint \
+  node_modules/eslint \
+  node_modules/eslint-config-next \
+  node_modules/is-extglob \
+  node_modules/is-glob \
+  node_modules/prettier \
+  node_modules/prettier-plugin-tailwindcss
 RUN npx prisma generate
 
 # ---- Stage 2 : Build ----
