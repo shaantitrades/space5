@@ -17,6 +17,16 @@ COPY prisma ./prisma/
 RUN npm install --legacy-peer-deps
 RUN npx prisma generate
 
+# ---- Stage 1b : Dépendances de production (sans devDependencies) ----
+# Réduit la taille de l'image finale (supprime eslint, prettier, typescript-eslint, etc.)
+FROM base AS prod-deps
+WORKDIR /app
+COPY package.json package-lock.json* ./
+COPY prisma ./prisma/
+COPY --from=deps /app/node_modules ./node_modules
+RUN npm prune --omit=dev
+RUN npx prisma generate
+
 # ---- Stage 2 : Build ----
 FROM base AS builder
 RUN apk add --no-cache libc6-compat openssl vips-dev
@@ -73,9 +83,8 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# node_modules complet (inclut la CLI Prisma v5 + client + engines pour les migrations runtime)
-# IMPORTANT: sans la CLI locale, `npx prisma` télécharge Prisma v7 (incompatible avec ce schéma v5)
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
+# node_modules de production (sans devDependencies) — inclut la CLI Prisma v5 + client + engines
+COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --chown=nextjs:nodejs prisma ./prisma
 
 # Script de démarrage (migrations + lancement)
