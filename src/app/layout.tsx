@@ -5,6 +5,8 @@ import './globals.css';
 import { siteConfig } from '@/config/site';
 import { InstallPrompt } from '@/components/pwa/install-prompt';
 import { PwaRegister } from '@/components/pwa/pwa-register';
+import { CookieConsent } from '@/components/consent/cookie-consent';
+import { AdScript } from '@/components/ads/ad-script';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -100,6 +102,8 @@ export default function RootLayout({
         {children}
         <InstallPrompt />
         <PwaRegister />
+        <AdScript />
+        <CookieConsent />
         <Toaster 
           position="top-right" 
           richColors 

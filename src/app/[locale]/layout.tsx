@@ -9,6 +9,8 @@ import { routing } from '@/i18n/routing';
 import { Navbar } from '@/components/layout/navbar';
 import { SearchBar } from '@/components/layout/search-bar';
 import { Footer } from '@/components/layout/footer';
+import { AdSlot } from '@/components/ads/ad-slot';
+import { adsConfig } from '@/config/ads';
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -36,7 +38,9 @@ export default async function LocaleLayout({
       <div className="flex min-h-screen flex-col">
         <Navbar />
         {/* <SearchBar /> */}
+        <AdSlot slot={adsConfig.slots.header} className="container mx-auto px-4 pt-4" />
         <main className="flex-1">{children}</main>
+        <AdSlot slot={adsConfig.slots.footer} className="container mx-auto px-4 pb-4" />
         <Footer />
       </div>
     </NextIntlClientProvider>
