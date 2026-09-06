@@ -79,6 +79,12 @@ export const metadata: Metadata = {
     canonical: siteConfig.url,
     languages: Object.fromEntries(locales.map((l) => [l, `${siteConfig.url}/${l}`])),
   },
+  verification: {
+    google: 'E3zpWu3IJ57W2iYGxsvNiN-CSjJGYftVcpYpGq6y85o',
+  },
+  other: {
+    'google-adsense-account': 'ca-pub-5343389597650456',
+  },
 };
 
 export const viewport: Viewport = {

@@ -11,7 +11,7 @@
  */
 export const adsConfig = {
   enabled: false,
-  clientId: '', // ex: 'ca-pub-1234567890123456'
+  clientId: 'ca-pub-5343389597650456',
   slots: {
     header: '', // bannière en haut de page
     inContent: '', // rectangle dans le contenu
