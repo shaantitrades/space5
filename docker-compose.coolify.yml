@@ -22,8 +22,8 @@ services:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
         NEXT_PUBLIC_VERSION: ${NEXT_PUBLIC_VERSION:-1.0.0}
     image: multi-convert:latest
-    expose:
-      - "3000"
+    ports:
+      - "18080:3000"
     restart: unless-stopped
     # Pas de binding de port hôte (le proxy Coolify route automatiquement)
     # (ancien mapping de port hôte "3000:3000" retiré)
