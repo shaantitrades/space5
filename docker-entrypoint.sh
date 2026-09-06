@@ -17,14 +17,13 @@ echo "🗄️  Base de données cible : ${DB_HOST:-inconnue}"
 # Attendre que la base de données soit prête (max ~5 minutes)
 echo "⏳ Attente de la base de données..."
 ATTEMPTS=0
-until $PRISMA db push --skip-generate >/tmp/db-push.log 2>&1; do
-  ATTEMPTS=$((ATTEMPTS + 1))
-  if [ "$ATTEMPTS" -ge 60 ]; then
-    echo "❌ Base de données indisponible après 60 tentatives"
-    echo "   Dernière erreur :"
-    tail -n 10 /tmp/db-push.log
-    exit 1
+DB_OK=false
+while [ "$ATTEMPTS" -lt 60 ]; do
+  if $PRISMA db push --skip-generate >/tmp/db-push.log 2>&1; then
+    DB_OK=true
+    break
   fi
+  ATTEMPTS=$((ATTEMPTS + 1))
   if [ "$ATTEMPTS" -eq 1 ]; then
     echo "   Erreur de connexion :"
     tail -n 10 /tmp/db-push.log
@@ -33,14 +32,17 @@ until $PRISMA db push --skip-generate >/tmp/db-push.log 2>&1; do
   sleep 5
 done
 
-# Appliquer les migrations Prisma
-echo "📦 Application des migrations Prisma..."
-$PRISMA migrate deploy || {
-  echo "⚠️  migrate deploy a échoué, tentative avec db push..."
-  $PRISMA db push --skip-generate
-}
-
-echo "✅ Base de données prête"
+if [ "$DB_OK" = true ]; then
+  # Appliquer les migrations Prisma
+  echo "📦 Application des migrations Prisma..."
+  $PRISMA migrate deploy || {
+    echo "⚠️  migrate deploy a échoué, tentative avec db push..."
+    $PRISMA db push --skip-generate
+  }
+  echo "✅ Base de données prête"
+else
+  echo "⚠️  Base de données indisponible — démarrage en mode dégradé (sans base de données)"
+fi
 echo "🌐 Lancement du serveur sur le port ${PORT:-3000}..."
 
 exec node server.js
