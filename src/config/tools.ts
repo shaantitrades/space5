@@ -3,7 +3,7 @@ import {
   Edit, PenTool, PenLine, ShieldX, Lock, Unlock, Droplet,
   Layers, RotateCw, Crop, Trash, ImagePlus, Sparkles, Zap,
   Star, Maximize2, Video, Music, Volume2, Film, Archive,
-  Grid3x3, FileX, Cloud, Link2, Plus, LayoutGrid
+  Grid3x3, FileX, Cloud, Link2, Plus, LayoutGrid, QrCode
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -22,6 +22,18 @@ export interface Tool {
 }
 
 export const toolsConfig: Tool[] = [
+  {
+    id: 'qr-generator',
+    name: 'QR Code Generator',
+    description: 'Générez des QR codes : URL, WiFi, vCard, email, téléphone, SMS, GPS',
+    icon: QrCode,
+    href: '/qr',
+    category: 'conversion',
+    color: 'text-slate-900',
+    bgColor: 'bg-slate-100',
+    popular: true,
+    new: true,
+  },
   // ===== TRANSFORMATION RAPIDE =====
   {
     id: 'pdf-edit',
