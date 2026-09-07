@@ -28,9 +28,9 @@ services:
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
       ADMIN_EMAILS: ${ADMIN_EMAILS}
     depends_on:
-      postgres:
+      mc_postgres:
         condition: service_healthy
-      redis:
+      mc_redis:
         condition: service_healthy
     # Expose container port so Coolify (or other orchestrators) can detect the app port
     expose:
@@ -45,7 +45,8 @@ services:
       - internal
       - proxy
 
-  postgres:
+  # Nom de service unique (évite les collisions DNS avec d'autres stacks sur le réseau partagé "coolify")
+  mc_postgres:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
@@ -63,7 +64,7 @@ services:
     networks:
       - internal
 
-  redis:
+  mc_redis:
     image: redis:7-alpine
     restart: unless-stopped
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
