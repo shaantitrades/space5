@@ -28,6 +28,7 @@ yarn-error.log*
 .env*.local
 .env.production
 .env.yaml
+.env.prod
 
 # Firebase
 .firebase/
