@@ -1,98 +1,70 @@
 # ============================================================
-# Multi Convert — Dockerfile optimisé pour Coolify / VPS
+# Multi Convert — Dockerfile minimal (Next.js standalone + Prisma)
+# Optimisé pour Coolify / VPS faible (2–4 Go RAM)
+# Étages : base -> deps -> builder -> runner
 # ============================================================
+
+# ---------- Base commune ----------
 FROM node:20-alpine AS base
+# libc6-compat : compatibilité glibc (engines Prisma) — openssl : requis par Prisma
+RUN apk add --no-cache libc6-compat openssl
+WORKDIR /app
 
-# ---- Stage 1 : Dépendances ----
+# ---------- 1) deps : dépendances de PRODUCTION uniquement ----------
 FROM base AS deps
-RUN apk add --no-cache libc6-compat openssl python3 make g++ vips-dev
-WORKDIR /app
-# Force development pour que npm installe TOUTES les dépendances (incl. devDependencies)
-ENV NODE_ENV=development
-
-COPY package.json package-lock.json* ./
+COPY package.json ./
 COPY prisma ./prisma/
 
-# Installation + génération du client Prisma
-RUN npm install --legacy-peer-deps
-RUN npx prisma generate
+# eslint / prettier ne servent PAS au build (eslint.ignoreDuringBuilds=true)
+# Utiliser une version stable de npm (v9) dans l'image pour éviter des bugs
+# observés avec npm@11 (semver Invalid Version lors de l'installation).
+RUN npm install -g npm@9
+# => on n'installe QUE les dépendances de production (moins de paquets, moins de RAM)
+RUN npm install --omit=dev --legacy-peer-deps --no-audit --no-fund
 
-# ---- Stage 1b : Dépendances de production (sans devDependencies) ----
-# Réduit la taille de l'image finale (supprime eslint, prettier, typescript-eslint, etc.)
-FROM base AS prod-deps
-WORKDIR /app
-COPY package.json package-lock.json* ./
-COPY prisma ./prisma/
-COPY --from=deps /app/node_modules ./node_modules
-RUN rm -rf \
-  node_modules/@types/nodemailer \
-  node_modules/@typescript-eslint \
-  node_modules/eslint \
-  node_modules/eslint-config-next \
-  node_modules/is-extglob \
-  node_modules/is-glob \
-  node_modules/prettier \
-  node_modules/prettier-plugin-tailwindcss
-RUN npx prisma generate
+# Génération du client Prisma (CLI locale v5 — évite que `npx` télécharge une v7 incompatible)
+RUN node ./node_modules/prisma/build/index.js generate
 
-# ---- Stage 2 : Build ----
+# ---------- 2) builder : compilation Next.js ----------
 FROM base AS builder
-RUN apk add --no-cache libc6-compat openssl vips-dev
-WORKDIR /app
-
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Générer le client Prisma pour le build (nécessaire pour les imports de types)
-RUN npx prisma generate
-
-# Variables d'environnement nécessaires au build (NEXT_PUBLIC_*)
-# Surchargeables via les build-args Coolify
+# NEXT_PUBLIC_* sont inlinées au build — surchargeables via les build-args Coolify
 ARG NEXT_PUBLIC_APP_URL=http://localhost:3000
 ARG NEXT_PUBLIC_API_URL=http://localhost:3000
 ARG NEXT_PUBLIC_VERSION=1.0.0
 
-ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_VERSION=$NEXT_PUBLIC_VERSION
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV CI=true
-# Valeurs factices pour éviter les erreurs de validation au build
-ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
-ENV DIRECT_URL="postgresql://build:build@localhost:5432/build"
-ENV REDIS_URL="redis://localhost:6379"
-ENV NEXTAUTH_SECRET="build-secret-placeholder-32chars-minimum-xx"
-ENV JWT_SECRET="build-jwt-secret-placeholder-32chars-minimumx"
-ENV ENCRYPTION_KEY="0000000000000000000000000000000000000000000000000000000000000000"
-ENV GOOGLE_CLIENT_ID="build-placeholder"
-ENV GOOGLE_CLIENT_SECRET="build-placeholder"
-# Skip env validation stricte pendant le build Next.js
-ENV NEXT_BUILD_PHASE=1
-# Augmenter la mémoire Node.js pour éviter les OOM pendant le build
-ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL \
+    NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
+    NEXT_PUBLIC_VERSION=$NEXT_PUBLIC_VERSION \
+    NEXT_TELEMETRY_DISABLED=1 \
+    CI=true \
+    NEXT_BUILD_PHASE=1
 
-RUN npm run build 2>&1
+# Limite le heap Node pour éviter l'OOM sur un petit VPS.
+# 2048 = OK pour 4 Go ; baissez à 1024–1536 sur un VPS 2 Go si OOM.
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 
-# ---- Stage 3 : Production ----
+RUN npm run build
+
+# ---------- 3) runner : image finale ----------
 FROM base AS runner
-RUN apk add --no-cache openssl vips
-WORKDIR /app
-
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
+ENV NODE_ENV=production \
+    NEXT_TELEMETRY_DISABLED=1 \
+    PORT=3000 \
+    HOSTNAME=0.0.0.0
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Fichiers publics & output standalone
+# Output standalone + fichiers statiques
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# node_modules de production (sans devDependencies) — inclut la CLI Prisma v5 + client + engines
-COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
+# node_modules de production (client + CLI Prisma + engines + modules natifs externalisés)
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --chown=nextjs:nodejs prisma ./prisma
 
 # Script de démarrage (migrations + lancement)
