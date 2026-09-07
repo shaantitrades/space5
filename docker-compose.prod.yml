@@ -32,6 +32,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    # Expose container port so Coolify (or other orchestrators) can detect the app port
+    expose:
+      - "3000"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
       interval: 30s
@@ -50,12 +53,13 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-MultiConvert2026}
       POSTGRES_DB: ${POSTGRES_DB:-multi_convert}
     volumes:
-      - pgdata_v3:/var/lib/postgresql/data
+      - pgdata_v4:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d ${POSTGRES_DB:-multi_convert}"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 30s
     networks:
       - internal
 
@@ -74,7 +78,7 @@ services:
       - internal
 
 volumes:
-  pgdata_v3:
+  pgdata_v4:
   redis_data:
 
 networks:
