@@ -53,7 +53,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-MultiConvert2026}
       POSTGRES_DB: ${POSTGRES_DB:-multi_convert}
     volumes:
-      - pgdata_v4:/var/lib/postgresql/data
+      - pgdata_v5:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d ${POSTGRES_DB:-multi_convert}"]
       interval: 10s
@@ -78,7 +78,7 @@ services:
       - internal
 
 volumes:
-  pgdata_v4:
+  pgdata_v5:
   redis_data:
 
 networks:
