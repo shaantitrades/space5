@@ -91,42 +91,42 @@ export function InstallPrompt() {
   const copy =
     lang === 'fr'
       ? {
-          title: 'Installer Multi Convert',
-          subtitle: 'Accès rapide en un clic, même hors ligne',
+          title: '📲 Multi Convert est disponible sur tous vos appareils',
+          subtitle: 'Installez l\u2019application pour un accès rapide, même hors ligne',
           install: 'Installer',
           ok: 'OK',
           dismiss: 'Fermer',
-          iosHint: 'Partager → « Sur l\u2019écran d\u2019accueil »',
+          iosHint: 'Disponible sur tous vos appareils \u2014 Partager → « Sur l\u2019écran d\u2019accueil »',
         }
       : {
-          title: 'Install Multi Convert',
-          subtitle: 'One-tap access, even offline',
+          title: '📲 Multi Convert is available on all your devices',
+          subtitle: 'Install the app for one-tap access, even offline',
           install: 'Install',
           ok: 'OK',
           dismiss: 'Close',
-          iosHint: "Share → 'Add to Home Screen'",
+          iosHint: "Available on all your devices — Share → 'Add to Home Screen'",
         };
 
   return (
-    <div className="fixed inset-x-0 bottom-4 z-[100] flex justify-center px-4">
-      <div className="flex w-full max-w-md items-center gap-3 rounded-2xl border border-border bg-card p-3 shadow-lg">
-        <img src="/icon-192.png" alt="Multi Convert" className="h-11 w-11 rounded-xl" />
+    <div className="sticky top-0 inset-x-0 z-[100] w-full border-b border-border bg-primary/95 text-primary-foreground backdrop-blur">
+      <div className="container mx-auto flex items-center gap-3 px-4 py-2.5">
+        <img src="/icon-192.png" alt="Multi Convert" className="h-8 w-8 shrink-0 rounded-lg" />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-foreground">{copy.title}</p>
-          <p className="truncate text-xs text-muted-foreground">
+          <p className="truncate text-sm font-semibold">{copy.title}</p>
+          <p className="truncate text-xs opacity-90">
             {isIOS ? copy.iosHint : copy.subtitle}
           </p>
         </div>
         <button
           onClick={handleInstall}
-          className="shrink-0 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground hover:opacity-90"
+          className="shrink-0 rounded-lg bg-primary-foreground px-3 py-1.5 text-xs font-semibold text-primary hover:opacity-90"
         >
           {isIOS ? copy.ok : copy.install}
         </button>
         <button
           onClick={handleDismiss}
           aria-label={copy.dismiss}
-          className="shrink-0 rounded-lg p-2 text-muted-foreground hover:bg-muted"
+          className="shrink-0 rounded-lg p-1.5 text-primary-foreground/80 hover:bg-primary-foreground/10"
         >
           ✕
         </button>

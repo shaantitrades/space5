@@ -31,7 +31,6 @@ export function Navbar() {
         ]
       : []),
     { href: '/features', label: t('features') },
-    { href: '/api', label: t('api') },
   ];
 
   const languageOrder = ['en', 'fr', 'es', 'de', 'it', 'pt', 'hi', 'ru', 'sv', 'no'];
