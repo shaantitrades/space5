@@ -6,7 +6,6 @@ import {
   Sparkles, FileSearch, Merge, Scissors, Stamp, Key
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
-import { BackButton } from '@/components/ui/back-button';
 import { siteConfig } from '@/config/site';
 
 export default function FeaturesPage() {
@@ -192,10 +191,6 @@ export default function FeaturesPage() {
       {/* Hero */}
       <section className="py-16 bg-gradient-to-b from-primary/10 to-background">
         <div className="container mx-auto px-4">
-          {/* Bouton retour */}
-          <div className="mb-6">
-            <BackButton />
-          </div>
 
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">

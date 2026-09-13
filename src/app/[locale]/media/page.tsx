@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import {
   Video,
@@ -17,11 +18,11 @@ import {
   X,
   CheckCircle2,
 } from 'lucide-react';
-import { BackButton } from '@/components/ui/back-button';
 
 type MediaTool = 'video-convert' | 'audio-convert' | 'extract-audio' | 'trim' | 'compress' | 'merge';
 
 export default function MediaPage() {
+  const searchParams = useSearchParams();
   const [selectedTool, setSelectedTool] = useState<MediaTool>('video-convert');
   const [files, setFiles] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -88,6 +89,15 @@ export default function MediaPage() {
     },
   ];
 
+  // Détecte le paramètre ?tool= dans l'URL et sélectionne l'outil correspondant
+  useEffect(() => {
+    const toolParam = searchParams.get('tool');
+    if (toolParam && tools.some((t) => t.id === toolParam)) {
+      setSelectedTool(toolParam as MediaTool);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const selectedFiles = Array.from(e.target.files);
@@ -153,27 +163,10 @@ export default function MediaPage() {
         formData.append('outputFormat', selectedAudioFormat.toLowerCase());
       }
 
-      let response: Response;
-      try {
-        response = await fetch('/api/media/process', {
-          method: 'POST',
-          body: formData,
-        });
-      } catch (fetchError: any) {
-        // Si l'API échoue (erreur SSL, etc.), simuler un traitement pour tester l'interface
-        console.warn('Erreur API, simulation du traitement pour test:', fetchError);
-        // Créer un blob de test à partir du premier fichier
-        const testFile = files[0];
-        const testBlob = new Blob([await testFile.arrayBuffer()], { type: testFile.type });
-        const extension = selectedTool === 'audio-convert' && selectedAudioFormat
-          ? selectedAudioFormat.toLowerCase()
-          : selectedTool === 'video-convert' && selectedVideoFormat
-          ? selectedVideoFormat.toLowerCase()
-          : selectedTool.includes('audio') ? 'mp3' : 'mp4';
-        const filename = `result-${selectedTool}.${extension}`;
-        setProcessedFile({ blob: testBlob, filename });
-        return;
-      }
+      const response = await fetch('/api/media/process', {
+        method: 'POST',
+        body: formData,
+      });
 
       if (!response.ok) throw new Error('Échec du traitement');
 
@@ -228,10 +221,6 @@ export default function MediaPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-12">
       <div className="container mx-auto px-4 max-w-7xl">
-        {/* Bouton retour */}
-        <div className="mb-6">
-          <BackButton />
-        </div>
 
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">

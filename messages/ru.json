@@ -13,7 +13,11 @@
     "upload": "Upload",
     "download": "Download",
     "convert": "Convert",
-    "close": "Close"
+    "close": "Close",
+    "hero_title": "Универсальный набор конвертеров",
+    "hero_subtitle": "Конвертируйте все файлы локально, быстро и безопасно.",
+    "start_converting": "Начать конвертацию",
+    "back": "Назад"
   },
   "nav": {
     "home": "Home",
@@ -24,7 +28,12 @@
     "enterprise": "Enterprise",
     "login": "Login",
     "signup": "Sign Up",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "tools": "Инструменты",
+    "archive": "Архив",
+    "fillSign": "Заполнить и подписать",
+    "language": "Язык",
+    "chooseLanguage": "Выберите язык"
   },
   "pricing": {
     "title": "Choose Your Plan",
@@ -71,5 +80,355 @@
     "processing": "Processing...",
     "completed": "Conversion Completed",
     "download": "Download Converted File"
+  },
+  "footer": {
+    "product": "Продукт",
+    "company": "Компания",
+    "legal": "Правовая информация",
+    "resources": "Ресурсы",
+    "rights": "Все права защищены",
+    "links": {
+      "Fonctionnalités": "Возможности",
+      "Tarifs": "Цены",
+      "API": "API",
+      "Applications": "Приложения",
+      "Intégrations": "Интеграции",
+      "À propos": "О нас",
+      "Sécurité": "Безопасность",
+      "Entreprise": "Предприятие",
+      "Blog": "Блог",
+      "Carrières": "Карьера",
+      "Confidentialité": "Конфиденциальность",
+      "Conditions": "Условия",
+      "RGPD": "GDPR",
+      "Cookies": "Файлы cookie",
+      "Mentions légales": "Правовая информация",
+      "Documentation": "Документация",
+      "Aide": "Помощь",
+      "Contact": "Контакты",
+      "Statut": "Статус",
+      "Changelog": "Изменения"
+    }
+  },
+  "home": {
+    "stats": {
+      "converted": "🎯 2 млн+ сконвертированных файлов",
+      "rating": "⭐ 4.9/5",
+      "gdpr": "🔐 Сертифицировано по GDPR"
+    },
+    "cta": "Нажмите, чтобы открыть",
+    "badges": {
+      "populaire": "Популярное",
+      "nouveau": "Новое",
+      "pro": "Pro"
+    },
+    "groups": {
+      "Catégories Principales": "Основные категории",
+      "Transformation Rapide": "Быстрое преобразование",
+      "Assemblage & Découpage": "Объединение и разделение",
+      "Authentification & Protection": "Аутентификация и защита",
+      "Conversion Intelligente": "Умная конвертация",
+      "Optimisation & Qualité": "Оптимизация и качество",
+      "Personnalisation Avancée": "Расширенная настройка",
+      "Production & Impression": "Производство и печать",
+      "Réparation & Récupération": "Восстановление и ремонт"
+    },
+    "mainTitles": {
+      "PDF & Documents": "PDF и документы",
+      "Images & Logos": "Изображения и логотипы",
+      "Vidéo & Audio": "Видео и аудио"
+    },
+    "mainDescriptions": {
+      "Conversion, OCR, Fusion, Compression de tous vos documents": "Конвертация, OCR, объединение и сжатие всех ваших документов",
+      "20+ formats, optimisation intelligente et redimensionnement": "Более 20 форматов, умная оптимизация и изменение размера",
+      "Batch processing, codecs multiples, qualité optimale": "Пакетная обработка, множество кодеков, оптимальное качество"
+    },
+    "features": {
+      "title": "Ключевые функции",
+      "subtitle": "Всё необходимое для профессиональной конвертации",
+      "IA-Powered": "На базе ИИ",
+      "Sécurité Militaire": "Военная безопасность",
+      "10 Langues": "10 языков",
+      "Workflows": "Рабочие процессы",
+      "Traitement par lot": "Пакетная обработка",
+      "Suggestions automatiques, amélioration qualité intelligente": "Автоматические подсказки, умное улучшение качества",
+      "Chiffrement, geo-blocking, protection fraude, RGPD": "Шифрование, геоблокировка, защита от мошенничества, GDPR",
+      "Interface internationalisée pour marchés premium": "Локализованный интерфейс для премиум-рынков",
+      "Pipelines visuels automatisés pour conversions complexes": "Автоматизированные визуальные конвейеры для сложных конвертаций",
+      "100+ fichiers simultanément avec gestion de queue": "Более 100 файлов одновременно с управлением очередью"
+    },
+    "toolTitles": {
+      "Modifier & Annoter": "Редактировать и аннотировать",
+      "Créer PDF": "Создать PDF",
+      "Convertir Format": "Конвертировать формат",
+      "Image to ICO": "Изображение в ICO",
+      "Optimiser Taille": "Оптимизировать размер",
+      "Extraire Contenu": "Извлечь содержимое",
+      "Reorganiser Pages": "Переупорядочить страницы",
+      "Appliquer Filtres": "Применить фильтры",
+      "Fusionner Documents": "Объединить документы",
+      "Scinder PDF": "Разделить PDF",
+      "Extraire par Sections": "Извлечь по разделам",
+      "Mélanger Pages": "Перемешать страницы",
+      "Ajouter Pages": "Добавить страницы",
+      "Finaliser & Valider": "Завершить и подтвердить",
+      "Sécuriser Document": "Защитить документ",
+      "Accéder Protégé": "Открыть защищённый",
+      "Marquer Fichier": "Пометить файл",
+      "QR Code Generator": "Генератор QR-кодов",
+      "Documents → PDF": "Документы → PDF",
+      "Images → PDF": "Изображения → PDF",
+      "PDF → Office": "PDF → Office",
+      "Media → Formats": "Медиа → Форматы",
+      "Texte → PDF": "Текст → PDF",
+      "PDF → Images": "PDF → Изображения",
+      "Réduire Poids": "Уменьшить размер",
+      "Reconnaissance Texte": "Распознавание текста",
+      "Corriger Orientation": "Исправить ориентацию",
+      "Transformer Couleurs": "Изменить цвета",
+      "Nettoyer Annotations": "Очистить аннотации",
+      "Créer Formulaires": "Создать формы",
+      "Gérer Signets": "Управление закладками",
+      "Ajouter En-têtes": "Добавить колонтитулы",
+      "Numérotation Automatique": "Автоматическая нумерация",
+      "Éditer Informations": "Редактировать информацию",
+      "Extraire Visuels": "Извлечь изображения",
+      "Ajuster Dimensions": "Настроить размеры",
+      "Orienter Pages": "Ориентировать страницы",
+      "Mise en Page Multiple": "Несколько страниц на листе",
+      "Numérotation Bates": "Нумерация Bates",
+      "Aplatir Document": "Объединить слои документа",
+      "Préparer Impression": "Подготовить к печати",
+      "Restaurer Fichier": "Восстановить файл",
+      "Renommer Intelligent": "Умное переименование",
+      "Améliorer Structure": "Улучшить структуру"
+    },
+    "toolDescriptions": {
+      "Personnalisez vos documents avec modifications et annotations": "Настраивайте документы с помощью правок и аннотаций",
+      "Rédiger un PDF professionnel depuis une page vierge (A4/Lettre) et exporter": "Создайте профессиональный PDF с чистого листа (A4/Letter) и экспортируйте",
+      "Transformer entre PDF, Word, Excel, Images et plus": "Конвертируйте между PDF, Word, Excel, изображениями и другими форматами",
+      "Convertir vos images (PNG, JPG) en fichiers ICO pour favicons": "Конвертируйте изображения (PNG, JPG) в файлы ICO для favicon",
+      "Réduire la taille de vos fichiers sans perte de qualité visible": "Уменьшайте размер файлов без заметной потери качества",
+      "Obtenir un nouveau document avec seulement les pages souhaitées": "Получите новый документ только с нужными страницами",
+      "Gérez la structure de vos documents en réarrangeant les pages": "Управляйте структурой документов, переставляя страницы",
+      "Ajouter des effets visuels et transformations créatives": "Добавляйте визуальные эффекты и креативные преобразования",
+      "Assemblez plusieurs PDF et images en un document unique": "Объединяйте несколько PDF и изображений в один документ",
+      "Séparez votre PDF en plusieurs fichiers distincts selon vos besoins": "Разделите PDF на несколько отдельных файлов по необходимости",
+      "Extraire chapitres basés sur les signets de la table des matières": "Извлекайте главы по закладкам оглавления",
+      "Alterner et mélanger les pages de plusieurs documents": "Чередуйте и перемешивайте страницы из нескольких документов",
+      "Insérer des pages supplémentaires dans votre document PDF": "Вставляйте дополнительные страницы в PDF-документ",
+      "Remplir des formulaires PDF et apposer vos signatures électroniques": "Заполняйте PDF-формы и добавляйте электронные подписи",
+      "Protégez vos fichiers sensibles avec des mots de passe robustes": "Защищайте важные файлы надёжными паролями",
+      "Retirez les restrictions d'accès selon vos besoins légitimes": "Снимайте ограничения доступа для законных задач",
+      "Marquez vos documents avec des filigranes textuels ou graphiques": "Помечайте документы текстовыми или графическими водяными знаками",
+      "Générez des QR codes : URL, WiFi, vCard, email, téléphone, SMS, GPS": "Создавайте QR-коды: URL, WiFi, vCard, email, телефон, SMS, GPS",
+      "Créer un document PDF à partir de Word, Excel, PPT": "Создайте PDF-документ из Word, Excel, PPT",
+      "Convertir images JPG, PNG, HEIC vers PDF": "Конвертируйте изображения JPG, PNG, HEIC в PDF",
+      "Transformer PDF vers Word, Excel, PowerPoint": "Конвертируйте PDF в Word, Excel, PowerPoint",
+      "Conversion vidéo et audio entre multiples formats": "Конвертация видео и аудио между множеством форматов",
+      "Convertir pages web HTML ou fichiers texte vers PDF": "Конвертируйте HTML-страницы или текстовые файлы в PDF",
+      "Convertir pages PDF vers JPG, PNG, TIFF": "Конвертируйте страницы PDF в JPG, PNG, TIFF",
+      "Optimiser la taille de vos fichiers pour un partage plus rapide": "Оптимизируйте размер файлов для быстрого обмена",
+      "Extraire le texte de documents scannés avec précision": "Точно извлекайте текст из отсканированных документов",
+      "Redresser automatiquement les pages PDF numérisées inclinées": "Автоматически выпрямляйте наклонённые отсканированные страницы PDF",
+      "Convertir un PDF en niveau de gris ou ajuster les couleurs": "Конвертируйте PDF в оттенки серого или настраивайте цвета",
+      "Suppression en lot des surlignages et annotations d'un PDF": "Массовое удаление выделений и аннотаций из PDF",
+      "Créateur de formulaires PDF gratuit, rendre les documents remplissables": "Бесплатный конструктор PDF-форм. Сделайте документы заполняемыми",
+      "Créer et organiser les signets PDF pour navigation facilitée": "Создавайте и упорядочивайте закладки PDF для удобной навигации",
+      "Appliquer numéros de pages et étiquettes au fichier PDF": "Добавляйте номера страниц и метки в PDF-файл",
+      "Ajouter des numéros de page au PDF automatiquement": "Автоматически добавляйте номера страниц в PDF",
+      "Changer auteur, titre, mots-clés et métadonnées du PDF": "Изменяйте автора, заголовок, ключевые слова и метаданные PDF",
+      "Extraire toutes les images depuis un fichier PDF": "Извлекайте все изображения из PDF-файла",
+      "Rogner les marges et changer la taille de la page PDF": "Обрезайте поля и меняйте размер страницы PDF",
+      "Pivoter et sauvegarder les pages PDF de façon permanente": "Поворачивайте и сохраняйте страницы PDF навсегда",
+      "Imprimer plusieurs pages par feuille de papier (N-up)": "Печатайте несколько страниц на листе (N-up)",
+      "Numérotation automatique sur plusieurs fichiers en même temps": "Автоматическая нумерация нескольких файлов одновременно",
+      "Rendre les PDF remplissables en lecture seule, imprimer en une étape": "Сделайте заполняемые PDF доступными только для чтения. Печать за один шаг",
+      "Combiner plusieurs actions pour préparer un PDF à l'impression": "Объедините несколько действий для подготовки PDF к печати",
+      "Récupérer des données corrompues ou endommagées d'un document PDF": "Восстанавливайте повреждённые данные из PDF-документа",
+      "Changer le nom de fichier basé sur le texte des pages PDF": "Меняйте имя файла на основе текста страниц PDF",
+      "Optimiser et améliorer la structure interne d'un document PDF": "Оптимизируйте и улучшайте внутреннюю структуру PDF-документа"
+    }
+  },
+  "catalog": {
+    "items": {
+      "pdf": {
+        "title": "Инструменты PDF",
+        "description": "Конвертация, OCR, объединение, сжатие"
+      },
+      "images": {
+        "title": "Инструменты для изображений",
+        "description": "Конвертация, оптимизация, фильтры"
+      },
+      "media": {
+        "title": "Видео и аудио",
+        "description": "Конвертация, извлечение, обрезка"
+      },
+      "archive": {
+        "title": "Архив (ZIP)",
+        "description": "Создание и распаковка ZIP-архивов"
+      },
+      "pdf-convert": {
+        "title": "Конвертировать документ",
+        "description": "Легко конвертируйте файлы в PDF, Word, Excel и другие форматы."
+      },
+      "pdf-ocr": {
+        "title": "Распознавание текста",
+        "description": "Точно извлекайте текст из отсканированных документов и изображений"
+      },
+      "pdf-merge": {
+        "title": "Объединить документы",
+        "description": "Объединяйте PDF в любом порядке с помощью нашего инструмента."
+      },
+      "pdf-split": {
+        "title": "Разделить и извлечь страницы",
+        "description": "Разделяйте и извлекайте страницы PDF в отдельные файлы."
+      },
+      "pdf-compress": {
+        "title": "Сжать PDF",
+        "description": "Уменьшите размер файлов, сохранив максимальное качество PDF."
+      },
+      "pdf-edit": {
+        "title": "Редактировать PDF",
+        "description": "Редактируйте PDF: текст, изображения, фигуры, аннотации, шрифты и цвета."
+      },
+      "pdf-annotate": {
+        "title": "Аннотировать PDF",
+        "description": "Добавляйте текст, изображения, фигуры, рисунки, стикеры, выделения и многое другое."
+      },
+      "pdf-fill-sign": {
+        "title": "Заполнить и подписать",
+        "description": "Заполняйте формы PDF и добавляйте электронные подписи."
+      },
+      "pdf-redact": {
+        "title": "Замаскировать PDF",
+        "description": "Безвозвратно удаляйте конфиденциальную информацию из PDF."
+      },
+      "pdf-protect": {
+        "title": "Защита паролем",
+        "description": "Защитите свои PDF, добавив пароль."
+      },
+      "pdf-unlock": {
+        "title": "Разблокировать PDF",
+        "description": "Удалите пароли PDF для полного доступа и большей гибкости."
+      },
+      "pdf-watermark": {
+        "title": "Добавить водяной знак",
+        "description": "Добавьте водяной знак или текст для защиты ваших PDF-файлов."
+      },
+      "pdf-organize": {
+        "title": "Упорядочить страницы",
+        "description": "Сортируйте страницы PDF как угодно. При необходимости удаляйте или добавляйте страницы."
+      },
+      "pdf-rotate": {
+        "title": "Повернуть страницы",
+        "description": "Поворачивайте страницы PDF в книжную или альбомную ориентацию."
+      },
+      "pdf-crop": {
+        "title": "Обрезать страницы",
+        "description": "Обрезайте и выравнивайте документы с помощью нашего инструмента."
+      },
+      "pdf-delete-pages": {
+        "title": "Удалить страницы",
+        "description": "Удалите одну или несколько страниц из вашего PDF-файла."
+      },
+      "img-convert": {
+        "title": "Конвертация",
+        "description": "Более 20 форматов (JPG, PNG, WebP, AVIF, GIF и др.)"
+      },
+      "img-optimize": {
+        "title": "Оптимизация",
+        "description": "Умное сжатие, WebP, AVIF"
+      },
+      "img-resize": {
+        "title": "Изменить размер",
+        "description": "Изменение размера, обрезка, поворот, отражение"
+      },
+      "img-filters": {
+        "title": "Фильтры",
+        "description": "Оттенки серого, сепия, размытие, резкость"
+      },
+      "img-watermark": {
+        "title": "Водяной знак",
+        "description": "Добавить текст или логотип"
+      },
+      "img-batch": {
+        "title": "Пакетная обработка",
+        "description": "Более 100 изображений одновременно"
+      },
+      "img-favicon": {
+        "title": "Генератор favicon",
+        "description": "Создание favicon (16x16, 32x32, 192x192 и др.)"
+      },
+      "media-video-convert": {
+        "title": "Конвертация видео",
+        "description": "MP4, AVI, MOV, WebM, MKV, FLV"
+      },
+      "media-audio-convert": {
+        "title": "Конвертация аудио",
+        "description": "MP3, WAV, FLAC, AAC, OGG"
+      },
+      "media-extract-audio": {
+        "title": "Извлечь аудио",
+        "description": "Извлеките аудиодорожку из видео"
+      },
+      "media-trim": {
+        "title": "Обрезать",
+        "description": "Обрезка видео и аудио"
+      },
+      "media-compress": {
+        "title": "Сжать",
+        "description": "Уменьшить размер"
+      },
+      "media-merge": {
+        "title": "Объединить",
+        "description": "Объединить несколько файлов"
+      },
+      "batch": {
+        "title": "Пакетная обработка",
+        "description": "Обрабатывайте несколько файлов одновременно"
+      },
+      "api": {
+        "title": "API",
+        "description": "API-интеграция для разработчиков"
+      }
+    }
+  },
+  "search": {
+    "placeholder": "Поиск инструментов и функций... (Ctrl+K или Cmd+K)",
+    "recent": "Недавние запросы",
+    "popular": "Популярные запросы",
+    "noResults": "По запросу «{query}» ничего не найдено",
+    "deleteRecent": "Удалить этот запрос",
+    "categories": {
+      "tool": "Инструмент",
+      "page": "Страница",
+      "feature": "Функция"
+    }
+  },
+  "install": {
+    "title": "📲 Multi Convert доступен на всех ваших устройствах",
+    "subtitle": "Установите приложение для быстрого доступа, в том числе офлайн",
+    "install": "Установить",
+    "ok": "ОК",
+    "dismiss": "Закрыть",
+    "iosHint": "Доступно на всех ваших устройствах — Поделиться → «На экран „Домой“»"
+  },
+  "userMenu": {
+    "login": "Вход",
+    "signup": "Регистрация",
+    "dashboard": "Панель управления",
+    "settings": "Настройки",
+    "logout": "Выйти"
+  },
+  "toolsModal": {
+    "title": "Выберите инструмент, с которым хотите работать",
+    "back": "Назад"
+  },
+  "cookie": {
+    "message": "🍪 Мы используем файлы cookie, чтобы финансировать сайт (реклама) и улучшать ваш опыт. Ознакомьтесь с нашей <link>политикой конфиденциальности</link>.",
+    "accept": "Принять",
+    "refuse": "Отклонить",
+    "learnMore": "Подробнее"
   }
 }

@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { QrGenerator } from '@/components/qr/qr-generator';
-import { BackButton } from '@/components/ui/back-button';
 
 export const metadata: Metadata = {
   title: 'Générateur de QR Code gratuit',
@@ -13,7 +12,6 @@ export default function QrPage() {
   return (
     <div className="py-8">
       <div className="container mx-auto px-4">
-        <BackButton />
         <QrGenerator />
       </div>
     </div>

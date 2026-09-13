@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Code, Copy, Check, Key, Zap, Shield, Book } from 'lucide-react';
-import { BackButton } from '@/components/ui/back-button';
 
 export default function DocumentationPage() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -101,10 +100,6 @@ curl_close($ch);
   return (
     <div className="min-h-screen bg-background py-12">
       <div className="container mx-auto px-4">
-        {/* Bouton retour */}
-        <div className="mb-6">
-          <BackButton />
-        </div>
 
         {/* Header */}
         <div className="text-center mb-12">

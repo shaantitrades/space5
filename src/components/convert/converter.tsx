@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { FileUpload } from './file-upload';
 import { FormatSelector } from './format-selector';
 import { Link } from '@/i18n/routing';
+import { useAuth } from '@/hooks/useAuth';
 
 export function Converter() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -13,7 +14,7 @@ export function Converter() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [downloadUrls, setDownloadUrls] = useState<string[]>([]);
   const [showOptions, setShowOptions] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // TODO: Récupérer du contexte auth
+  const { isAuthenticated: isLoggedIn, isLoading: authLoading } = useAuth();
   const [conversionsUsed, setConversionsUsed] = useState(12); // TODO: Récupérer de l'API
   const [conversionsLimit, setConversionsLimit] = useState(25); // TODO: Récupérer du plan
 
@@ -116,7 +117,7 @@ export function Converter() {
           </div>
 
           {/* Limite de conversions */}
-          {!isLoggedIn ? (
+          {authLoading ? null : !isLoggedIn ? (
             <div className="p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
               <div className="flex-1">

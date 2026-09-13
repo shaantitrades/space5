@@ -16,7 +16,8 @@
     "upload": "Upload",
     "download": "Download",
     "convert": "Convert",
-    "close": "Close"
+    "close": "Close",
+    "back": "Back"
   },
   "nav": {
     "home": "Home",
@@ -29,7 +30,10 @@
     "enterprise": "Enterprise",
     "login": "Login",
     "signup": "Sign Up",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "fillSign": "Fill & Sign",
+    "language": "Language",
+    "chooseLanguage": "Choose language"
   },
   "pricing": {
     "title": "Choose Your Plan",
@@ -76,5 +80,355 @@
     "processing": "Processing...",
     "completed": "Conversion Completed",
     "download": "Download Converted File"
+  },
+  "home": {
+    "stats": {
+      "converted": "🎯 2M+ files converted",
+      "rating": "⭐ 4.9/5",
+      "gdpr": "🔐 GDPR Certified"
+    },
+    "cta": "Click to access",
+    "badges": {
+      "populaire": "Popular",
+      "nouveau": "New",
+      "pro": "Pro"
+    },
+    "groups": {
+      "Catégories Principales": "Main Categories",
+      "Transformation Rapide": "Quick Transformation",
+      "Assemblage & Découpage": "Merge & Split",
+      "Authentification & Protection": "Authentication & Protection",
+      "Conversion Intelligente": "Smart Conversion",
+      "Optimisation & Qualité": "Optimization & Quality",
+      "Personnalisation Avancée": "Advanced Customization",
+      "Production & Impression": "Production & Printing",
+      "Réparation & Récupération": "Repair & Recovery"
+    },
+    "mainTitles": {
+      "PDF & Documents": "PDF & Documents",
+      "Images & Logos": "Images & Logos",
+      "Vidéo & Audio": "Video & Audio"
+    },
+    "mainDescriptions": {
+      "Conversion, OCR, Fusion, Compression de tous vos documents": "Conversion, OCR, merge and compression for all your documents",
+      "20+ formats, optimisation intelligente et redimensionnement": "20+ formats, smart optimization and resizing",
+      "Batch processing, codecs multiples, qualité optimale": "Batch processing, multiple codecs, optimal quality"
+    },
+    "features": {
+      "title": "Key Features",
+      "subtitle": "Everything you need for professional conversion",
+      "IA-Powered": "AI-Powered",
+      "Sécurité Militaire": "Military-Grade Security",
+      "10 Langues": "10 Languages",
+      "Workflows": "Workflows",
+      "Traitement par lot": "Batch Processing",
+      "Suggestions automatiques, amélioration qualité intelligente": "Automatic suggestions, smart quality enhancement",
+      "Chiffrement, geo-blocking, protection fraude, RGPD": "Encryption, geo-blocking, fraud protection, GDPR",
+      "Interface internationalisée pour marchés premium": "Localized interface for premium markets",
+      "Pipelines visuels automatisés pour conversions complexes": "Automated visual pipelines for complex conversions",
+      "100+ fichiers simultanément avec gestion de queue": "100+ files simultaneously with queue management"
+    },
+    "toolTitles": {
+      "Modifier & Annoter": "Edit & Annotate",
+      "Créer PDF": "Create PDF",
+      "Convertir Format": "Convert Format",
+      "Image to ICO": "Image to ICO",
+      "Optimiser Taille": "Optimize Size",
+      "Extraire Contenu": "Extract Content",
+      "Reorganiser Pages": "Reorganize Pages",
+      "Appliquer Filtres": "Apply Filters",
+      "Fusionner Documents": "Merge Documents",
+      "Scinder PDF": "Split PDF",
+      "Extraire par Sections": "Extract by Sections",
+      "Mélanger Pages": "Shuffle Pages",
+      "Ajouter Pages": "Add Pages",
+      "Finaliser & Valider": "Finalize & Validate",
+      "Sécuriser Document": "Secure Document",
+      "Accéder Protégé": "Access Protected",
+      "Marquer Fichier": "Mark File",
+      "QR Code Generator": "QR Code Generator",
+      "Documents → PDF": "Documents → PDF",
+      "Images → PDF": "Images → PDF",
+      "PDF → Office": "PDF → Office",
+      "Media → Formats": "Media → Formats",
+      "Texte → PDF": "Text → PDF",
+      "PDF → Images": "PDF → Images",
+      "Réduire Poids": "Reduce Size",
+      "Reconnaissance Texte": "Text Recognition",
+      "Corriger Orientation": "Fix Orientation",
+      "Transformer Couleurs": "Transform Colors",
+      "Nettoyer Annotations": "Clean Annotations",
+      "Créer Formulaires": "Create Forms",
+      "Gérer Signets": "Manage Bookmarks",
+      "Ajouter En-têtes": "Add Headers",
+      "Numérotation Automatique": "Auto Numbering",
+      "Éditer Informations": "Edit Information",
+      "Extraire Visuels": "Extract Visuals",
+      "Ajuster Dimensions": "Adjust Dimensions",
+      "Orienter Pages": "Orient Pages",
+      "Mise en Page Multiple": "Multiple Pages Layout",
+      "Numérotation Bates": "Bates Numbering",
+      "Aplatir Document": "Flatten Document",
+      "Préparer Impression": "Prepare for Printing",
+      "Restaurer Fichier": "Restore File",
+      "Renommer Intelligent": "Smart Rename",
+      "Améliorer Structure": "Improve Structure"
+    },
+    "toolDescriptions": {
+      "Personnalisez vos documents avec modifications et annotations": "Customize your documents with edits and annotations",
+      "Rédiger un PDF professionnel depuis une page vierge (A4/Lettre) et exporter": "Write a professional PDF from a blank page (A4/Letter) and export",
+      "Transformer entre PDF, Word, Excel, Images et plus": "Convert between PDF, Word, Excel, images and more",
+      "Convertir vos images (PNG, JPG) en fichiers ICO pour favicons": "Convert your images (PNG, JPG) to ICO files for favicons",
+      "Réduire la taille de vos fichiers sans perte de qualité visible": "Reduce file size without visible quality loss",
+      "Obtenir un nouveau document avec seulement les pages souhaitées": "Get a new document with only the pages you want",
+      "Gérez la structure de vos documents en réarrangeant les pages": "Manage your document structure by rearranging pages",
+      "Ajouter des effets visuels et transformations créatives": "Add visual effects and creative transformations",
+      "Assemblez plusieurs PDF et images en un document unique": "Combine multiple PDFs and images into a single document",
+      "Séparez votre PDF en plusieurs fichiers distincts selon vos besoins": "Split your PDF into several separate files as needed",
+      "Extraire chapitres basés sur les signets de la table des matières": "Extract chapters based on table-of-contents bookmarks",
+      "Alterner et mélanger les pages de plusieurs documents": "Alternate and shuffle pages from multiple documents",
+      "Insérer des pages supplémentaires dans votre document PDF": "Insert additional pages into your PDF document",
+      "Remplir des formulaires PDF et apposer vos signatures électroniques": "Fill PDF forms and add your electronic signatures",
+      "Protégez vos fichiers sensibles avec des mots de passe robustes": "Protect your sensitive files with strong passwords",
+      "Retirez les restrictions d'accès selon vos besoins légitimes": "Remove access restrictions for your legitimate needs",
+      "Marquez vos documents avec des filigranes textuels ou graphiques": "Mark your documents with text or graphic watermarks",
+      "Générez des QR codes : URL, WiFi, vCard, email, téléphone, SMS, GPS": "Generate QR codes: URL, WiFi, vCard, email, phone, SMS, GPS",
+      "Créer un document PDF à partir de Word, Excel, PPT": "Create a PDF document from Word, Excel, PPT",
+      "Convertir images JPG, PNG, HEIC vers PDF": "Convert JPG, PNG, HEIC images to PDF",
+      "Transformer PDF vers Word, Excel, PowerPoint": "Convert PDF to Word, Excel, PowerPoint",
+      "Conversion vidéo et audio entre multiples formats": "Video and audio conversion between multiple formats",
+      "Convertir pages web HTML ou fichiers texte vers PDF": "Convert HTML web pages or text files to PDF",
+      "Convertir pages PDF vers JPG, PNG, TIFF": "Convert PDF pages to JPG, PNG, TIFF",
+      "Optimiser la taille de vos fichiers pour un partage plus rapide": "Optimize your file size for faster sharing",
+      "Extraire le texte de documents scannés avec précision": "Extract text from scanned documents accurately",
+      "Redresser automatiquement les pages PDF numérisées inclinées": "Automatically straighten skewed scanned PDF pages",
+      "Convertir un PDF en niveau de gris ou ajuster les couleurs": "Convert a PDF to grayscale or adjust colors",
+      "Suppression en lot des surlignages et annotations d'un PDF": "Batch removal of highlights and annotations from a PDF",
+      "Créateur de formulaires PDF gratuit, rendre les documents remplissables": "Free PDF form creator. Make documents fillable",
+      "Créer et organiser les signets PDF pour navigation facilitée": "Create and organize PDF bookmarks for easier navigation",
+      "Appliquer numéros de pages et étiquettes au fichier PDF": "Apply page numbers and labels to the PDF file",
+      "Ajouter des numéros de page au PDF automatiquement": "Automatically add page numbers to the PDF",
+      "Changer auteur, titre, mots-clés et métadonnées du PDF": "Change author, title, keywords and PDF metadata",
+      "Extraire toutes les images depuis un fichier PDF": "Extract all images from a PDF file",
+      "Rogner les marges et changer la taille de la page PDF": "Crop margins and change the PDF page size",
+      "Pivoter et sauvegarder les pages PDF de façon permanente": "Rotate and permanently save PDF pages",
+      "Imprimer plusieurs pages par feuille de papier (N-up)": "Print multiple pages per sheet of paper (N-up)",
+      "Numérotation automatique sur plusieurs fichiers en même temps": "Automatic numbering across multiple files at once",
+      "Rendre les PDF remplissables en lecture seule, imprimer en une étape": "Make fillable PDFs read-only. Print in one step",
+      "Combiner plusieurs actions pour préparer un PDF à l'impression": "Combine several actions to prepare a PDF for printing",
+      "Récupérer des données corrompues ou endommagées d'un document PDF": "Recover corrupted or damaged data from a PDF document",
+      "Changer le nom de fichier basé sur le texte des pages PDF": "Change the file name based on the PDF page text",
+      "Optimiser et améliorer la structure interne d'un document PDF": "Optimize and improve the internal structure of a PDF document"
+    }
+  },
+  "footer": {
+    "product": "Product",
+    "company": "Company",
+    "legal": "Legal",
+    "resources": "Resources",
+    "rights": "All rights reserved",
+    "links": {
+      "Fonctionnalités": "Features",
+      "Tarifs": "Pricing",
+      "API": "API",
+      "Applications": "Apps",
+      "Intégrations": "Integrations",
+      "À propos": "About",
+      "Sécurité": "Security",
+      "Entreprise": "Enterprise",
+      "Blog": "Blog",
+      "Carrières": "Careers",
+      "Confidentialité": "Privacy",
+      "Conditions": "Terms",
+      "RGPD": "GDPR",
+      "Cookies": "Cookies",
+      "Mentions légales": "Legal notice",
+      "Documentation": "Documentation",
+      "Aide": "Help",
+      "Contact": "Contact",
+      "Statut": "Status",
+      "Changelog": "Changelog"
+    }
+  },
+  "catalog": {
+    "items": {
+      "pdf": {
+        "title": "PDF Tools",
+        "description": "Conversion, OCR, Merge, Compression"
+      },
+      "images": {
+        "title": "Image Tools",
+        "description": "Conversion, Optimisation, Filters"
+      },
+      "media": {
+        "title": "Video & Audio",
+        "description": "Conversion, Extraction, Trim"
+      },
+      "archive": {
+        "title": "Archive (ZIP)",
+        "description": "Create or extract ZIP archives"
+      },
+      "pdf-convert": {
+        "title": "Convert a document",
+        "description": "Easily convert files to PDF, Word, Excel and more."
+      },
+      "pdf-ocr": {
+        "title": "Text recognition",
+        "description": "Accurately extract text from scanned documents or images"
+      },
+      "pdf-merge": {
+        "title": "Merge documents",
+        "description": "Combine PDFs in any order with our merge tool."
+      },
+      "pdf-split": {
+        "title": "Split and extract pages",
+        "description": "Split and extract PDF pages to create separate files."
+      },
+      "pdf-compress": {
+        "title": "Compress PDF",
+        "description": "Reduce file size while optimising for maximum PDF quality."
+      },
+      "pdf-edit": {
+        "title": "Edit PDF",
+        "description": "Edit PDFs with text, images, shapes, annotations, fonts and colours."
+      },
+      "pdf-annotate": {
+        "title": "Annotate PDF",
+        "description": "Add text, images, shapes, drawings, sticky notes, highlights and much more."
+      },
+      "pdf-fill-sign": {
+        "title": "Fill & Sign",
+        "description": "Fill in PDF forms and add your electronic signatures."
+      },
+      "pdf-redact": {
+        "title": "Redact PDF",
+        "description": "Permanently remove sensitive information from your PDF."
+      },
+      "pdf-protect": {
+        "title": "Password protection",
+        "description": "Secure your PDFs by adding a password."
+      },
+      "pdf-unlock": {
+        "title": "Unlock PDF",
+        "description": "Remove PDF passwords for full access and greater flexibility."
+      },
+      "pdf-watermark": {
+        "title": "Add a watermark",
+        "description": "Add a watermark or text as protection to your PDF files."
+      },
+      "pdf-organize": {
+        "title": "Organise pages",
+        "description": "Sort your PDF pages however you like. Delete or add pages if needed."
+      },
+      "pdf-rotate": {
+        "title": "Rotate pages",
+        "description": "Rotate your PDF pages to portrait or landscape."
+      },
+      "pdf-crop": {
+        "title": "Crop pages",
+        "description": "Crop and trim your documents with our PDF cropper."
+      },
+      "pdf-delete-pages": {
+        "title": "Delete pages",
+        "description": "Remove one or more pages from your PDF file."
+      },
+      "img-convert": {
+        "title": "Conversion",
+        "description": "20+ formats (JPG, PNG, WebP, AVIF, GIF, etc.)"
+      },
+      "img-optimize": {
+        "title": "Optimisation",
+        "description": "Smart compression, WebP, AVIF"
+      },
+      "img-resize": {
+        "title": "Resize",
+        "description": "Resize, crop, rotate, flip"
+      },
+      "img-filters": {
+        "title": "Filters",
+        "description": "Grayscale, sepia, blur, sharpen"
+      },
+      "img-watermark": {
+        "title": "Watermark",
+        "description": "Add text or a logo"
+      },
+      "img-batch": {
+        "title": "Batch processing",
+        "description": "100+ images at once"
+      },
+      "img-favicon": {
+        "title": "Favicon generator",
+        "description": "Create favicons (16x16, 32x32, 192x192, etc.)"
+      },
+      "media-video-convert": {
+        "title": "Video conversion",
+        "description": "MP4, AVI, MOV, WebM, MKV, FLV"
+      },
+      "media-audio-convert": {
+        "title": "Audio conversion",
+        "description": "MP3, WAV, FLAC, AAC, OGG"
+      },
+      "media-extract-audio": {
+        "title": "Extract audio",
+        "description": "Extract the audio track from a video"
+      },
+      "media-trim": {
+        "title": "Trim",
+        "description": "Cut video/audio"
+      },
+      "media-compress": {
+        "title": "Compress",
+        "description": "Reduce the file size"
+      },
+      "media-merge": {
+        "title": "Merge",
+        "description": "Combine several files"
+      },
+      "batch": {
+        "title": "Batch processing",
+        "description": "Process several files at once"
+      },
+      "api": {
+        "title": "API",
+        "description": "API integration for developers"
+      }
+    }
+  },
+  "search": {
+    "placeholder": "Search tools, features... (Ctrl+K or Cmd+K)",
+    "recent": "Recent searches",
+    "popular": "Popular suggestions",
+    "noResults": "No results found for “{query}”",
+    "deleteRecent": "Delete this search",
+    "categories": {
+      "tool": "Tool",
+      "page": "Page",
+      "feature": "Feature"
+    }
+  },
+  "install": {
+    "title": "📲 Multi Convert is available on all your devices",
+    "subtitle": "Install the app for one-tap access, even offline",
+    "install": "Install",
+    "ok": "OK",
+    "dismiss": "Close",
+    "iosHint": "Available on all your devices — Share → “Add to Home Screen”"
+  },
+  "userMenu": {
+    "login": "Log in",
+    "signup": "Sign up",
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "logout": "Log out"
+  },
+  "toolsModal": {
+    "title": "Choose the tool you want to work with",
+    "back": "Back"
+  },
+  "cookie": {
+    "message": "🍪 We use cookies to fund the site (advertising) and improve your experience. See our <link>privacy policy</link>.",
+    "accept": "Accept",
+    "refuse": "Decline",
+    "learnMore": "Learn more"
   }
 }

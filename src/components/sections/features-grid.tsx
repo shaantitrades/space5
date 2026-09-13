@@ -2,8 +2,16 @@
 
 import { FileText, Image, Video, Music, Zap, Lock, Globe2, Workflow } from 'lucide-react';
 import { Link } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 
 export function FeaturesGrid() {
+  const t = useTranslations();
+  /** Traduit la clé si elle existe, sinon conserve le texte français d'origine */
+  const tr = (key: string, fallback: string): string => {
+    const fullKey = `home.${key}`;
+    return t.has(fullKey) ? (t(fullKey) as string) : fallback;
+  };
+
   const features = [
     {
       icon: Zap,
@@ -42,10 +50,10 @@ export function FeaturesGrid() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-bold mb-3">
-            Fonctionnalités Phares
+            {tr('features.title', 'Fonctionnalités Phares')}
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Tout ce dont vous avez besoin pour une conversion professionnelle
+            {tr('features.subtitle', 'Tout ce dont vous avez besoin pour une conversion professionnelle')}
           </p>
         </div>
 
@@ -65,13 +73,13 @@ export function FeaturesGrid() {
                     <Icon className="w-6 h-6 text-primary" />
                   </div>
                   <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">
-                    {feature.title}
+                    {tr(`features.${feature.title}`, feature.title)}
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    {feature.description}
+                    {tr(`features.${feature.description}`, feature.description)}
                   </p>
                   <p className="text-xs text-primary font-medium mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                    Cliquez pour accéder →
+                    {tr('cta', 'Cliquez pour accéder')} →
                   </p>
                 </Link>
               );
@@ -86,9 +94,9 @@ export function FeaturesGrid() {
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
                   <Icon className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
+                <h3 className="text-lg font-semibold mb-2">{tr(`features.${feature.title}`, feature.title)}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  {feature.description}
+                  {tr(`features.${feature.description}`, feature.description)}
                 </p>
               </div>
             );

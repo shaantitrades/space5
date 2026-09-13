@@ -5,6 +5,7 @@ import AuthLayout from '@/components/auth/AuthLayout';
 import SecurityBadges from '@/components/auth/SecurityBadges';
 import { Mail, ArrowRight, CheckCircle } from 'lucide-react';
 import { Link } from '@/i18n/routing';
+import { AuthError } from '@/components/auth/auth-error';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -96,11 +97,8 @@ export default function ForgotPasswordPage() {
       <div className="space-y-6">
         <SecurityBadges />
 
-        {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-800">{error}</p>
-          </div>
-        )}
+        {/* Erreur : bandeau fixe en bas de l'écran (toujours visible) */}
+        <AuthError message={error} onClose={() => setError('')} />
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>

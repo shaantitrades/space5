@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { Calculator, CreditCard, Check, Zap } from 'lucide-react';
 import { Link } from '@/i18n/routing';
-import { BackButton } from '@/components/ui/back-button';
 
 export default function CreditsPage() {
   const [fileType, setFileType] = useState('pdf');
@@ -76,10 +75,6 @@ export default function CreditsPage() {
   return (
     <div className="min-h-screen bg-background py-12">
       <div className="container mx-auto px-4">
-        {/* Bouton retour */}
-        <div className="mb-6">
-          <BackButton />
-        </div>
 
         {/* Header */}
         <div className="text-center mb-12">

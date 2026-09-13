@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, Suspense, lazy } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   Image as ImageIcon,
   Sparkles,
@@ -16,7 +17,6 @@ import {
   Link2,
   Edit,
 } from 'lucide-react';
-import { BackButton } from '@/components/ui/back-button';
 import { FileUploadSkeleton } from '@/components/ui/file-upload-skeleton';
 
 // Lazy load ImageEditor pour optimiser le bundle
@@ -27,6 +27,7 @@ const ImageEditor = lazy(() =>
 type ImageTool = 'convert' | 'optimize' | 'resize' | 'filters' | 'watermark' | 'batch' | 'favicon';
 
 export default function ImagesPage() {
+  const searchParams = useSearchParams();
   const [selectedTool, setSelectedTool] = useState<ImageTool>('convert');
   const [files, setFiles] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -93,6 +94,15 @@ export default function ImagesPage() {
       bgColor: 'bg-yellow-50',
     },
   ];
+
+  // Détecte le paramètre ?tool= dans l'URL et sélectionne l'outil correspondant
+  useEffect(() => {
+    const toolParam = searchParams.get('tool');
+    if (toolParam && tools.some((t) => t.id === toolParam)) {
+      setSelectedTool(toolParam as ImageTool);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -186,10 +196,6 @@ export default function ImagesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-12">
       <div className="container mx-auto px-4 max-w-7xl">
-        {/* Bouton retour */}
-        <div className="mb-6">
-          <BackButton />
-        </div>
 
         {/* Header */}
         <div className="text-center mb-12">

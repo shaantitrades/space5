@@ -13,7 +13,11 @@
     "upload": "Upload",
     "download": "Download",
     "convert": "Convert",
-    "close": "Close"
+    "close": "Close",
+    "hero_title": "Suite de conversión universal",
+    "hero_subtitle": "Convierte todos tus archivos localmente, rápido y seguro.",
+    "start_converting": "Empezar a convertir",
+    "back": "Volver"
   },
   "nav": {
     "home": "Home",
@@ -24,7 +28,12 @@
     "enterprise": "Enterprise",
     "login": "Login",
     "signup": "Sign Up",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "tools": "Herramientas",
+    "archive": "Archivo",
+    "fillSign": "Rellenar y firmar",
+    "language": "Idioma",
+    "chooseLanguage": "Elegir idioma"
   },
   "pricing": {
     "title": "Choose Your Plan",
@@ -71,5 +80,355 @@
     "processing": "Processing...",
     "completed": "Conversion Completed",
     "download": "Download Converted File"
+  },
+  "footer": {
+    "product": "Producto",
+    "company": "Empresa",
+    "legal": "Legal",
+    "resources": "Recursos",
+    "rights": "Todos los derechos reservados",
+    "links": {
+      "Fonctionnalités": "Funciones",
+      "Tarifs": "Precios",
+      "API": "API",
+      "Applications": "Aplicaciones",
+      "Intégrations": "Integraciones",
+      "À propos": "Acerca de",
+      "Sécurité": "Seguridad",
+      "Entreprise": "Empresa",
+      "Blog": "Blog",
+      "Carrières": "Empleo",
+      "Confidentialité": "Privacidad",
+      "Conditions": "Términos",
+      "RGPD": "RGPD",
+      "Cookies": "Cookies",
+      "Mentions légales": "Aviso legal",
+      "Documentation": "Documentación",
+      "Aide": "Ayuda",
+      "Contact": "Contacto",
+      "Statut": "Estado",
+      "Changelog": "Novedades"
+    }
+  },
+  "home": {
+    "stats": {
+      "converted": "🎯 2 M+ archivos convertidos",
+      "rating": "⭐ 4.9/5",
+      "gdpr": "🔐 Certificado RGPD"
+    },
+    "cta": "Haz clic para acceder",
+    "badges": {
+      "populaire": "Popular",
+      "nouveau": "Nuevo",
+      "pro": "Pro"
+    },
+    "groups": {
+      "Catégories Principales": "Categorías principales",
+      "Transformation Rapide": "Transformación rápida",
+      "Assemblage & Découpage": "Combinar y dividir",
+      "Authentification & Protection": "Autenticación y protección",
+      "Conversion Intelligente": "Conversión inteligente",
+      "Optimisation & Qualité": "Optimización y calidad",
+      "Personnalisation Avancée": "Personalización avanzada",
+      "Production & Impression": "Producción e impresión",
+      "Réparation & Récupération": "Reparación y recuperación"
+    },
+    "mainTitles": {
+      "PDF & Documents": "PDF y documentos",
+      "Images & Logos": "Imágenes y logotipos",
+      "Vidéo & Audio": "Vídeo y audio"
+    },
+    "mainDescriptions": {
+      "Conversion, OCR, Fusion, Compression de tous vos documents": "Conversión, OCR, combinación y compresión de todos tus documentos",
+      "20+ formats, optimisation intelligente et redimensionnement": "Más de 20 formatos, optimización inteligente y redimensionado",
+      "Batch processing, codecs multiples, qualité optimale": "Procesamiento por lotes, múltiples códecs, calidad óptima"
+    },
+    "features": {
+      "title": "Funciones destacadas",
+      "subtitle": "Todo lo que necesitas para una conversión profesional",
+      "IA-Powered": "Con IA",
+      "Sécurité Militaire": "Seguridad militar",
+      "10 Langues": "10 idiomas",
+      "Workflows": "Flujos de trabajo",
+      "Traitement par lot": "Procesamiento por lotes",
+      "Suggestions automatiques, amélioration qualité intelligente": "Sugerencias automáticas, mejora inteligente de la calidad",
+      "Chiffrement, geo-blocking, protection fraude, RGPD": "Cifrado, geobloqueo, protección antifraude, RGPD",
+      "Interface internationalisée pour marchés premium": "Interfaz localizada para mercados premium",
+      "Pipelines visuels automatisés pour conversions complexes": "Pipelines visuales automatizados para conversiones complejas",
+      "100+ fichiers simultanément avec gestion de queue": "Más de 100 archivos a la vez con gestión de colas"
+    },
+    "toolTitles": {
+      "Modifier & Annoter": "Editar y anotar",
+      "Créer PDF": "Crear PDF",
+      "Convertir Format": "Convertir formato",
+      "Image to ICO": "Imagen a ICO",
+      "Optimiser Taille": "Optimizar tamaño",
+      "Extraire Contenu": "Extraer contenido",
+      "Reorganiser Pages": "Reorganizar páginas",
+      "Appliquer Filtres": "Aplicar filtros",
+      "Fusionner Documents": "Combinar documentos",
+      "Scinder PDF": "Dividir PDF",
+      "Extraire par Sections": "Extraer por secciones",
+      "Mélanger Pages": "Mezclar páginas",
+      "Ajouter Pages": "Añadir páginas",
+      "Finaliser & Valider": "Finalizar y validar",
+      "Sécuriser Document": "Proteger documento",
+      "Accéder Protégé": "Acceder a protegido",
+      "Marquer Fichier": "Marcar archivo",
+      "QR Code Generator": "Generador de códigos QR",
+      "Documents → PDF": "Documentos → PDF",
+      "Images → PDF": "Imágenes → PDF",
+      "PDF → Office": "PDF → Office",
+      "Media → Formats": "Medios → Formatos",
+      "Texte → PDF": "Texto → PDF",
+      "PDF → Images": "PDF → Imágenes",
+      "Réduire Poids": "Reducir peso",
+      "Reconnaissance Texte": "Reconocimiento de texto",
+      "Corriger Orientation": "Corregir orientación",
+      "Transformer Couleurs": "Transformar colores",
+      "Nettoyer Annotations": "Limpiar anotaciones",
+      "Créer Formulaires": "Crear formularios",
+      "Gérer Signets": "Gestionar marcadores",
+      "Ajouter En-têtes": "Añadir encabezados",
+      "Numérotation Automatique": "Numeración automática",
+      "Éditer Informations": "Editar información",
+      "Extraire Visuels": "Extraer imágenes",
+      "Ajuster Dimensions": "Ajustar dimensiones",
+      "Orienter Pages": "Orientar páginas",
+      "Mise en Page Multiple": "Varias páginas por hoja",
+      "Numérotation Bates": "Numeración Bates",
+      "Aplatir Document": "Aplanar documento",
+      "Préparer Impression": "Preparar para imprimir",
+      "Restaurer Fichier": "Restaurar archivo",
+      "Renommer Intelligent": "Renombrar inteligente",
+      "Améliorer Structure": "Mejorar estructura"
+    },
+    "toolDescriptions": {
+      "Personnalisez vos documents avec modifications et annotations": "Personaliza tus documentos con ediciones y anotaciones",
+      "Rédiger un PDF professionnel depuis une page vierge (A4/Lettre) et exporter": "Crea un PDF profesional desde una página en blanco (A4/Carta) y expórtalo",
+      "Transformer entre PDF, Word, Excel, Images et plus": "Convierte entre PDF, Word, Excel, imágenes y más",
+      "Convertir vos images (PNG, JPG) en fichiers ICO pour favicons": "Convierte tus imágenes (PNG, JPG) en archivos ICO para favicons",
+      "Réduire la taille de vos fichiers sans perte de qualité visible": "Reduce el tamaño de tus archivos sin pérdida visible de calidad",
+      "Obtenir un nouveau document avec seulement les pages souhaitées": "Obtén un nuevo documento solo con las páginas que quieras",
+      "Gérez la structure de vos documents en réarrangeant les pages": "Gestiona la estructura de tus documentos reordenando las páginas",
+      "Ajouter des effets visuels et transformations créatives": "Añade efectos visuales y transformaciones creativas",
+      "Assemblez plusieurs PDF et images en un document unique": "Combina varios PDF e imágenes en un solo documento",
+      "Séparez votre PDF en plusieurs fichiers distincts selon vos besoins": "Divide tu PDF en varios archivos separados según tus necesidades",
+      "Extraire chapitres basés sur les signets de la table des matières": "Extrae capítulos basados en los marcadores del índice",
+      "Alterner et mélanger les pages de plusieurs documents": "Alterna y mezcla páginas de varios documentos",
+      "Insérer des pages supplémentaires dans votre document PDF": "Inserta páginas adicionales en tu documento PDF",
+      "Remplir des formulaires PDF et apposer vos signatures électroniques": "Rellena formularios PDF y añade tus firmas electrónicas",
+      "Protégez vos fichiers sensibles avec des mots de passe robustes": "Protege tus archivos confidenciales con contraseñas robustas",
+      "Retirez les restrictions d'accès selon vos besoins légitimes": "Elimina las restricciones de acceso para tus necesidades legítimas",
+      "Marquez vos documents avec des filigranes textuels ou graphiques": "Marca tus documentos con marcas de agua de texto o imagen",
+      "Générez des QR codes : URL, WiFi, vCard, email, téléphone, SMS, GPS": "Genera códigos QR: URL, WiFi, vCard, email, teléfono, SMS, GPS",
+      "Créer un document PDF à partir de Word, Excel, PPT": "Crea un PDF a partir de Word, Excel, PPT",
+      "Convertir images JPG, PNG, HEIC vers PDF": "Convierte imágenes JPG, PNG, HEIC a PDF",
+      "Transformer PDF vers Word, Excel, PowerPoint": "Convierte PDF a Word, Excel, PowerPoint",
+      "Conversion vidéo et audio entre multiples formats": "Conversión de vídeo y audio entre múltiples formatos",
+      "Convertir pages web HTML ou fichiers texte vers PDF": "Convierte páginas web HTML o archivos de texto a PDF",
+      "Convertir pages PDF vers JPG, PNG, TIFF": "Convierte páginas PDF a JPG, PNG, TIFF",
+      "Optimiser la taille de vos fichiers pour un partage plus rapide": "Optimiza el tamaño de tus archivos para compartir más rápido",
+      "Extraire le texte de documents scannés avec précision": "Extrae texto de documentos escaneados con precisión",
+      "Redresser automatiquement les pages PDF numérisées inclinées": "Endereza automáticamente páginas PDF escaneadas e inclinadas",
+      "Convertir un PDF en niveau de gris ou ajuster les couleurs": "Convierte un PDF a escala de grises o ajusta los colores",
+      "Suppression en lot des surlignages et annotations d'un PDF": "Elimina en lote resaltados y anotaciones de un PDF",
+      "Créateur de formulaires PDF gratuit, rendre les documents remplissables": "Creador de formularios PDF gratis. Haz que los documentos se puedan rellenar",
+      "Créer et organiser les signets PDF pour navigation facilitée": "Crea y organiza marcadores PDF para una navegación más fácil",
+      "Appliquer numéros de pages et étiquettes au fichier PDF": "Aplica números de página y etiquetas al archivo PDF",
+      "Ajouter des numéros de page au PDF automatiquement": "Añade números de página al PDF automáticamente",
+      "Changer auteur, titre, mots-clés et métadonnées du PDF": "Cambia autor, título, palabras clave y metadatos del PDF",
+      "Extraire toutes les images depuis un fichier PDF": "Extrae todas las imágenes de un archivo PDF",
+      "Rogner les marges et changer la taille de la page PDF": "Recorta márgenes y cambia el tamaño de página del PDF",
+      "Pivoter et sauvegarder les pages PDF de façon permanente": "Rota y guarda las páginas PDF de forma permanente",
+      "Imprimer plusieurs pages par feuille de papier (N-up)": "Imprime varias páginas por hoja de papel (N-up)",
+      "Numérotation automatique sur plusieurs fichiers en même temps": "Numeración automática en varios archivos a la vez",
+      "Rendre les PDF remplissables en lecture seule, imprimer en une étape": "Convierte PDF rellenables en solo lectura. Imprime en un solo paso",
+      "Combiner plusieurs actions pour préparer un PDF à l'impression": "Combina varias acciones para preparar un PDF para imprimir",
+      "Récupérer des données corrompues ou endommagées d'un document PDF": "Recupera datos corruptos o dañados de un documento PDF",
+      "Changer le nom de fichier basé sur le texte des pages PDF": "Cambia el nombre del archivo según el texto de las páginas PDF",
+      "Optimiser et améliorer la structure interne d'un document PDF": "Optimiza y mejora la estructura interna de un documento PDF"
+    }
+  },
+  "catalog": {
+    "items": {
+      "pdf": {
+        "title": "Herramientas PDF",
+        "description": "Conversión, OCR, Unir, Comprimir"
+      },
+      "images": {
+        "title": "Herramientas de imagen",
+        "description": "Conversión, Optimización, Filtros"
+      },
+      "media": {
+        "title": "Vídeo y audio",
+        "description": "Conversión, Extracción, Recorte"
+      },
+      "archive": {
+        "title": "Archivo (ZIP)",
+        "description": "Crear o extraer archivos ZIP"
+      },
+      "pdf-convert": {
+        "title": "Convertir un documento",
+        "description": "Convierte fácilmente archivos a PDF, Word, Excel y más."
+      },
+      "pdf-ocr": {
+        "title": "Reconocimiento de texto",
+        "description": "Extrae texto de documentos escaneados o imágenes con precisión"
+      },
+      "pdf-merge": {
+        "title": "Unir documentos",
+        "description": "Combina varios PDF en el orden que quieras con nuestra herramienta."
+      },
+      "pdf-split": {
+        "title": "Dividir y extraer páginas",
+        "description": "Divide y extrae páginas PDF para crear archivos independientes."
+      },
+      "pdf-compress": {
+        "title": "Comprimir PDF",
+        "description": "Reduce el tamaño de los archivos manteniendo la máxima calidad PDF."
+      },
+      "pdf-edit": {
+        "title": "Editar PDF",
+        "description": "Edita PDF con texto, imágenes, formas, anotaciones, fuentes y colores."
+      },
+      "pdf-annotate": {
+        "title": "Anotar PDF",
+        "description": "Añade texto, imágenes, formas, dibujos, notas adhesivas, resaltados y mucho más."
+      },
+      "pdf-fill-sign": {
+        "title": "Rellenar y firmar",
+        "description": "Rellena formularios PDF y añade tus firmas electrónicas."
+      },
+      "pdf-redact": {
+        "title": "Censurar PDF",
+        "description": "Elimina de forma permanente la información confidencial de tu PDF."
+      },
+      "pdf-protect": {
+        "title": "Protección con contraseña",
+        "description": "Protege tus PDF añadiendo una contraseña."
+      },
+      "pdf-unlock": {
+        "title": "Desbloquear PDF",
+        "description": "Elimina las contraseñas de los PDF para un acceso total y más flexibilidad."
+      },
+      "pdf-watermark": {
+        "title": "Añadir marca de agua",
+        "description": "Añade una marca de agua o texto como protección a tus archivos PDF."
+      },
+      "pdf-organize": {
+        "title": "Organizar páginas",
+        "description": "Ordena las páginas de tu PDF como quieras. Elimina o añade páginas si es necesario."
+      },
+      "pdf-rotate": {
+        "title": "Girar páginas",
+        "description": "Gira las páginas de tu PDF a vertical u horizontal."
+      },
+      "pdf-crop": {
+        "title": "Recortar páginas",
+        "description": "Recorta y ajusta tus documentos con nuestra herramienta de recorte PDF."
+      },
+      "pdf-delete-pages": {
+        "title": "Eliminar páginas",
+        "description": "Elimina una o varias páginas de tu archivo PDF."
+      },
+      "img-convert": {
+        "title": "Conversión",
+        "description": "Más de 20 formatos (JPG, PNG, WebP, AVIF, GIF, etc.)"
+      },
+      "img-optimize": {
+        "title": "Optimización",
+        "description": "Compresión inteligente, WebP, AVIF"
+      },
+      "img-resize": {
+        "title": "Redimensionar",
+        "description": "Redimensionar, recortar, girar, voltear"
+      },
+      "img-filters": {
+        "title": "Filtros",
+        "description": "Escala de grises, sepia, desenfoque, nitidez"
+      },
+      "img-watermark": {
+        "title": "Marca de agua",
+        "description": "Añadir texto o logotipo"
+      },
+      "img-batch": {
+        "title": "Procesamiento por lotes",
+        "description": "Más de 100 imágenes a la vez"
+      },
+      "img-favicon": {
+        "title": "Generador de favicons",
+        "description": "Crear favicons (16x16, 32x32, 192x192, etc.)"
+      },
+      "media-video-convert": {
+        "title": "Conversión de vídeo",
+        "description": "MP4, AVI, MOV, WebM, MKV, FLV"
+      },
+      "media-audio-convert": {
+        "title": "Conversión de audio",
+        "description": "MP3, WAV, FLAC, AAC, OGG"
+      },
+      "media-extract-audio": {
+        "title": "Extraer audio",
+        "description": "Extrae la pista de audio de un vídeo"
+      },
+      "media-trim": {
+        "title": "Recortar",
+        "description": "Cortar vídeo/audio"
+      },
+      "media-compress": {
+        "title": "Comprimir",
+        "description": "Reducir el tamaño"
+      },
+      "media-merge": {
+        "title": "Unir",
+        "description": "Combinar varios archivos"
+      },
+      "batch": {
+        "title": "Procesamiento por lotes",
+        "description": "Procesa varios archivos a la vez"
+      },
+      "api": {
+        "title": "API",
+        "description": "Integración API para desarrolladores"
+      }
+    }
+  },
+  "search": {
+    "placeholder": "Buscar herramientas, funciones... (Ctrl+K o Cmd+K)",
+    "recent": "Búsquedas recientes",
+    "popular": "Sugerencias populares",
+    "noResults": "No se encontraron resultados para «{query}»",
+    "deleteRecent": "Eliminar esta búsqueda",
+    "categories": {
+      "tool": "Herramienta",
+      "page": "Página",
+      "feature": "Función"
+    }
+  },
+  "install": {
+    "title": "📲 Multi Convert está disponible en todos tus dispositivos",
+    "subtitle": "Instala la app para acceder al instante, incluso sin conexión",
+    "install": "Instalar",
+    "ok": "OK",
+    "dismiss": "Cerrar",
+    "iosHint": "Disponible en todos tus dispositivos — Compartir → «Añadir a pantalla de inicio»"
+  },
+  "userMenu": {
+    "login": "Iniciar sesión",
+    "signup": "Registrarse",
+    "dashboard": "Panel",
+    "settings": "Configuración",
+    "logout": "Cerrar sesión"
+  },
+  "toolsModal": {
+    "title": "Elige la herramienta con la que quieres trabajar",
+    "back": "Volver"
+  },
+  "cookie": {
+    "message": "🍪 Usamos cookies para financiar el sitio (publicidad) y mejorar tu experiencia. Consulta nuestra <link>política de privacidad</link>.",
+    "accept": "Aceptar",
+    "refuse": "Rechazar",
+    "learnMore": "Más información"
   }
 }

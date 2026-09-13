@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -15,12 +16,15 @@ const COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000; // 7 jours avant de re-proposer
  * - Android / Chrome / Edge : s'affiche via l'événement `beforeinstallprompt`.
  * - iOS Safari : s'affiche après un délai (iOS ne déclenche pas l'événement).
  * - Ne s'affiche pas si déjà installée ou récemment refusée.
+ * Tous les textes viennent du namespace i18n `install` (10 langues).
  */
 export function InstallPrompt() {
+  const t = useTranslations('install');
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+
 
   useEffect(() => {
     const standalone =
@@ -87,29 +91,18 @@ export function InstallPrompt() {
 
   if (!visible || isStandalone) return null;
 
-  const lang = typeof navigator !== 'undefined' && navigator.language?.startsWith('fr') ? 'fr' : 'en';
-  const copy =
-    lang === 'fr'
-      ? {
-          title: '📲 Multi Convert est disponible sur tous vos appareils',
-          subtitle: 'Installez l\u2019application pour un accès rapide, même hors ligne',
-          install: 'Installer',
-          ok: 'OK',
-          dismiss: 'Fermer',
-          iosHint: 'Disponible sur tous vos appareils \u2014 Partager → « Sur l\u2019écran d\u2019accueil »',
-        }
-      : {
-          title: '📲 Multi Convert is available on all your devices',
-          subtitle: 'Install the app for one-tap access, even offline',
-          install: 'Install',
-          ok: 'OK',
-          dismiss: 'Close',
-          iosHint: "Available on all your devices — Share → 'Add to Home Screen'",
-        };
+  const copy = {
+    title: t('title'),
+    subtitle: t('subtitle'),
+    install: t('install'),
+    ok: t('ok'),
+    dismiss: t('dismiss'),
+    iosHint: t('iosHint'),
+  };
 
   return (
-    <div className="sticky top-0 inset-x-0 z-[100] w-full border-b border-border bg-primary/95 text-primary-foreground backdrop-blur">
-      <div className="container mx-auto flex items-center gap-3 px-4 py-2.5">
+    <div className="fixed inset-x-3 bottom-4 z-[9999] mx-auto max-w-md rounded-xl border border-border bg-primary/95 text-primary-foreground shadow-2xl backdrop-blur">
+      <div className="flex items-center gap-3 px-4 py-3">
         <img src="/icon-192.png" alt="Multi Convert" className="h-8 w-8 shrink-0 rounded-lg" />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold">{copy.title}</p>

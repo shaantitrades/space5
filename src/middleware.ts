@@ -216,6 +216,7 @@ export const config = {
      * - _next/image (optimisation d'image)
      * - favicon.ico (favicon)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    /* Exclut aussi tous les fichiers statiques (chemins contenant un point) : /icon-192.png, /manifest.webmanifest, /sw.js, etc. */
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)',
   ],
 };

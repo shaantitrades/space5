@@ -10,6 +10,7 @@ import { useRouter } from '@/i18n/routing';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import PasswordStrength from './PasswordStrength';
 import RateLimiter from './RateLimiter';
+import { AuthError } from './auth-error';
 
 export default function SignupForm() {
   const router = useRouter();
@@ -110,12 +111,8 @@ export default function SignupForm() {
       {/* Rate Limiter */}
       <RateLimiter action="signup" />
 
-      {/* Error Message */}
-      {error && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-800">{error}</p>
-        </div>
-      )}
+      {/* Erreur : bandeau fixe en bas de l'écran (toujours visible) */}
+      <AuthError message={error} onClose={() => setError('')} />
 
       {/* Full Name */}
       <div>

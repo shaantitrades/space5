@@ -342,8 +342,7 @@ export async function POST(request: NextRequest) {
           
           resultBuffer = await PDFOrganizer.reorderPages(buffers[0], newOrder);
         } else {
-          // Par défaut, retourner le PDF tel quel
-          resultBuffer = buffers[0];
+          throwHttp(400, { error: 'Paramètre removePages ou newOrder requis pour organiser le PDF' });
         }
         fileName = 'organized.pdf';
         break;

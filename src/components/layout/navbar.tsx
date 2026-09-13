@@ -4,9 +4,9 @@ import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
 import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { Globe, Menu, X, PenLine, Check } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ToolsModal } from '@/components/modals/tools-modal';
-import { getAvailableLocales } from '@/config/i18n';
+import { getAvailableLocales, LANGUAGES } from '@/config/i18n';
 import  UserMenu from '@/components/layout/user-menu';
 import { siteConfig } from '@/config/site';
 
@@ -18,6 +18,26 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [toolsModalOpen, setToolsModalOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
+  const langMenuRef = useRef<HTMLDivElement>(null);
+
+  // Ferme automatiquement le menu des langues au clic à l'extérieur ou avec Échap
+  useEffect(() => {
+    if (!langOpen) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (langMenuRef.current && !langMenuRef.current.contains(event.target as Node)) {
+        setLangOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setLangOpen(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [langOpen]);
 
   const navItems = [
     { href: '/', label: t('home') },
@@ -35,14 +55,27 @@ export function Navbar() {
 
   const languageOrder = ['en', 'fr', 'es', 'de', 'it', 'pt', 'hi', 'ru', 'sv', 'no'];
   const available = new Set(getAvailableLocales(1));
-  const languages = languageOrder.filter((c) => available.has(c));
+  const languages = languageOrder
+    .filter((code) => available.has(code))
+    .map((code) => ({
+      code,
+      name: LANGUAGES[code]?.nativeName ?? code.toUpperCase(),
+    }));
 
 
   return (
-    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="relative z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
+            <img
+              src="/logo.svg"
+              alt=""
+              aria-hidden="true"
+              width={32}
+              height={32}
+              className="h-8 w-8 shrink-0"
+            />
             <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               Multi Convert
             </span>
@@ -70,7 +103,7 @@ export function Navbar() {
               }`}
             >
               <PenLine className="w-4 h-4" />
-              <span>Remplir et Signer</span>
+              <span>{t('fillSign')}</span>
             </Link>
             
             {/* Bouton Outils - Ouvre la modale */}
@@ -80,37 +113,37 @@ export function Navbar() {
                 pathname?.startsWith('/pdf') ? 'text-primary' : 'text-muted-foreground'
               }`}
             >
-              Outils
+              {t('tools')}
             </button>
           </div>
 
           <div className="flex items-center space-x-4">
             {/* Language Selector */}
-            <div className="hidden md:block relative">
+            <div ref={langMenuRef} className="hidden md:block relative">
               <button
                 type="button"
                 onClick={() => setLangOpen((v) => !v)}
                 className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-border hover:bg-muted transition-colors text-sm"
-                aria-label="Choisir la langue"
+                aria-label={t('chooseLanguage')}
+                aria-expanded={langOpen}
+                aria-haspopup="menu"
               >
                 <Globe className="w-4 h-4" />
                 <span className="uppercase">{locale}</span>
               </button>
               {langOpen && (
                 <div className="absolute right-0 top-full mt-2 w-44 max-h-80 overflow-y-auto bg-background border border-border rounded-xl shadow-lg z-[9999]">
-                  {languages.map((code) => (
-                    <button
-                      key={code}
-                      type="button"
-                      onClick={() => {
-                        setLangOpen(false);
-                        router.replace(pathname || '/', { locale: code });
-                      }}
-                      className="w-full px-3 py-2 text-sm flex items-center justify-between hover:bg-muted transition-colors"
+                  {languages.map((language) => (
+                    <Link
+                      key={language.code}
+                      href={pathname || '/'}
+                      locale={language.code}
+                      onClick={() => setLangOpen(false)}
+                      className="w-full px-3 py-2 text-sm flex items-center justify-between gap-2 hover:bg-muted transition-colors"
                     >
-                      <span className="uppercase">{code}</span>
-                      {code === locale && <Check className="w-4 h-4" />}
-                    </button>
+                      <span className="truncate">{language.name}</span>
+                      {language.code === locale && <Check className="w-4 h-4 shrink-0" />}
+                    </Link>
                   ))}
                 </div>
               )}
@@ -150,7 +183,7 @@ export function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
             >
               <PenLine className="w-4 h-4" />
-              <span>Remplir et Signer</span>
+              <span>{t('fillSign')}</span>
             </Link>
             
             {/* Bouton Outils Mobile */}
@@ -161,22 +194,22 @@ export function Navbar() {
               }}
               className="block px-4 py-2 text-sm font-medium hover:bg-accent rounded-md text-left w-full"
             >
-              Outils
+              {t('tools')}
             </button>
             
             <div className="px-4 py-2 border-t">
               <div className="flex items-center justify-between py-2">
                 <span className="text-sm font-medium flex items-center gap-2">
-                  <Globe className="w-4 h-4" /> Langue
+                  <Globe className="w-4 h-4" /> {t('language')}
                 </span>
                 <select
                   className="bg-transparent border border-border rounded-md px-2 py-1 text-sm"
                   value={locale}
                   onChange={(e) => router.replace(pathname || '/', { locale: e.target.value })}
                 >
-                  {languages.map((code) => (
-                    <option key={code} value={code}>
-                      {code.toUpperCase()}
+                  {languages.map((language) => (
+                    <option key={language.code} value={language.code}>
+                      {language.name}
                     </option>
                   ))}
                 </select>

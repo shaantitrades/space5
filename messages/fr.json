@@ -16,7 +16,8 @@
     "upload": "Téléverser",
     "download": "Télécharger",
     "convert": "Convertir",
-    "close": "Fermer"
+    "close": "Fermer",
+    "back": "Retour"
   },
   "nav": {
     "home": "Accueil",
@@ -29,7 +30,10 @@
     "enterprise": "Entreprise",
     "login": "Connexion",
     "signup": "S'inscrire",
-    "dashboard": "Tableau de bord"
+    "dashboard": "Tableau de bord",
+    "fillSign": "Remplir et Signer",
+    "language": "Langue",
+    "chooseLanguage": "Choisir la langue"
   },
   "pricing": {
     "title": "Choisissez Votre Plan",
@@ -83,5 +87,215 @@
     "upload": "Glissez-déposez vos fichiers PDF ici",
     "processing": "Traitement en cours...",
     "download": "Télécharger"
+  },
+  "footer": {
+    "product": "Produit",
+    "company": "Société",
+    "legal": "Légal",
+    "resources": "Ressources",
+    "rights": "Tous droits réservés",
+    "links": {
+      "Fonctionnalités": "Fonctionnalités",
+      "Tarifs": "Tarifs",
+      "API": "API",
+      "Applications": "Applications",
+      "Intégrations": "Intégrations",
+      "À propos": "À propos",
+      "Sécurité": "Sécurité",
+      "Entreprise": "Entreprise",
+      "Blog": "Blog",
+      "Carrières": "Carrières",
+      "Confidentialité": "Confidentialité",
+      "Conditions": "Conditions",
+      "RGPD": "RGPD",
+      "Cookies": "Cookies",
+      "Mentions légales": "Mentions légales",
+      "Documentation": "Documentation",
+      "Aide": "Aide",
+      "Contact": "Contact",
+      "Statut": "Statut",
+      "Changelog": "Changelog"
+    }
+  },
+  "catalog": {
+    "items": {
+      "pdf": {
+        "title": "Outils PDF",
+        "description": "Conversion, OCR, Fusion, Compression"
+      },
+      "images": {
+        "title": "Outils Images",
+        "description": "Conversion, Optimisation, Filtres"
+      },
+      "media": {
+        "title": "Vidéo & Audio",
+        "description": "Conversion, Extraction, Trim"
+      },
+      "archive": {
+        "title": "Archive (ZIP)",
+        "description": "Créer ou extraire des archives ZIP"
+      },
+      "pdf-convert": {
+        "title": "Convertir un document",
+        "description": "Convertissez facilement des fichiers en PDF, Word, Excel, etc."
+      },
+      "pdf-ocr": {
+        "title": "Reconnaissance de texte",
+        "description": "Extrayez le texte de documents scannés ou d’images avec précision"
+      },
+      "pdf-merge": {
+        "title": "Fusionner des documents",
+        "description": "Combinez des PDF dans n’importe quel ordre grâce à notre outil de fusion."
+      },
+      "pdf-split": {
+        "title": "Scinder et extraire des pages",
+        "description": "Scindez et extrayez des pages PDF pour créer des fichiers distincts."
+      },
+      "pdf-compress": {
+        "title": "Compresser le PDF",
+        "description": "Réduisez la taille des fichiers tout en optimisant pour une qualité PDF maximale."
+      },
+      "pdf-edit": {
+        "title": "Modifier PDF",
+        "description": "Modifiez des PDF avec du texte, des images, des formes, des annotations, des polices et des couleurs."
+      },
+      "pdf-annotate": {
+        "title": "Annoter le PDF",
+        "description": "Ajoutez du texte, des images, des formes, des dessins, des notes autocollantes, des surlignages et bien plus encore."
+      },
+      "pdf-fill-sign": {
+        "title": "Remplir et Signer",
+        "description": "Remplissez des formulaires PDF et apposez vos signatures électroniques."
+      },
+      "pdf-redact": {
+        "title": "Caviarder le PDF",
+        "description": "Supprimez définitivement les informations sensibles de votre PDF."
+      },
+      "pdf-protect": {
+        "title": "Protection par mot de passe",
+        "description": "Sécurisez vos PDF en ajoutant un mot de passe."
+      },
+      "pdf-unlock": {
+        "title": "Déverrouiller le PDF",
+        "description": "Supprimez les mots de passe PDF pour un accès complet et une plus grande flexibilité."
+      },
+      "pdf-watermark": {
+        "title": "Ajouter un filigrane",
+        "description": "Ajoutez un filigrane ou du texte comme protection à vos fichiers PDF."
+      },
+      "pdf-organize": {
+        "title": "Organiser les pages",
+        "description": "Triez vos pages PDF comme vous le souhaitez. Supprimez ou ajoutez des pages si nécessaire."
+      },
+      "pdf-rotate": {
+        "title": "Faire pivoter les pages",
+        "description": "Faites pivoter vos pages PDF en mode portrait ou paysage."
+      },
+      "pdf-crop": {
+        "title": "Recadrer les pages",
+        "description": "Recadrez et découpez vos documents avec notre recadrage PDF."
+      },
+      "pdf-delete-pages": {
+        "title": "Supprimer des pages",
+        "description": "Supprimez une ou plusieurs pages de votre fichier PDF."
+      },
+      "img-convert": {
+        "title": "Conversion",
+        "description": "20+ formats (JPG, PNG, WebP, AVIF, GIF, etc.)"
+      },
+      "img-optimize": {
+        "title": "Optimisation",
+        "description": "Compression intelligente, WebP, AVIF"
+      },
+      "img-resize": {
+        "title": "Redimensionner",
+        "description": "Resize, crop, rotate, flip"
+      },
+      "img-filters": {
+        "title": "Filtres",
+        "description": "Grayscale, sepia, blur, sharpen"
+      },
+      "img-watermark": {
+        "title": "Filigrane",
+        "description": "Ajouter texte ou logo"
+      },
+      "img-batch": {
+        "title": "Traitement par lot",
+        "description": "100+ images simultanément"
+      },
+      "img-favicon": {
+        "title": "Générateur Favicon",
+        "description": "Créer favicons (16x16, 32x32, 192x192, etc.)"
+      },
+      "media-video-convert": {
+        "title": "Conversion Vidéo",
+        "description": "MP4, AVI, MOV, WebM, MKV, FLV"
+      },
+      "media-audio-convert": {
+        "title": "Conversion Audio",
+        "description": "MP3, WAV, FLAC, AAC, OGG"
+      },
+      "media-extract-audio": {
+        "title": "Extraire Audio",
+        "description": "Extraire l’audio d’une vidéo"
+      },
+      "media-trim": {
+        "title": "Découper",
+        "description": "Couper vidéo/audio"
+      },
+      "media-compress": {
+        "title": "Compresser",
+        "description": "Réduire la taille"
+      },
+      "media-merge": {
+        "title": "Fusionner",
+        "description": "Combiner plusieurs fichiers"
+      },
+      "batch": {
+        "title": "Traitement par lot",
+        "description": "Traiter plusieurs fichiers à la fois"
+      },
+      "api": {
+        "title": "API",
+        "description": "Intégration API pour développeurs"
+      }
+    }
+  },
+  "search": {
+    "placeholder": "Rechercher des outils, fonctionnalités... (Ctrl+K ou Cmd+K)",
+    "recent": "Recherches récentes",
+    "popular": "Suggestions populaires",
+    "noResults": "Aucun résultat trouvé pour « {query} »",
+    "deleteRecent": "Supprimer cette recherche",
+    "categories": {
+      "tool": "Outil",
+      "page": "Page",
+      "feature": "Fonctionnalité"
+    }
+  },
+  "install": {
+    "title": "📲 Multi Convert est disponible sur tous vos appareils",
+    "subtitle": "Installez l’application pour un accès rapide, même hors ligne",
+    "install": "Installer",
+    "ok": "OK",
+    "dismiss": "Fermer",
+    "iosHint": "Disponible sur tous vos appareils — Partager → « Sur l’écran d’accueil »"
+  },
+  "userMenu": {
+    "login": "Connexion",
+    "signup": "S’inscrire",
+    "dashboard": "Tableau de bord",
+    "settings": "Paramètres",
+    "logout": "Déconnexion"
+  },
+  "toolsModal": {
+    "title": "Choisissez l’outil avec lequel vous souhaitez travailler",
+    "back": "Retour"
+  },
+  "cookie": {
+    "message": "🍪 Nous utilisons des cookies pour financer le site (publicité) et améliorer votre expérience. Consultez notre <link>politique de confidentialité</link>.",
+    "accept": "Accepter",
+    "refuse": "Refuser",
+    "learnMore": "En savoir plus"
   }
 }

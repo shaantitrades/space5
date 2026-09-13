@@ -13,7 +13,11 @@
     "upload": "Upload",
     "download": "Download",
     "convert": "Convert",
-    "close": "Close"
+    "close": "Close",
+    "hero_title": "Universell konverteringssvit",
+    "hero_subtitle": "Konvertera alla dina filer lokalt, snabbt och säkert.",
+    "start_converting": "Börja konvertera",
+    "back": "Tillbaka"
   },
   "nav": {
     "home": "Home",
@@ -24,7 +28,12 @@
     "enterprise": "Enterprise",
     "login": "Login",
     "signup": "Sign Up",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "tools": "Verktyg",
+    "archive": "Arkiv",
+    "fillSign": "Fyll i och signera",
+    "language": "Språk",
+    "chooseLanguage": "Välj språk"
   },
   "pricing": {
     "title": "Choose Your Plan",
@@ -71,5 +80,355 @@
     "processing": "Processing...",
     "completed": "Conversion Completed",
     "download": "Download Converted File"
+  },
+  "footer": {
+    "product": "Produkt",
+    "company": "Företag",
+    "legal": "Juridiskt",
+    "resources": "Resurser",
+    "rights": "Alla rättigheter förbehållna",
+    "links": {
+      "Fonctionnalités": "Funktioner",
+      "Tarifs": "Priser",
+      "API": "API",
+      "Applications": "Appar",
+      "Intégrations": "Integrationer",
+      "À propos": "Om oss",
+      "Sécurité": "Säkerhet",
+      "Entreprise": "Företag",
+      "Blog": "Blogg",
+      "Carrières": "Karriär",
+      "Confidentialité": "Integritet",
+      "Conditions": "Villkor",
+      "RGPD": "GDPR",
+      "Cookies": "Cookies",
+      "Mentions légales": "Juridisk information",
+      "Documentation": "Dokumentation",
+      "Aide": "Hjälp",
+      "Contact": "Kontakt",
+      "Statut": "Status",
+      "Changelog": "Ändringslogg"
+    }
+  },
+  "home": {
+    "stats": {
+      "converted": "🎯 2 milj+ konverterade filer",
+      "rating": "⭐ 4.9/5",
+      "gdpr": "🔐 GDPR-certifierad"
+    },
+    "cta": "Klicka för att öppna",
+    "badges": {
+      "populaire": "Populär",
+      "nouveau": "Ny",
+      "pro": "Pro"
+    },
+    "groups": {
+      "Catégories Principales": "Huvudkategorier",
+      "Transformation Rapide": "Snabb omvandling",
+      "Assemblage & Découpage": "Slå samman och dela",
+      "Authentification & Protection": "Autentisering och skydd",
+      "Conversion Intelligente": "Smart konvertering",
+      "Optimisation & Qualité": "Optimering och kvalitet",
+      "Personnalisation Avancée": "Avancerad anpassning",
+      "Production & Impression": "Produktion och utskrift",
+      "Réparation & Récupération": "Reparation och återställning"
+    },
+    "mainTitles": {
+      "PDF & Documents": "PDF och dokument",
+      "Images & Logos": "Bilder och logotyper",
+      "Vidéo & Audio": "Video och ljud"
+    },
+    "mainDescriptions": {
+      "Conversion, OCR, Fusion, Compression de tous vos documents": "Konvertering, OCR, sammanslagning och komprimering av alla dina dokument",
+      "20+ formats, optimisation intelligente et redimensionnement": "Över 20 format, smart optimering och storleksändring",
+      "Batch processing, codecs multiples, qualité optimale": "Batchbearbetning, flera codecs, optimal kvalitet"
+    },
+    "features": {
+      "title": "Nyckelfunktioner",
+      "subtitle": "Allt du behöver för professionell konvertering",
+      "IA-Powered": "AI-driven",
+      "Sécurité Militaire": "Militär säkerhet",
+      "10 Langues": "10 språk",
+      "Workflows": "Arbetsflöden",
+      "Traitement par lot": "Batchbearbetning",
+      "Suggestions automatiques, amélioration qualité intelligente": "Automatiska förslag, smart kvalitetsförbättring",
+      "Chiffrement, geo-blocking, protection fraude, RGPD": "Kryptering, geoblockering, bedrägeriskydd, GDPR",
+      "Interface internationalisée pour marchés premium": "Lokaliserat gränssnitt för premiummarknader",
+      "Pipelines visuels automatisés pour conversions complexes": "Automatiserade visuella pipelines för komplexa konverteringar",
+      "100+ fichiers simultanément avec gestion de queue": "Över 100 filer samtidigt med köhantering"
+    },
+    "toolTitles": {
+      "Modifier & Annoter": "Redigera och kommentera",
+      "Créer PDF": "Skapa PDF",
+      "Convertir Format": "Konvertera format",
+      "Image to ICO": "Bild till ICO",
+      "Optimiser Taille": "Optimera storlek",
+      "Extraire Contenu": "Extrahera innehåll",
+      "Reorganiser Pages": "Ordna om sidor",
+      "Appliquer Filtres": "Använd filter",
+      "Fusionner Documents": "Slå samman dokument",
+      "Scinder PDF": "Dela PDF",
+      "Extraire par Sections": "Extrahera efter avsnitt",
+      "Mélanger Pages": "Blanda sidor",
+      "Ajouter Pages": "Lägg till sidor",
+      "Finaliser & Valider": "Slutför och validera",
+      "Sécuriser Document": "Skydda dokument",
+      "Accéder Protégé": "Öppna skyddat",
+      "Marquer Fichier": "Märk fil",
+      "QR Code Generator": "QR-kodsgenerator",
+      "Documents → PDF": "Dokument → PDF",
+      "Images → PDF": "Bilder → PDF",
+      "PDF → Office": "PDF → Office",
+      "Media → Formats": "Media → Format",
+      "Texte → PDF": "Text → PDF",
+      "PDF → Images": "PDF → Bilder",
+      "Réduire Poids": "Minska storlek",
+      "Reconnaissance Texte": "Textigenkänning",
+      "Corriger Orientation": "Korrigera orientering",
+      "Transformer Couleurs": "Ändra färger",
+      "Nettoyer Annotations": "Rensa kommentarer",
+      "Créer Formulaires": "Skapa formulär",
+      "Gérer Signets": "Hantera bokmärken",
+      "Ajouter En-têtes": "Lägg till sidhuvuden",
+      "Numérotation Automatique": "Automatisk numrering",
+      "Éditer Informations": "Redigera information",
+      "Extraire Visuels": "Extrahera bilder",
+      "Ajuster Dimensions": "Justera mått",
+      "Orienter Pages": "Rotera sidor",
+      "Mise en Page Multiple": "Flera sidor per ark",
+      "Numérotation Bates": "Bates-numrering",
+      "Aplatir Document": "Platta till dokument",
+      "Préparer Impression": "Förbered för utskrift",
+      "Restaurer Fichier": "Återställ fil",
+      "Renommer Intelligent": "Smart namnbyte",
+      "Améliorer Structure": "Förbättra struktur"
+    },
+    "toolDescriptions": {
+      "Personnalisez vos documents avec modifications et annotations": "Anpassa dina dokument med redigeringar och kommentarer",
+      "Rédiger un PDF professionnel depuis une page vierge (A4/Lettre) et exporter": "Skapa en professionell PDF från en tom sida (A4/Letter) och exportera",
+      "Transformer entre PDF, Word, Excel, Images et plus": "Konvertera mellan PDF, Word, Excel, bilder och mer",
+      "Convertir vos images (PNG, JPG) en fichiers ICO pour favicons": "Konvertera dina bilder (PNG, JPG) till ICO-filer för favicons",
+      "Réduire la taille de vos fichiers sans perte de qualité visible": "Minska filstorleken utan synlig kvalitetsförlust",
+      "Obtenir un nouveau document avec seulement les pages souhaitées": "Få ett nytt dokument med endast de sidor du vill ha",
+      "Gérez la structure de vos documents en réarrangeant les pages": "Hantera dokumentens struktur genom att ordna om sidorna",
+      "Ajouter des effets visuels et transformations créatives": "Lägg till visuella effekter och kreativa omvandlingar",
+      "Assemblez plusieurs PDF et images en un document unique": "Slå samman flera PDF:er och bilder till ett enda dokument",
+      "Séparez votre PDF en plusieurs fichiers distincts selon vos besoins": "Dela upp din PDF i flera separata filer efter behov",
+      "Extraire chapitres basés sur les signets de la table des matières": "Extrahera kapitel baserat på bokmärken i innehållsförteckningen",
+      "Alterner et mélanger les pages de plusieurs documents": "Växla och blanda sidor från flera dokument",
+      "Insérer des pages supplémentaires dans votre document PDF": "Infoga ytterligare sidor i ditt PDF-dokument",
+      "Remplir des formulaires PDF et apposer vos signatures électroniques": "Fyll i PDF-formulär och lägg till dina elektroniska signaturer",
+      "Protégez vos fichiers sensibles avec des mots de passe robustes": "Skydda dina känsliga filer med starka lösenord",
+      "Retirez les restrictions d'accès selon vos besoins légitimes": "Ta bort åtkomstbegränsningar för dina legitima behov",
+      "Marquez vos documents avec des filigranes textuels ou graphiques": "Märk dina dokument med text- eller grafikvattenstämplar",
+      "Générez des QR codes : URL, WiFi, vCard, email, téléphone, SMS, GPS": "Generera QR-koder: URL, WiFi, vCard, e-post, telefon, SMS, GPS",
+      "Créer un document PDF à partir de Word, Excel, PPT": "Skapa ett PDF-dokument från Word, Excel, PPT",
+      "Convertir images JPG, PNG, HEIC vers PDF": "Konvertera JPG-, PNG-, HEIC-bilder till PDF",
+      "Transformer PDF vers Word, Excel, PowerPoint": "Konvertera PDF till Word, Excel, PowerPoint",
+      "Conversion vidéo et audio entre multiples formats": "Video- och ljudkonvertering mellan flera format",
+      "Convertir pages web HTML ou fichiers texte vers PDF": "Konvertera HTML-webbsidor eller textfiler till PDF",
+      "Convertir pages PDF vers JPG, PNG, TIFF": "Konvertera PDF-sidor till JPG, PNG, TIFF",
+      "Optimiser la taille de vos fichiers pour un partage plus rapide": "Optimera filstorleken för snabbare delning",
+      "Extraire le texte de documents scannés avec précision": "Extrahera text från skannade dokument med precision",
+      "Redresser automatiquement les pages PDF numérisées inclinées": "Räta automatiskt ut skeva skannade PDF-sidor",
+      "Convertir un PDF en niveau de gris ou ajuster les couleurs": "Konvertera en PDF till gråskala eller justera färger",
+      "Suppression en lot des surlignages et annotations d'un PDF": "Massborttagning av markeringar och kommentarer från en PDF",
+      "Créateur de formulaires PDF gratuit, rendre les documents remplissables": "Gratis PDF-formulärskapare. Gör dokument ifyllbara",
+      "Créer et organiser les signets PDF pour navigation facilitée": "Skapa och organisera PDF-bokmärken för enklare navigering",
+      "Appliquer numéros de pages et étiquettes au fichier PDF": "Använd sidnummer och etiketter på PDF-filen",
+      "Ajouter des numéros de page au PDF automatiquement": "Lägg automatiskt till sidnummer i PDF:en",
+      "Changer auteur, titre, mots-clés et métadonnées du PDF": "Ändra författare, titel, nyckelord och PDF-metadata",
+      "Extraire toutes les images depuis un fichier PDF": "Extrahera alla bilder från en PDF-fil",
+      "Rogner les marges et changer la taille de la page PDF": "Beskär marginaler och ändra PDF-sidans storlek",
+      "Pivoter et sauvegarder les pages PDF de façon permanente": "Rotera och spara PDF-sidor permanent",
+      "Imprimer plusieurs pages par feuille de papier (N-up)": "Skriv ut flera sidor per pappersark (N-up)",
+      "Numérotation automatique sur plusieurs fichiers en même temps": "Automatisk numrering över flera filer samtidigt",
+      "Rendre les PDF remplissables en lecture seule, imprimer en une étape": "Gör ifyllbara PDF:er skrivskyddade. Skriv ut i ett steg",
+      "Combiner plusieurs actions pour préparer un PDF à l'impression": "Kombinera flera åtgärder för att förbereda en PDF för utskrift",
+      "Récupérer des données corrompues ou endommagées d'un document PDF": "Återställ skadad eller korrupt data från ett PDF-dokument",
+      "Changer le nom de fichier basé sur le texte des pages PDF": "Ändra filnamnet baserat på texten på PDF-sidorna",
+      "Optimiser et améliorer la structure interne d'un document PDF": "Optimera och förbättra den interna strukturen i ett PDF-dokument"
+    }
+  },
+  "catalog": {
+    "items": {
+      "pdf": {
+        "title": "PDF-verktyg",
+        "description": "Konvertering, OCR, sammanfoga, komprimera"
+      },
+      "images": {
+        "title": "Bildverktyg",
+        "description": "Konvertering, optimering, filter"
+      },
+      "media": {
+        "title": "Video och ljud",
+        "description": "Konvertering, extrahering, trimning"
+      },
+      "archive": {
+        "title": "Arkiv (ZIP)",
+        "description": "Skapa eller packa upp ZIP-arkiv"
+      },
+      "pdf-convert": {
+        "title": "Konvertera ett dokument",
+        "description": "Konvertera enkelt filer till PDF, Word, Excel med mera."
+      },
+      "pdf-ocr": {
+        "title": "Textigenkänning",
+        "description": "Extrahera text från skannade dokument eller bilder med precision"
+      },
+      "pdf-merge": {
+        "title": "Sammanfoga dokument",
+        "description": "Kombinera PDF-filer i valfri ordning med vårt verktyg."
+      },
+      "pdf-split": {
+        "title": "Dela och extrahera sidor",
+        "description": "Dela och extrahera PDF-sidor för att skapa separata filer."
+      },
+      "pdf-compress": {
+        "title": "Komprimera PDF",
+        "description": "Minska filstorleken och behåll maximal PDF-kvalitet."
+      },
+      "pdf-edit": {
+        "title": "Redigera PDF",
+        "description": "Redigera PDF-filer med text, bilder, former, anteckningar, typsnitt och färger."
+      },
+      "pdf-annotate": {
+        "title": "Kommentera PDF",
+        "description": "Lägg till text, bilder, former, teckningar, klisterlappar, överstrykningar och mycket mer."
+      },
+      "pdf-fill-sign": {
+        "title": "Fyll i och signera",
+        "description": "Fyll i PDF-formulär och lägg till dina elektroniska signaturer."
+      },
+      "pdf-redact": {
+        "title": "Maskera PDF",
+        "description": "Ta bort känslig information permanent från din PDF."
+      },
+      "pdf-protect": {
+        "title": "Lösenordsskydd",
+        "description": "Skydda dina PDF-filer genom att lägga till ett lösenord."
+      },
+      "pdf-unlock": {
+        "title": "Lås upp PDF",
+        "description": "Ta bort PDF-lösenord för full åtkomst och större flexibilitet."
+      },
+      "pdf-watermark": {
+        "title": "Lägg till vattenstämpel",
+        "description": "Lägg till en vattenstämpel eller text som skydd i dina PDF-filer."
+      },
+      "pdf-organize": {
+        "title": "Ordna sidor",
+        "description": "Sortera dina PDF-sidor som du vill. Ta bort eller lägg till sidor vid behov."
+      },
+      "pdf-rotate": {
+        "title": "Rotera sidor",
+        "description": "Rotera dina PDF-sidor till stående eller liggande format."
+      },
+      "pdf-crop": {
+        "title": "Beskär sidor",
+        "description": "Beskär och justera dina dokument med vårt PDF-verktyg."
+      },
+      "pdf-delete-pages": {
+        "title": "Ta bort sidor",
+        "description": "Ta bort en eller flera sidor från din PDF-fil."
+      },
+      "img-convert": {
+        "title": "Konvertering",
+        "description": "Över 20 format (JPG, PNG, WebP, AVIF, GIF m.fl.)"
+      },
+      "img-optimize": {
+        "title": "Optimering",
+        "description": "Smart komprimering, WebP, AVIF"
+      },
+      "img-resize": {
+        "title": "Ändra storlek",
+        "description": "Ändra storlek, beskära, rotera, vänd"
+      },
+      "img-filters": {
+        "title": "Filter",
+        "description": "Gråskala, sepia, oskärpa, skärpa"
+      },
+      "img-watermark": {
+        "title": "Vattenstämpel",
+        "description": "Lägg till text eller logotyp"
+      },
+      "img-batch": {
+        "title": "Batchbearbetning",
+        "description": "Över 100 bilder samtidigt"
+      },
+      "img-favicon": {
+        "title": "Favicon-generator",
+        "description": "Skapa favicons (16x16, 32x32, 192x192 m.fl.)"
+      },
+      "media-video-convert": {
+        "title": "Videokonvertering",
+        "description": "MP4, AVI, MOV, WebM, MKV, FLV"
+      },
+      "media-audio-convert": {
+        "title": "Ljudkonvertering",
+        "description": "MP3, WAV, FLAC, AAC, OGG"
+      },
+      "media-extract-audio": {
+        "title": "Extrahera ljud",
+        "description": "Extrahera ljudspåret från en video"
+      },
+      "media-trim": {
+        "title": "Trimma",
+        "description": "Klipp video/ljud"
+      },
+      "media-compress": {
+        "title": "Komprimera",
+        "description": "Minska storleken"
+      },
+      "media-merge": {
+        "title": "Sammanfoga",
+        "description": "Kombinera flera filer"
+      },
+      "batch": {
+        "title": "Batchbearbetning",
+        "description": "Bearbeta flera filer samtidigt"
+      },
+      "api": {
+        "title": "API",
+        "description": "API-integration för utvecklare"
+      }
+    }
+  },
+  "search": {
+    "placeholder": "Sök verktyg, funktioner... (Ctrl+K eller Cmd+K)",
+    "recent": "Senaste sökningar",
+    "popular": "Populära förslag",
+    "noResults": "Inga resultat för ”{query}”",
+    "deleteRecent": "Ta bort denna sökning",
+    "categories": {
+      "tool": "Verktyg",
+      "page": "Sida",
+      "feature": "Funktion"
+    }
+  },
+  "install": {
+    "title": "📲 Multi Convert finns på alla dina enheter",
+    "subtitle": "Installera appen för snabb åtkomst, även offline",
+    "install": "Installera",
+    "ok": "OK",
+    "dismiss": "Stäng",
+    "iosHint": "Finns på alla dina enheter — Dela → ”Lägg till på hemskärmen”"
+  },
+  "userMenu": {
+    "login": "Logga in",
+    "signup": "Registrera dig",
+    "dashboard": "Instrumentpanel",
+    "settings": "Inställningar",
+    "logout": "Logga ut"
+  },
+  "toolsModal": {
+    "title": "Välj det verktyg du vill arbeta med",
+    "back": "Tillbaka"
+  },
+  "cookie": {
+    "message": "🍪 Vi använder cookies för att finansiera webbplatsen (reklam) och förbättra din upplevelse. Läs vår <link>integritetspolicy</link>.",
+    "accept": "Acceptera",
+    "refuse": "Avböj",
+    "learnMore": "Läs mer"
   }
 }

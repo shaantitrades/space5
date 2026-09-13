@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { Check, Building, Users, Shield, Zap, Phone, Mail, MessageSquare, TrendingUp, Lock, Globe, Rocket, Server, Cloud, ChevronDown, ChevronUp } from 'lucide-react';
 import { Link } from '@/i18n/routing';
-import { BackButton } from '@/components/ui/back-button';
 
 export default function EntreprisePage() {
   const [formData, setFormData] = useState({
@@ -159,10 +158,6 @@ export default function EntreprisePage() {
       {/* Hero */}
       <section className="py-16 bg-gradient-to-b from-primary/10 to-background">
         <div className="container mx-auto px-4">
-          {/* Bouton retour */}
-          <div className="mb-6">
-            <BackButton />
-          </div>
 
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">

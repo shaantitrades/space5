@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, Suspense, lazy, useRef } from 'react';
-import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { useConversionHistory } from '@/lib/conversion-history';
 import { useConversionProgress } from '@/hooks/use-conversion-progress';
@@ -35,7 +34,6 @@ import {
   Cloud,
   Link2
 } from 'lucide-react';
-import { BackButton } from '@/components/ui/back-button';
 import { FileUploadSkeleton } from '@/components/ui/file-upload-skeleton';
 import { ConversionProgress } from '@/components/ui/conversion-progress';
 
@@ -63,7 +61,6 @@ type PDFTool =
   | 'delete-pages';
 
 export default function PDFToolsPage() {
-  const t = useTranslations('pdf');
   const searchParams = useSearchParams();
   const { addConversion, updateConversion } = useConversionHistory();
   const { 
@@ -919,10 +916,6 @@ export default function PDFToolsPage() {
           </div>
         </div>
 
-        {/* Bouton retour en bas */}
-        <div className="mt-12 pb-6">
-          <BackButton />
-        </div>
       </div>
     </div>
   );

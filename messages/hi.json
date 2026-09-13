@@ -13,7 +13,11 @@
     "upload": "Upload",
     "download": "Download",
     "convert": "Convert",
-    "close": "Close"
+    "close": "Close",
+    "hero_title": "यूनिवर्सल कन्वर्ज़न सूट",
+    "hero_subtitle": "अपनी सभी फ़ाइलें स्थानीय रूप से, तेज़ी से और सुरक्षित रूप से कन्वर्ट करें।",
+    "start_converting": "कन्वर्ट करना शुरू करें",
+    "back": "वापस"
   },
   "nav": {
     "home": "Home",
@@ -24,7 +28,12 @@
     "enterprise": "Enterprise",
     "login": "Login",
     "signup": "Sign Up",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "tools": "उपकरण",
+    "archive": "संग्रह",
+    "fillSign": "भरें और हस्ताक्षर करें",
+    "language": "भाषा",
+    "chooseLanguage": "भाषा चुनें"
   },
   "pricing": {
     "title": "Choose Your Plan",
@@ -71,5 +80,355 @@
     "processing": "Processing...",
     "completed": "Conversion Completed",
     "download": "Download Converted File"
+  },
+  "footer": {
+    "product": "उत्पाद",
+    "company": "कंपनी",
+    "legal": "कानूनी",
+    "resources": "संसाधन",
+    "rights": "सर्वाधिकार सुरक्षित",
+    "links": {
+      "Fonctionnalités": "विशेषताएँ",
+      "Tarifs": "मूल्य",
+      "API": "API",
+      "Applications": "ऐप्स",
+      "Intégrations": "एकीकरण",
+      "À propos": "हमारे बारे में",
+      "Sécurité": "सुरक्षा",
+      "Entreprise": "उद्यम",
+      "Blog": "ब्लॉग",
+      "Carrières": "करियर",
+      "Confidentialité": "गोपनीयता",
+      "Conditions": "शर्तें",
+      "RGPD": "GDPR",
+      "Cookies": "कुकीज़",
+      "Mentions légales": "कानूनी सूचना",
+      "Documentation": "दस्तावेज़",
+      "Aide": "सहायता",
+      "Contact": "संपर्क",
+      "Statut": "स्थिति",
+      "Changelog": "चेंजलॉग"
+    }
+  },
+  "home": {
+    "stats": {
+      "converted": "🎯 2 मिलियन+ फ़ाइलें कन्वर्ट की गईं",
+      "rating": "⭐ 4.9/5",
+      "gdpr": "🔐 GDPR प्रमाणित"
+    },
+    "cta": "खोलने के लिए क्लिक करें",
+    "badges": {
+      "populaire": "लोकप्रिय",
+      "nouveau": "नया",
+      "pro": "Pro"
+    },
+    "groups": {
+      "Catégories Principales": "मुख्य श्रेणियाँ",
+      "Transformation Rapide": "तेज़ रूपांतरण",
+      "Assemblage & Découpage": "मर्ज और विभाजन",
+      "Authentification & Protection": "प्रमाणीकरण और सुरक्षा",
+      "Conversion Intelligente": "स्मार्ट कन्वर्ज़न",
+      "Optimisation & Qualité": "अनुकूलन और गुणवत्ता",
+      "Personnalisation Avancée": "उन्नत अनुकूलन",
+      "Production & Impression": "उत्पादन और प्रिंटिंग",
+      "Réparation & Récupération": "मरम्मत और रिकवरी"
+    },
+    "mainTitles": {
+      "PDF & Documents": "PDF और दस्तावेज़",
+      "Images & Logos": "इमेज और लोगो",
+      "Vidéo & Audio": "वीडियो और ऑडियो"
+    },
+    "mainDescriptions": {
+      "Conversion, OCR, Fusion, Compression de tous vos documents": "आपके सभी दस्तावेज़ों का कन्वर्ज़न, OCR, मर्जिंग और कम्प्रेशन",
+      "20+ formats, optimisation intelligente et redimensionnement": "20+ फ़ॉर्मेट, स्मार्ट अनुकूलन और आकार बदलना",
+      "Batch processing, codecs multiples, qualité optimale": "बैच प्रोसेसिंग, कई कोडेक, सर्वोत्तम गुणवत्ता"
+    },
+    "features": {
+      "title": "मुख्य विशेषताएँ",
+      "subtitle": "पेशेवर कन्वर्ज़न के लिए आपको जो चाहिए",
+      "IA-Powered": "AI-संचालित",
+      "Sécurité Militaire": "सैन्य-स्तरीय सुरक्षा",
+      "10 Langues": "10 भाषाएँ",
+      "Workflows": "वर्कफ़्लो",
+      "Traitement par lot": "बैच प्रोसेसिंग",
+      "Suggestions automatiques, amélioration qualité intelligente": "स्वतः सुझाव, स्मार्ट गुणवत्ता सुधार",
+      "Chiffrement, geo-blocking, protection fraude, RGPD": "एन्क्रिप्शन, जियो-ब्लॉकिंग, धोखाधड़ी सुरक्षा, GDPR",
+      "Interface internationalisée pour marchés premium": "प्रीमियम बाज़ारों के लिए स्थानीयकृत इंटरफ़ेस",
+      "Pipelines visuels automatisés pour conversions complexes": "जटिल कन्वर्ज़न के लिए स्वचालित विज़ुअल पाइपलाइन",
+      "100+ fichiers simultanément avec gestion de queue": "कतार प्रबंधन के साथ एक साथ 100+ फ़ाइलें"
+    },
+    "toolTitles": {
+      "Modifier & Annoter": "संपादित करें और एनोटेट करें",
+      "Créer PDF": "PDF बनाएँ",
+      "Convertir Format": "फ़ॉर्मेट कन्वर्ट करें",
+      "Image to ICO": "इमेज से ICO",
+      "Optimiser Taille": "आकार अनुकूलित करें",
+      "Extraire Contenu": "सामग्री निकालें",
+      "Reorganiser Pages": "पृष्ठ पुनर्व्यवस्थित करें",
+      "Appliquer Filtres": "फ़िल्टर लगाएँ",
+      "Fusionner Documents": "दस्तावेज़ मर्ज करें",
+      "Scinder PDF": "PDF विभाजित करें",
+      "Extraire par Sections": "अनुभागों द्वारा निकालें",
+      "Mélanger Pages": "पृष्ठ मिलाएँ",
+      "Ajouter Pages": "पृष्ठ जोड़ें",
+      "Finaliser & Valider": "पूर्ण करें और सत्यापित करें",
+      "Sécuriser Document": "दस्तावेज़ सुरक्षित करें",
+      "Accéder Protégé": "सुरक्षित फ़ाइल खोलें",
+      "Marquer Fichier": "फ़ाइल पर निशान लगाएँ",
+      "QR Code Generator": "QR कोड जनरेटर",
+      "Documents → PDF": "दस्तावेज़ → PDF",
+      "Images → PDF": "इमेज → PDF",
+      "PDF → Office": "PDF → Office",
+      "Media → Formats": "मीडिया → फ़ॉर्मेट",
+      "Texte → PDF": "टेक्स्ट → PDF",
+      "PDF → Images": "PDF → इमेज",
+      "Réduire Poids": "आकार घटाएँ",
+      "Reconnaissance Texte": "टेक्स्ट पहचान",
+      "Corriger Orientation": "दिशा ठीक करें",
+      "Transformer Couleurs": "रंग बदलें",
+      "Nettoyer Annotations": "एनोटेशन साफ़ करें",
+      "Créer Formulaires": "फ़ॉर्म बनाएँ",
+      "Gérer Signets": "बुकमार्क प्रबंधित करें",
+      "Ajouter En-têtes": "हेडर जोड़ें",
+      "Numérotation Automatique": "स्वतः क्रमांकन",
+      "Éditer Informations": "जानकारी संपादित करें",
+      "Extraire Visuels": "इमेज निकालें",
+      "Ajuster Dimensions": "आयाम समायोजित करें",
+      "Orienter Pages": "पृष्ठ घुमाएँ",
+      "Mise en Page Multiple": "प्रति शीट कई पृष्ठ",
+      "Numérotation Bates": "Bates क्रमांकन",
+      "Aplatir Document": "दस्तावेज़ समतल करें",
+      "Préparer Impression": "प्रिंट के लिए तैयार करें",
+      "Restaurer Fichier": "फ़ाइल पुनर्स्थापित करें",
+      "Renommer Intelligent": "स्मार्ट नाम बदलें",
+      "Améliorer Structure": "संरचना बेहतर करें"
+    },
+    "toolDescriptions": {
+      "Personnalisez vos documents avec modifications et annotations": "संपादन और एनोटेशन के साथ अपने दस्तावेज़ों को अनुकूलित करें",
+      "Rédiger un PDF professionnel depuis une page vierge (A4/Lettre) et exporter": "खाली पृष्ठ (A4/Letter) से पेशेवर PDF बनाएँ और निर्यात करें",
+      "Transformer entre PDF, Word, Excel, Images et plus": "PDF, Word, Excel, इमेज और अन्य के बीच कन्वर्ट करें",
+      "Convertir vos images (PNG, JPG) en fichiers ICO pour favicons": "अपनी इमेज (PNG, JPG) को फ़ेविकॉन के लिए ICO फ़ाइलों में बदलें",
+      "Réduire la taille de vos fichiers sans perte de qualité visible": "गुणवत्ता में दिखने वाली कमी के बिना फ़ाइल का आकार घटाएँ",
+      "Obtenir un nouveau document avec seulement les pages souhaitées": "केवल मनचाहे पृष्ठों के साथ नया दस्तावेज़ पाएँ",
+      "Gérez la structure de vos documents en réarrangeant les pages": "पृष्ठों को पुनर्व्यवस्थित करके दस्तावेज़ की संरचना प्रबंधित करें",
+      "Ajouter des effets visuels et transformations créatives": "दृश्य प्रभाव और रचनात्मक रूपांतरण जोड़ें",
+      "Assemblez plusieurs PDF et images en un document unique": "कई PDF और इमेज को एक ही दस्तावेज़ में मिलाएँ",
+      "Séparez votre PDF en plusieurs fichiers distincts selon vos besoins": "आवश्यकतानुसार अपनी PDF को कई अलग फ़ाइलों में बाँटें",
+      "Extraire chapitres basés sur les signets de la table des matières": "विषय-सूची के बुकमार्क के आधार पर अध्याय निकालें",
+      "Alterner et mélanger les pages de plusieurs documents": "कई दस्तावेज़ों के पृष्ठों को बदल-बदल कर मिलाएँ",
+      "Insérer des pages supplémentaires dans votre document PDF": "अपने PDF दस्तावेज़ में अतिरिक्त पृष्ठ डालें",
+      "Remplir des formulaires PDF et apposer vos signatures électroniques": "PDF फ़ॉर्म भरें और इलेक्ट्रॉनिक हस्ताक्षर जोड़ें",
+      "Protégez vos fichiers sensibles avec des mots de passe robustes": "संवेदनशील फ़ाइलों को मज़बूत पासवर्ड से सुरक्षित करें",
+      "Retirez les restrictions d'accès selon vos besoins légitimes": "वैध आवश्यकताओं के लिए पहुँच प्रतिबंध हटाएँ",
+      "Marquez vos documents avec des filigranes textuels ou graphiques": "अपने दस्तावेज़ों पर टेक्स्ट या ग्राफ़िक वॉटरमार्क लगाएँ",
+      "Générez des QR codes : URL, WiFi, vCard, email, téléphone, SMS, GPS": "QR कोड बनाएँ: URL, WiFi, vCard, ईमेल, फ़ोन, SMS, GPS",
+      "Créer un document PDF à partir de Word, Excel, PPT": "Word, Excel, PPT से PDF दस्तावेज़ बनाएँ",
+      "Convertir images JPG, PNG, HEIC vers PDF": "JPG, PNG, HEIC इमेज को PDF में बदलें",
+      "Transformer PDF vers Word, Excel, PowerPoint": "PDF को Word, Excel, PowerPoint में बदलें",
+      "Conversion vidéo et audio entre multiples formats": "कई फ़ॉर्मेट के बीच वीडियो और ऑडियो कन्वर्ज़न",
+      "Convertir pages web HTML ou fichiers texte vers PDF": "HTML वेब पेज या टेक्स्ट फ़ाइलों को PDF में बदलें",
+      "Convertir pages PDF vers JPG, PNG, TIFF": "PDF पृष्ठों को JPG, PNG, TIFF में बदलें",
+      "Optimiser la taille de vos fichiers pour un partage plus rapide": "तेज़ साझा करने के लिए फ़ाइल का आकार अनुकूलित करें",
+      "Extraire le texte de documents scannés avec précision": "स्कैन किए गए दस्तावेज़ों से सटीकता से टेक्स्ट निकालें",
+      "Redresser automatiquement les pages PDF numérisées inclinées": "तिरछे स्कैन किए गए PDF पृष्ठों को स्वतः सीधा करें",
+      "Convertir un PDF en niveau de gris ou ajuster les couleurs": "PDF को ग्रेस्केल में बदलें या रंग समायोजित करें",
+      "Suppression en lot des surlignages et annotations d'un PDF": "PDF से हाइलाइट और एनोटेशन को बैच में हटाएँ",
+      "Créateur de formulaires PDF gratuit, rendre les documents remplissables": "मुफ़्त PDF फ़ॉर्म निर्माता। दस्तावेज़ों को भरने योग्य बनाएँ",
+      "Créer et organiser les signets PDF pour navigation facilitée": "आसान नेविगेशन के लिए PDF बुकमार्क बनाएँ और व्यवस्थित करें",
+      "Appliquer numéros de pages et étiquettes au fichier PDF": "PDF फ़ाइल पर पृष्ठ संख्या और लेबल लगाएँ",
+      "Ajouter des numéros de page au PDF automatiquement": "PDF में स्वतः पृष्ठ संख्या जोड़ें",
+      "Changer auteur, titre, mots-clés et métadonnées du PDF": "PDF का लेखक, शीर्षक, कीवर्ड और मेटाडेटा बदलें",
+      "Extraire toutes les images depuis un fichier PDF": "PDF फ़ाइल से सभी इमेज निकालें",
+      "Rogner les marges et changer la taille de la page PDF": "मार्जिन काटें और PDF पृष्ठ का आकार बदलें",
+      "Pivoter et sauvegarder les pages PDF de façon permanente": "PDF पृष्ठों को घुमाएँ और स्थायी रूप से सहेजें",
+      "Imprimer plusieurs pages par feuille de papier (N-up)": "प्रति शीट कई पृष्ठ प्रिंट करें (N-up)",
+      "Numérotation automatique sur plusieurs fichiers en même temps": "एक साथ कई फ़ाइलों पर स्वतः क्रमांकन",
+      "Rendre les PDF remplissables en lecture seule, imprimer en une étape": "भरने योग्य PDF को केवल-पढ़ने के लिए बनाएँ। एक चरण में प्रिंट करें",
+      "Combiner plusieurs actions pour préparer un PDF à l'impression": "PDF को प्रिंट के लिए तैयार करने हेतु कई क्रियाएँ संयोजित करें",
+      "Récupérer des données corrompues ou endommagées d'un document PDF": "PDF दस्तावेज़ से खराब या क्षतिग्रस्त डेटा पुनर्प्राप्त करें",
+      "Changer le nom de fichier basé sur le texte des pages PDF": "PDF पृष्ठों के टेक्स्ट के आधार पर फ़ाइल का नाम बदलें",
+      "Optimiser et améliorer la structure interne d'un document PDF": "PDF दस्तावेज़ की आंतरिक संरचना को अनुकूलित और बेहतर करें"
+    }
+  },
+  "catalog": {
+    "items": {
+      "pdf": {
+        "title": "PDF उपकरण",
+        "description": "कन्वर्ज़न, OCR, मर्ज, कंप्रेशन"
+      },
+      "images": {
+        "title": "इमेज उपकरण",
+        "description": "कन्वर्ज़न, ऑप्टिमाइज़ेशन, फ़िल्टर"
+      },
+      "media": {
+        "title": "वीडियो और ऑडियो",
+        "description": "कन्वर्ज़न, एक्सट्रैक्शन, ट्रिम"
+      },
+      "archive": {
+        "title": "आर्काइव (ZIP)",
+        "description": "ZIP आर्काइव बनाएँ या निकालें"
+      },
+      "pdf-convert": {
+        "title": "दस्तावेज़ कन्वर्ट करें",
+        "description": "फ़ाइलों को आसानी से PDF, Word, Excel और अन्य में बदलें।"
+      },
+      "pdf-ocr": {
+        "title": "टेक्स्ट पहचान",
+        "description": "स्कैन किए गए दस्तावेज़ों या इमेज से सटीक टेक्स्ट निकालें"
+      },
+      "pdf-merge": {
+        "title": "दस्तावेज़ मर्ज करें",
+        "description": "हमारे टूल से PDF को किसी भी क्रम में जोड़ें।"
+      },
+      "pdf-split": {
+        "title": "पेज विभाजित और निकालें",
+        "description": "अलग फ़ाइलें बनाने के लिए PDF पेज विभाजित करें और निकालें।"
+      },
+      "pdf-compress": {
+        "title": "PDF कंप्रेस करें",
+        "description": "अधिकतम PDF गुणवत्ता बनाए रखते हुए फ़ाइल आकार घटाएँ।"
+      },
+      "pdf-edit": {
+        "title": "PDF संपादित करें",
+        "description": "टेक्स्ट, इमेज, आकृतियाँ, एनोटेशन, फ़ॉन्ट और रंगों के साथ PDF संपादित करें।"
+      },
+      "pdf-annotate": {
+        "title": "PDF एनोटेट करें",
+        "description": "टेक्स्ट, इमेज, आकृतियाँ, चित्र, स्टिकी नोट्स, हाइलाइट और बहुत कुछ जोड़ें।"
+      },
+      "pdf-fill-sign": {
+        "title": "भरें और हस्ताक्षर करें",
+        "description": "PDF फ़ॉर्म भरें और अपने इलेक्ट्रॉनिक हस्ताक्षर जोड़ें।"
+      },
+      "pdf-redact": {
+        "title": "PDF रिडैक्ट करें",
+        "description": "अपने PDF से संवेदनशील जानकारी स्थायी रूप से हटाएँ।"
+      },
+      "pdf-protect": {
+        "title": "पासवर्ड सुरक्षा",
+        "description": "पासवर्ड जोड़कर अपने PDF सुरक्षित करें।"
+      },
+      "pdf-unlock": {
+        "title": "PDF अनलॉक करें",
+        "description": "पूरी पहुँच और अधिक लचीलेपन के लिए PDF पासवर्ड हटाएँ।"
+      },
+      "pdf-watermark": {
+        "title": "वॉटरमार्क जोड़ें",
+        "description": "अपनी PDF फ़ाइलों की सुरक्षा के लिए वॉटरमार्क या टेक्स्ट जोड़ें।"
+      },
+      "pdf-organize": {
+        "title": "पेज व्यवस्थित करें",
+        "description": "अपने PDF पेज मनचाहे क्रम में लगाएँ। ज़रूरत हो तो पेज हटाएँ या जोड़ें।"
+      },
+      "pdf-rotate": {
+        "title": "पेज घुमाएँ",
+        "description": "अपने PDF पेजों को पोर्ट्रेट या लैंडस्केप में घुमाएँ।"
+      },
+      "pdf-crop": {
+        "title": "पेज क्रॉप करें",
+        "description": "हमारे PDF क्रॉप टूल से दस्तावेज़ों को काटें और समायोजित करें।"
+      },
+      "pdf-delete-pages": {
+        "title": "पेज हटाएँ",
+        "description": "अपनी PDF फ़ाइल से एक या अधिक पेज हटाएँ।"
+      },
+      "img-convert": {
+        "title": "कन्वर्ज़न",
+        "description": "20+ फ़ॉर्मैट (JPG, PNG, WebP, AVIF, GIF आदि)"
+      },
+      "img-optimize": {
+        "title": "ऑप्टिमाइज़ेशन",
+        "description": "स्मार्ट कंप्रेशन, WebP, AVIF"
+      },
+      "img-resize": {
+        "title": "आकार बदलें",
+        "description": "आकार बदलें, क्रॉप, रोटेट, फ़्लिप"
+      },
+      "img-filters": {
+        "title": "फ़िल्टर",
+        "description": "ग्रेस्केल, सेपिया, ब्लर, शार्पन"
+      },
+      "img-watermark": {
+        "title": "वॉटरमार्क",
+        "description": "टेक्स्ट या लोगो जोड़ें"
+      },
+      "img-batch": {
+        "title": "बैच प्रोसेसिंग",
+        "description": "एक साथ 100+ इमेज"
+      },
+      "img-favicon": {
+        "title": "फ़ेविकॉन जेनरेटर",
+        "description": "फ़ेविकॉन बनाएँ (16x16, 32x32, 192x192 आदि)"
+      },
+      "media-video-convert": {
+        "title": "वीडियो कन्वर्ज़न",
+        "description": "MP4, AVI, MOV, WebM, MKV, FLV"
+      },
+      "media-audio-convert": {
+        "title": "ऑडियो कन्वर्ज़न",
+        "description": "MP3, WAV, FLAC, AAC, OGG"
+      },
+      "media-extract-audio": {
+        "title": "ऑडियो निकालें",
+        "description": "वीडियो से ऑडियो ट्रैक निकालें"
+      },
+      "media-trim": {
+        "title": "काटें",
+        "description": "वीडियो/ऑडियो काटें"
+      },
+      "media-compress": {
+        "title": "कंप्रेस करें",
+        "description": "आकार घटाएँ"
+      },
+      "media-merge": {
+        "title": "मर्ज करें",
+        "description": "कई फ़ाइलें जोड़ें"
+      },
+      "batch": {
+        "title": "बैच प्रोसेसिंग",
+        "description": "एक साथ कई फ़ाइलें प्रोसेस करें"
+      },
+      "api": {
+        "title": "API",
+        "description": "डेवलपर्स के लिए API इंटीग्रेशन"
+      }
+    }
+  },
+  "search": {
+    "placeholder": "उपकरण, सुविधाएँ खोजें... (Ctrl+K या Cmd+K)",
+    "recent": "हाल की खोजें",
+    "popular": "लोकप्रिय सुझाव",
+    "noResults": "«{query}» के लिए कोई परिणाम नहीं मिला",
+    "deleteRecent": "यह खोज हटाएँ",
+    "categories": {
+      "tool": "उपकरण",
+      "page": "पेज",
+      "feature": "सुविधा"
+    }
+  },
+  "install": {
+    "title": "📲 Multi Convert आपके सभी डिवाइस पर उपलब्ध है",
+    "subtitle": "ऐप इंस्टॉल करें — तेज़ पहुँच, ऑफ़लाइन भी",
+    "install": "इंस्टॉल करें",
+    "ok": "ठीक है",
+    "dismiss": "बंद करें",
+    "iosHint": "सभी डिवाइस पर उपलब्ध — शेयर → «होम स्क्रीन पर जोड़ें»"
+  },
+  "userMenu": {
+    "login": "लॉगिन",
+    "signup": "साइन अप",
+    "dashboard": "डैशबोर्ड",
+    "settings": "सेटिंग्स",
+    "logout": "लॉग आउट"
+  },
+  "toolsModal": {
+    "title": "वह टूल चुनें जिसके साथ आप काम करना चाहते हैं",
+    "back": "वापस"
+  },
+  "cookie": {
+    "message": "🍪 हम साइट को वित्तपोषित करने (विज्ञापन) और आपका अनुभव बेहतर बनाने के लिए कुकीज़ का उपयोग करते हैं। हमारी <link>गोपनीयता नीति</link> देखें।",
+    "accept": "स्वीकार करें",
+    "refuse": "अस्वीकार करें",
+    "learnMore": "और जानें"
   }
 }

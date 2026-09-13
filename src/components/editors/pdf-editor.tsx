@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -1993,29 +1993,29 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
   return (
     <div className="fixed inset-0 z-[10000] bg-background flex flex-col">
       {/* Barre d'outils sup�rieure - Header */}
-      <div className="bg-card border-b border-border p-3 flex items-center justify-between">
-        <div className="flex items-center space-x-3">
+      <div className="bg-card border-b border-border p-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center space-x-3 min-w-0">
           <button
             onClick={onClose}
             className="p-2 rounded-lg hover:bg-muted transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
-          <h2 className="text-xl font-bold">Éditeur PDF</h2>
-          <span className="text-sm text-muted-foreground ml-2 flex items-center">
-            <Upload className="w-4 h-4 mr-1" />
+          <h2 className="text-xl font-bold hidden sm:block">Éditeur PDF</h2>
+          <span className="text-sm text-muted-foreground ml-2 flex items-center truncate">
+            <Upload className="w-4 h-4 mr-1 shrink-0" />
             {sourceFile.name}
           </span>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center flex-wrap gap-2">
           <button
             onClick={handleImportNew}
             className="flex items-center space-x-2 px-3 py-2 text-sm border border-border rounded-lg hover:bg-muted transition-colors"
             title="Importer nouveau fichier"
           >
             <Upload className="w-4 h-4" />
-            <span className="hidden md:inline">Importer nouveau</span>
+            <span className="inline">Importer nouveau</span>
           </button>
           <button
             onClick={handleAddBlankPage}
@@ -2023,7 +2023,7 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
             title="Ajouter une page blanche"
           >
             <Plus className="w-4 h-4" />
-            <span className="hidden md:inline">Page blanche</span>
+            <span className="inline">Page blanche</span>
           </button>
           <button
             onClick={handlePrint}
@@ -2064,7 +2064,7 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
               title="Optimiser"
             >
               <Sparkles className="w-4 h-4" />
-              <span className="hidden md:inline">Optimiser</span>
+              <span className="inline">Optimiser</span>
               <ChevronDown className={`w-4 h-4 transition-transform ${showOptimizeMenu ? 'rotate-180' : ''}`} />
             </button>
             {showOptimizeMenu && (
@@ -2098,7 +2098,7 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
               title="Compresser"
             >
               <Minimize2 className="w-4 h-4" />
-              <span className="hidden md:inline">Compresser</span>
+              <span className="inline">Compresser</span>
               <ChevronDown className={`w-4 h-4 transition-transform ${showCompressMenu ? 'rotate-180' : ''}`} />
             </button>
             {showCompressMenu && (
@@ -2645,7 +2645,7 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
             title="Plus d'outils"
           >
             <Grid3x3 className="w-4 h-4 inline mr-1" />
-            <span className="hidden md:inline">Plus d'outils</span>
+            <span className="inline">Plus d'outils</span>
           </button>
         </div>
       </div>

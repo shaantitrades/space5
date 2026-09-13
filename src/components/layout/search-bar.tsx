@@ -1,67 +1,85 @@
 'use client';
 
 import { useState, useEffect, useRef, KeyboardEvent } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, usePathname } from '@/i18n/routing';
 import { Search, X, Command, FileText, Image as ImageIcon, Video, File, Zap, TrendingUp, Clock, ArrowRight, Star, PenLine, Edit, PenTool, ShieldX, Lock, Unlock, Droplet, Layers, RotateCw, Crop, Trash, Sparkles, Minimize2, Film, Music, Volume2, Scissors, Combine, FileSearch, Maximize2 } from 'lucide-react';
 
-interface SearchResult {
+/** Entree statique de l'index : les libelles viennent du catalogue i18n */
+interface SearchItem {
   id: string;
-  title: string;
-  description: string;
   category: 'tool' | 'page' | 'feature';
   href: string;
   icon: React.ElementType;
   keywords: string[];
 }
 
-const searchableItems: SearchResult[] = [
+interface SearchResult extends SearchItem {
+  title: string;
+  description: string;
+}
+
+/** Outils mis en avant quand le champ est vide (ids du catalogue) */
+const SUGGESTED_IDS = ['pdf-convert', 'pdf-merge', 'pdf-compress', 'pdf-fill-sign'];
+
+const searchableItems: SearchItem[] = [
   // Pages principales
-  { id: 'pdf', title: 'Outils PDF', description: 'Conversion, OCR, Fusion, Compression', category: 'page', href: '/pdf', icon: FileText, keywords: ['pdf', 'document', 'conversion', 'ocr', 'fusion', 'compression'] },
-  { id: 'images', title: 'Outils Images', description: 'Conversion, Optimisation, Filtres', category: 'page', href: '/images', icon: ImageIcon, keywords: ['image', 'photo', 'logo', 'optimisation', 'filtre', 'resize'] },
-  { id: 'media', title: 'Vidéo & Audio', description: 'Conversion, Extraction, Trim', category: 'page', href: '/media', icon: Video, keywords: ['video', 'audio', 'mp4', 'mp3', 'conversion', 'extraction'] },
-  { id: 'archive', title: 'Archive (ZIP)', description: 'Créer ou extraire des archives ZIP', category: 'page', href: '/archive', icon: File, keywords: ['zip', 'archive', 'compresser', 'extraire', 'décompresser'] },
+  { id: 'pdf', category: 'page', href: '/pdf', icon: FileText, keywords: ['pdf', 'document', 'conversion', 'ocr', 'fusion', 'compression'] },
+  { id: 'images', category: 'page', href: '/images', icon: ImageIcon, keywords: ['image', 'photo', 'logo', 'optimisation', 'filtre', 'resize'] },
+  { id: 'media', category: 'page', href: '/media', icon: Video, keywords: ['video', 'audio', 'mp4', 'mp3', 'conversion', 'extraction'] },
+  { id: 'archive', category: 'page', href: '/archive', icon: File, keywords: ['zip', 'archive', 'compresser', 'extraire', 'décompresser'] },
   
   // Outils PDF
-  { id: 'pdf-convert', title: 'Conversion PDF', description: 'Transformer vos documents entre PDF, Word, Excel et formats image', category: 'tool', href: '/pdf?tool=convert', icon: FileText, keywords: ['pdf', 'convertir', 'word', 'excel', 'jpg', 'png', 'conversion'] },
-  { id: 'pdf-ocr', title: 'Reconnaissance de texte', description: 'Extrayez le texte de documents scannés ou d\'images avec précision', category: 'tool', href: '/pdf?tool=ocr', icon: FileSearch, keywords: ['ocr', 'texte', 'reconnaissance', 'scanner', 'reconnaissance de texte', 'extraire texte'] },
-  { id: 'pdf-merge', title: 'Fusionner PDF', description: 'Assemblez plusieurs fichiers PDF en un document unique', category: 'tool', href: '/pdf?tool=merge', icon: Combine, keywords: ['fusionner', 'combiner', 'merge', 'unir', 'assembler'] },
-  { id: 'pdf-split', title: 'Scinder et Extraire', description: 'Séparez votre PDF en plusieurs fichiers distincts selon vos besoins', category: 'tool', href: '/pdf?tool=split', icon: Scissors, keywords: ['diviser', 'séparer', 'split', 'couper', 'scinder', 'extraire', 'séparer pdf'] },
-  { id: 'pdf-compress', title: 'Compresser le PDF', description: 'Diminuez la taille de vos fichiers tout en préservant la qualité', category: 'tool', href: '/pdf?tool=compress', icon: Minimize2, keywords: ['compresser', 'réduire', 'compress', 'taille', 'diminuer', 'réduire pdf'] },
-  { id: 'pdf-edit', title: 'Éditeur PDF Avancé', description: 'Personnalisez vos documents avec des modifications textuelles et visuelles', category: 'tool', href: '/pdf?tool=edit', icon: Edit, keywords: ['éditeur', 'edit', 'modifier', 'personnaliser', 'éditeur pdf', 'modifier pdf'] },
-  { id: 'pdf-annotate', title: 'Annoter le PDF', description: 'Enrichissez vos fichiers avec des notes, surlignages et dessins interactifs', category: 'tool', href: '/pdf?tool=annotate', icon: PenTool, keywords: ['annoter', 'notes', 'surlignage', 'dessins', 'annotation', 'commenter'] },
-  { id: 'pdf-fill-sign', title: 'Remplir et Signer', description: 'Remplissez des formulaires PDF et apposez vos signatures électroniques', category: 'tool', href: '/pdf?tool=sign', icon: PenLine, keywords: ['remplir', 'signer', 'signature', 'formulaire', 'form', 'fill', 'sign', 'électronique', 'remplir et signer', 'remplissage', 'validation', 'signer pdf', 'formulaire pdf'] },
-  { id: 'pdf-redact', title: 'Protection des Données', description: 'Masquez de façon permanente les informations confidentielles', category: 'tool', href: '/pdf?tool=redact', icon: ShieldX, keywords: ['protéger', 'masquer', 'confidentiel', 'redact', 'caviarder', 'protection données', 'masquer informations'] },
-  { id: 'pdf-protect', title: 'Sécurisation Avancée', description: 'Protégez vos fichiers sensibles avec des mots de passe robustes', category: 'tool', href: '/pdf?tool=protect', icon: Lock, keywords: ['sécuriser', 'protéger', 'mot de passe', 'password', 'sécurité', 'sécurisation', 'protéger pdf'] },
-  { id: 'pdf-unlock', title: 'Déverrouiller le PDF', description: 'Retirez les restrictions d\'accès selon vos besoins légitimes', category: 'tool', href: '/pdf?tool=unlock', icon: Unlock, keywords: ['déverrouiller', 'unlock', 'retirer restrictions', 'débloquer', 'déverrouiller pdf', 'enlever mot de passe', 'débloquer pdf'] },
-  { id: 'pdf-watermark', title: 'Filigranes Personnalisés', description: 'Marquez vos documents avec des filigranes textuels ou graphiques', category: 'tool', href: '/pdf?tool=watermark', icon: Droplet, keywords: ['filigrane', 'watermark', 'marquer', 'filigrane personnalisé', 'marque document'] },
-  { id: 'pdf-organize', title: 'Réorganisation de Pages', description: 'Gérez la structure de vos documents en réarrangeant les pages', category: 'tool', href: '/pdf?tool=organize', icon: Layers, keywords: ['réorganiser', 'organiser', 'pages', 'réarranger', 'structure', 'réorganisation'] },
-  { id: 'pdf-rotate', title: 'Faire Pivoter les Pages', description: 'Ajustez l\'orientation de vos pages en mode portrait ou paysage', category: 'tool', href: '/pdf?tool=rotate', icon: RotateCw, keywords: ['pivoter', 'rotate', 'rotation', 'orientation', 'portrait', 'paysage', 'tourner'] },
-  { id: 'pdf-crop', title: 'Recadrer les Pages', description: 'Découpez et ajustez les dimensions de vos pages selon vos préférences', category: 'tool', href: '/pdf?tool=crop', icon: Crop, keywords: ['recadrer', 'crop', 'découper', 'dimensions', 'redimensionner', 'ajuster'] },
-  { id: 'pdf-delete-pages', title: 'Supprimer des Pages', description: 'Retirez une ou plusieurs pages de votre document en quelques clics', category: 'tool', href: '/pdf?tool=delete-pages', icon: Trash, keywords: ['supprimer', 'delete', 'retirer', 'pages', 'enlever', 'effacer pages'] },
+  { id: 'pdf-convert', category: 'tool', href: '/pdf?tool=convert', icon: FileText, keywords: ['pdf', 'convertir', 'word', 'excel', 'jpg', 'png', 'conversion'] },
+  { id: 'pdf-ocr', category: 'tool', href: '/pdf?tool=ocr', icon: FileSearch, keywords: ['ocr', 'texte', 'reconnaissance', 'scanner', 'reconnaissance de texte', 'extraire texte'] },
+  { id: 'pdf-merge', category: 'tool', href: '/pdf?tool=merge', icon: Combine, keywords: ['fusionner', 'combiner', 'merge', 'unir', 'assembler'] },
+  { id: 'pdf-split', category: 'tool', href: '/pdf?tool=split', icon: Scissors, keywords: ['diviser', 'séparer', 'split', 'couper', 'scinder', 'extraire', 'séparer pdf'] },
+  { id: 'pdf-compress', category: 'tool', href: '/pdf?tool=compress', icon: Minimize2, keywords: ['compresser', 'réduire', 'compress', 'taille', 'diminuer', 'réduire pdf'] },
+  { id: 'pdf-edit', category: 'tool', href: '/pdf?tool=edit', icon: Edit, keywords: ['éditeur', 'edit', 'modifier', 'personnaliser', 'éditeur pdf', 'modifier pdf'] },
+  { id: 'pdf-annotate', category: 'tool', href: '/pdf?tool=annotate', icon: PenTool, keywords: ['annoter', 'notes', 'surlignage', 'dessins', 'annotation', 'commenter'] },
+  { id: 'pdf-fill-sign', category: 'tool', href: '/pdf?tool=sign', icon: PenLine, keywords: ['remplir', 'signer', 'signature', 'formulaire', 'form', 'fill', 'sign', 'électronique', 'remplir et signer', 'remplissage', 'validation', 'signer pdf', 'formulaire pdf'] },
+  { id: 'pdf-redact', category: 'tool', href: '/pdf?tool=redact', icon: ShieldX, keywords: ['protéger', 'masquer', 'confidentiel', 'redact', 'caviarder', 'protection données', 'masquer informations'] },
+  { id: 'pdf-protect', category: 'tool', href: '/pdf?tool=protect', icon: Lock, keywords: ['sécuriser', 'protéger', 'mot de passe', 'password', 'sécurité', 'sécurisation', 'protéger pdf'] },
+  { id: 'pdf-unlock', category: 'tool', href: '/pdf?tool=unlock', icon: Unlock, keywords: ['déverrouiller', 'unlock', 'retirer restrictions', 'débloquer', 'déverrouiller pdf', 'enlever mot de passe', 'débloquer pdf'] },
+  { id: 'pdf-watermark', category: 'tool', href: '/pdf?tool=watermark', icon: Droplet, keywords: ['filigrane', 'watermark', 'marquer', 'filigrane personnalisé', 'marque document'] },
+  { id: 'pdf-organize', category: 'tool', href: '/pdf?tool=organize', icon: Layers, keywords: ['réorganiser', 'organiser', 'pages', 'réarranger', 'structure', 'réorganisation'] },
+  { id: 'pdf-rotate', category: 'tool', href: '/pdf?tool=rotate', icon: RotateCw, keywords: ['pivoter', 'rotate', 'rotation', 'orientation', 'portrait', 'paysage', 'tourner'] },
+  { id: 'pdf-crop', category: 'tool', href: '/pdf?tool=crop', icon: Crop, keywords: ['recadrer', 'crop', 'découper', 'dimensions', 'redimensionner', 'ajuster'] },
+  { id: 'pdf-delete-pages', category: 'tool', href: '/pdf?tool=delete-pages', icon: Trash, keywords: ['supprimer', 'delete', 'retirer', 'pages', 'enlever', 'effacer pages'] },
   
   // Outils Images
-  { id: 'img-convert', title: 'Conversion', description: '20+ formats (JPG, PNG, WebP, AVIF, GIF, etc.)', category: 'tool', href: '/images?tool=convert', icon: ImageIcon, keywords: ['convertir', 'jpg', 'png', 'webp', 'svg', 'avif', 'gif', 'conversion images'] },
-  { id: 'img-optimize', title: 'Optimisation', description: 'Compression intelligente, WebP, AVIF', category: 'tool', href: '/images?tool=optimize', icon: Zap, keywords: ['optimiser', 'optimize', 'réduire', 'qualité', 'compression', 'compression intelligente'] },
-  { id: 'img-resize', title: 'Redimensionner', description: 'Resize, crop, rotate, flip', category: 'tool', href: '/images?tool=resize', icon: Maximize2, keywords: ['redimensionner', 'resize', 'taille', 'dimensions', 'crop', 'rotate', 'flip'] },
-  { id: 'img-filters', title: 'Filtres', description: 'Grayscale, sepia, blur, sharpen', category: 'tool', href: '/images?tool=filters', icon: Sparkles, keywords: ['filtres', 'filters', 'grayscale', 'sepia', 'blur', 'sharpen', 'effets'] },
-  { id: 'img-watermark', title: 'Filigrane', description: 'Ajouter texte ou logo', category: 'tool', href: '/images?tool=watermark', icon: Droplet, keywords: ['filigrane', 'watermark', 'texte', 'logo', 'marquer image'] },
-  { id: 'img-batch', title: 'Traitement par lot', description: '100+ images simultanément', category: 'tool', href: '/images?tool=batch', icon: Scissors, keywords: ['batch', 'lot', 'multiple', 'plusieurs', 'traitement par lot', 'plusieurs images'] },
-  { id: 'img-favicon', title: 'Générateur Favicon', description: 'Créer favicons (16x16, 32x32, 192x192, etc.)', category: 'tool', href: '/images?tool=favicon', icon: Star, keywords: ['favicon', 'icône', 'icon', 'icone', 'favicons', 'générateur', 'créer', 'apple-touch-icon', 'android-chrome'] },
+  { id: 'img-convert', category: 'tool', href: '/images?tool=convert', icon: ImageIcon, keywords: ['convertir', 'jpg', 'png', 'webp', 'svg', 'avif', 'gif', 'conversion images'] },
+  { id: 'img-optimize', category: 'tool', href: '/images?tool=optimize', icon: Zap, keywords: ['optimiser', 'optimize', 'réduire', 'qualité', 'compression', 'compression intelligente'] },
+  { id: 'img-resize', category: 'tool', href: '/images?tool=resize', icon: Maximize2, keywords: ['redimensionner', 'resize', 'taille', 'dimensions', 'crop', 'rotate', 'flip'] },
+  { id: 'img-filters', category: 'tool', href: '/images?tool=filters', icon: Sparkles, keywords: ['filtres', 'filters', 'grayscale', 'sepia', 'blur', 'sharpen', 'effets'] },
+  { id: 'img-watermark', category: 'tool', href: '/images?tool=watermark', icon: Droplet, keywords: ['filigrane', 'watermark', 'texte', 'logo', 'marquer image'] },
+  { id: 'img-batch', category: 'tool', href: '/images?tool=batch', icon: Scissors, keywords: ['batch', 'lot', 'multiple', 'plusieurs', 'traitement par lot', 'plusieurs images'] },
+  { id: 'img-favicon', category: 'tool', href: '/images?tool=favicon', icon: Star, keywords: ['favicon', 'icône', 'icon', 'icone', 'favicons', 'générateur', 'créer', 'apple-touch-icon', 'android-chrome'] },
   
   // Outils Media
-  { id: 'media-video-convert', title: 'Conversion Vidéo', description: 'MP4, AVI, MOV, WebM, MKV, FLV', category: 'tool', href: '/media?tool=video-convert', icon: Video, keywords: ['convertir', 'vidéo', 'video', 'mp4', 'avi', 'mov', 'webm', 'mkv', 'flv', 'conversion vidéo'] },
-  { id: 'media-audio-convert', title: 'Conversion Audio', description: 'MP3, WAV, FLAC, AAC, OGG', category: 'tool', href: '/media?tool=audio-convert', icon: Music, keywords: ['convertir', 'audio', 'mp3', 'wav', 'flac', 'aac', 'ogg', 'conversion audio'] },
-  { id: 'media-extract-audio', title: 'Extraire Audio', description: 'Extraire l\'audio d\'une vidéo', category: 'tool', href: '/media?tool=extract-audio', icon: Volume2, keywords: ['extraire', 'audio', 'extract', 'sound', 'extraire audio vidéo', 'extraction audio'] },
-  { id: 'media-trim', title: 'Découper', description: 'Couper vidéo/audio', category: 'tool', href: '/media?tool=trim', icon: Scissors, keywords: ['découper', 'trim', 'couper', 'découper vidéo', 'couper audio', 'découpage'] },
-  { id: 'media-compress', title: 'Compresser', description: 'Réduire la taille', category: 'tool', href: '/media?tool=compress', icon: Minimize2, keywords: ['compresser', 'compress', 'réduire', 'taille', 'compression vidéo', 'compression audio'] },
-  { id: 'media-merge', title: 'Fusionner', description: 'Combiner plusieurs fichiers', category: 'tool', href: '/media?tool=merge', icon: Film, keywords: ['fusionner', 'merge', 'combiner', 'fusionner vidéo', 'fusionner audio', 'combiner fichiers'] },
+  { id: 'media-video-convert', category: 'tool', href: '/media?tool=video-convert', icon: Video, keywords: ['convertir', 'vidéo', 'video', 'mp4', 'avi', 'mov', 'webm', 'mkv', 'flv', 'conversion vidéo'] },
+  { id: 'media-audio-convert', category: 'tool', href: '/media?tool=audio-convert', icon: Music, keywords: ['convertir', 'audio', 'mp3', 'wav', 'flac', 'aac', 'ogg', 'conversion audio'] },
+  { id: 'media-extract-audio', category: 'tool', href: '/media?tool=extract-audio', icon: Volume2, keywords: ['extraire', 'audio', 'extract', 'sound', 'extraire audio vidéo', 'extraction audio'] },
+  { id: 'media-trim', category: 'tool', href: '/media?tool=trim', icon: Scissors, keywords: ['découper', 'trim', 'couper', 'découper vidéo', 'couper audio', 'découpage'] },
+  { id: 'media-compress', category: 'tool', href: '/media?tool=compress', icon: Minimize2, keywords: ['compresser', 'compress', 'réduire', 'taille', 'compression vidéo', 'compression audio'] },
+  { id: 'media-merge', category: 'tool', href: '/media?tool=merge', icon: Film, keywords: ['fusionner', 'merge', 'combiner', 'fusionner vidéo', 'fusionner audio', 'combiner fichiers'] },
   
   // Fonctionnalités
-  { id: 'batch', title: 'Traitement par lot', description: 'Traiter plusieurs fichiers à la fois', category: 'feature', href: '/pdf', icon: Zap, keywords: ['batch', 'lot', 'multiple', 'plusieurs'] },
-  { id: 'api', title: 'API', description: 'Intégration API pour développeurs', category: 'feature', href: '/api', icon: TrendingUp, keywords: ['api', 'développeur', 'intégration', 'developer'] },
+  { id: 'batch', category: 'feature', href: '/pdf', icon: Zap, keywords: ['batch', 'lot', 'multiple', 'plusieurs'] },
+  { id: 'api', category: 'feature', href: '/api', icon: TrendingUp, keywords: ['api', 'développeur', 'intégration', 'developer'] },
 ];
 
-export function SearchBar() {
+/** Normalise une chaîne (minuscules + suppression des accents) pour la recherche */
+const normalizeText = (value: string): string =>
+  value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+export function SearchBar({ embedded = false }: { embedded?: boolean }) {
+  const t = useTranslations('search');
+  const tc = useTranslations('catalog');
+  const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
   const [query, setQuery] = useState('');
@@ -71,6 +89,14 @@ export function SearchBar() {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const searchBarRef = useRef<HTMLDivElement>(null);
+
+  // Index localise : titre et description resolus dans la langue active
+  const items: SearchResult[] = searchableItems.map((item) => ({
+    ...item,
+    title: tc(`items.${item.id}.title`),
+    description: tc(`items.${item.id}.description`),
+  }));
+  const suggestions = SUGGESTED_IDS.map((id) => tc(`items.${id}.title`));
 
   // Charger les recherches récentes depuis localStorage
   useEffect(() => {
@@ -105,23 +131,25 @@ export function SearchBar() {
       return;
     }
 
-    const searchTerm = query.toLowerCase().trim();
-    const filtered = searchableItems.filter((item) => {
-      const searchableText = `${item.title} ${item.description} ${item.keywords.join(' ')}`.toLowerCase();
-      return searchableText.includes(searchTerm);
+    const searchTerm = normalizeText(query.trim());
+    // Tous les mots saisis doivent etre presents (recherche multi-mots)
+    const terms = searchTerm.split(/\s+/).filter(Boolean);
+    const filtered = items.filter((item) => {
+      const searchableText = normalizeText(`${item.title} ${item.description} ${item.keywords.join(' ')}`);
+      return terms.every((term) => searchableText.includes(term));
     });
 
     // Trier par pertinence (titre > description > mots-clés)
     const scored = filtered.map((item) => {
       let score = 0;
-      const titleLower = item.title.toLowerCase();
-      const descLower = item.description.toLowerCase();
+      const titleLower = normalizeText(item.title);
+      const descLower = normalizeText(item.description);
 
       if (titleLower.startsWith(searchTerm)) score += 100;
       if (titleLower.includes(searchTerm)) score += 50;
       if (descLower.includes(searchTerm)) score += 25;
       item.keywords.forEach((keyword) => {
-        if (keyword.toLowerCase().includes(searchTerm)) score += 10;
+        if (normalizeText(keyword).includes(searchTerm)) score += 10;
       });
 
       return { item, score };
@@ -130,7 +158,8 @@ export function SearchBar() {
     const sorted = scored.sort((a, b) => b.score - a.score).map((s) => s.item);
     setResults(sorted.slice(0, 8)); // Limiter à 8 résultats
     setSelectedIndex(0);
-  }, [query]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `items` est reconstruit a chaque rendu
+  }, [query, locale]);
 
   // Fermer quand on clique à l'extérieur
   useEffect(() => {
@@ -177,23 +206,12 @@ export function SearchBar() {
     }
   };
 
-  const getCategoryLabel = (category: string) => {
-    switch (category) {
-      case 'tool':
-        return 'Outil';
-      case 'page':
-        return 'Page';
-      case 'feature':
-        return 'Fonctionnalité';
-      default:
-        return '';
-    }
-  };
+  const getCategoryLabel = (category: SearchResult['category']) => t(`categories.${category}`);
 
   return (
-    <div ref={searchBarRef} className="relative bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4 py-3">
-        <div className="max-w-3xl mx-auto">
+    <div ref={searchBarRef} className={embedded ? 'relative' : 'relative bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'}>
+      <div className={embedded ? '' : 'container mx-auto px-4 py-3'}>
+        <div className={embedded ? 'mx-auto max-w-2xl' : 'max-w-3xl mx-auto'}>
           <div className="relative">
             {/* Champ de recherche */}
             <div
@@ -212,7 +230,7 @@ export function SearchBar() {
                 onChange={(e) => setQuery(e.target.value)}
                 onFocus={() => setIsOpen(true)}
                 onKeyDown={handleKeyDown}
-                placeholder="Rechercher des outils, fonctionnalités... (Ctrl+K ou Cmd+K)"
+                placeholder={t('placeholder')}
                 className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground"
               />
               {query && (
@@ -237,7 +255,7 @@ export function SearchBar() {
 
             {/* Dropdown de résultats */}
             {isOpen && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-background border-2 border-border rounded-lg shadow-xl z-50 max-h-[500px] overflow-hidden">
+              <div className="absolute top-full left-0 right-0 mt-2 bg-background border-2 border-border rounded-lg shadow-xl z-[9999] max-h-[500px] overflow-hidden">
                 {query.trim().length === 0 ? (
                   // Aucune recherche - Afficher les recherches récentes et suggestions
                   <div className="p-4">
@@ -245,7 +263,7 @@ export function SearchBar() {
                       <div className="mb-4">
                         <div className="flex items-center space-x-2 mb-2 text-xs font-semibold text-muted-foreground uppercase">
                           <Clock className="w-3 h-3" />
-                          <span>Recherches récentes</span>
+                          <span>{t('recent')}</span>
                         </div>
                         <div className="space-y-1">
                           {recentSearches.map((search, idx) => (
@@ -264,7 +282,7 @@ export function SearchBar() {
                               <button
                                 onClick={(e) => handleDeleteRecentSearch(e, search)}
                                 className="p-1 rounded hover:bg-red-100 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                                title="Supprimer cette recherche"
+                                title={t('deleteRecent')}
                               >
                                 <X className="w-4 h-4" />
                               </button>
@@ -276,10 +294,10 @@ export function SearchBar() {
                     <div>
                       <div className="flex items-center space-x-2 mb-2 text-xs font-semibold text-muted-foreground uppercase">
                         <TrendingUp className="w-3 h-3" />
-                        <span>Suggestions populaires</span>
+                        <span>{t('popular')}</span>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
-                        {['Convertir PDF', 'Fusionner PDF', 'Optimiser Images', 'Compresser PDF'].map((suggestion) => (
+                        {suggestions.map((suggestion) => (
                           <button
                             key={suggestion}
                             onClick={() => {
@@ -298,7 +316,7 @@ export function SearchBar() {
                   // Aucun résultat
                   <div className="p-8 text-center text-muted-foreground">
                     <Search className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p className="text-sm">Aucun résultat trouvé pour &quot;{query}&quot;</p>
+                    <p className="text-sm">{t('noResults', { query })}</p>
                   </div>
                 ) : (
                   // Résultats

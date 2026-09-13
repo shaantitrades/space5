@@ -7,6 +7,7 @@ import { X, ArrowLeft,
   Edit, PenTool, PenLine, ShieldX, Lock, Unlock, Droplet,
   Layers, RotateCw, Crop, Trash } from 'lucide-react';
 import { Link } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 
 interface ToolsModalProps {
   isOpen: boolean;
@@ -15,13 +16,13 @@ interface ToolsModalProps {
 
 interface PDFTool {
   id: string;
-  name: string;
-  description: string;
   icon: any;
   href: string;
 }
 
 export function ToolsModal({ isOpen, onClose }: ToolsModalProps) {
+  const tc = useTranslations('catalog');
+  const t = useTranslations('toolsModal');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -33,107 +34,77 @@ export function ToolsModal({ isOpen, onClose }: ToolsModalProps) {
 
   const pdfTools: PDFTool[] = [
     {
-      id: 'annotate',
-      name: 'Annoter le PDF',
-      description: 'Ajoutez du texte, des images, des formes, des dessins, des notes autocollantes, des surlignages et bien plus encore.',
+      id: 'pdf-annotate',
       icon: PenTool,
       href: '/pdf?tool=annotate',
     },
     {
-      id: 'edit',
-      name: 'Modifier PDF',
-      description: 'Modifiez des PDF avec du texte, des images, des formes, des annotations, des polices et des couleurs.',
+      id: 'pdf-edit',
       icon: Edit,
       href: '/pdf?tool=edit',
     },
     {
-      id: 'sign',
-      name: 'Signer un PDF',
-      description: 'Appliquez votre signature, ajoutez des initiales, des dates, des cases à cocher et plus encore.',
+      id: 'pdf-fill-sign',
       icon: PenLine,
       href: '/pdf?tool=sign',
     },
     {
-      id: 'convert',
-      name: 'Convertir un document',
-      description: 'Convertissez facilement des fichiers en PDF, Word, Excel, etc.',
+      id: 'pdf-convert',
       icon: FileText,
       href: '/pdf?tool=convert',
     },
     {
-      id: 'merge',
-      name: 'Fusionner des documents',
-      description: 'Combinez des PDF dans n\'importe quel ordre grâce à notre outil de fusion.',
+      id: 'pdf-merge',
       icon: Combine,
       href: '/pdf?tool=merge',
     },
     {
-      id: 'compress',
-      name: 'Compresser le PDF',
-      description: 'Réduisez la taille des fichiers tout en optimisant pour une qualité PDF maximale.',
+      id: 'pdf-compress',
       icon: Minimize2,
       href: '/pdf?tool=compress',
     },
     {
-      id: 'redact',
-      name: 'Caviarder le PDF',
-      description: 'Supprimez définitivement les informations sensibles de votre PDF.',
+      id: 'pdf-redact',
       icon: ShieldX,
       href: '/pdf?tool=redact',
     },
     {
-      id: 'organize',
-      name: 'Organiser les pages',
-      description: 'Triez vos pages PDF comme vous le souhaitez. Supprimez ou ajoutez des pages si nécessaire.',
+      id: 'pdf-organize',
       icon: Layers,
       href: '/pdf?tool=organize',
     },
     {
-      id: 'split',
-      name: 'Scinder et extraire des pages',
-      description: 'Scindez et extrayez des pages PDF pour créer des fichiers distincts.',
+      id: 'pdf-split',
       icon: Scissors,
       href: '/pdf?tool=split',
     },
     {
-      id: 'protect',
-      name: 'Protection par mot de passe',
-      description: 'Sécurisez vos PDF en ajoutant un mot de passe.',
+      id: 'pdf-protect',
       icon: Lock,
       href: '/pdf?tool=protect',
     },
     {
-      id: 'unlock',
-      name: 'Déverrouiller le PDF',
-      description: 'Supprimez les mots de passe PDF pour un accès complet et une plus grande flexibilité.',
+      id: 'pdf-unlock',
       icon: Unlock,
       href: '/pdf?tool=unlock',
     },
     {
-      id: 'watermark',
-      name: 'Ajouter un filigrane',
-      description: 'Ajoutez un filigrane ou du texte comme protection à vos fichiers PDF.',
+      id: 'pdf-watermark',
       icon: Droplet,
       href: '/pdf?tool=watermark',
     },
     {
-      id: 'rotate',
-      name: 'Faire pivoter les pages',
-      description: 'Faites pivoter vos pages PDF en mode portrait ou paysage.',
+      id: 'pdf-rotate',
       icon: RotateCw,
       href: '/pdf?tool=rotate',
     },
     {
-      id: 'delete-pages',
-      name: 'Supprimer des pages',
-      description: 'Supprimez une ou plusieurs pages de votre fichier PDF.',
+      id: 'pdf-delete-pages',
       icon: Trash,
       href: '/pdf?tool=delete-pages',
     },
     {
-      id: 'crop',
-      name: 'Recadrer les pages',
-      description: 'Recadrez et découpez vos documents avec notre recadrage PDF.',
+      id: 'pdf-crop',
       icon: Crop,
       href: '/pdf?tool=crop',
     },
@@ -171,7 +142,7 @@ export function ToolsModal({ isOpen, onClose }: ToolsModalProps) {
               <X className="w-5 h-5" />
             </button>
             <h2 className="text-2xl font-bold text-center pr-8">
-              Choisissez l&apos;outil avec lequel vous souhaitez travailler
+              {t('title')}
             </h2>
           </div>
 
@@ -192,11 +163,11 @@ export function ToolsModal({ isOpen, onClose }: ToolsModalProps) {
                         <Icon className="w-5 h-5 text-primary" />
                       </div>
                       <h3 className="font-bold text-base group-hover:text-primary transition-colors">
-                        {tool.name}
+                        {tc(`items.${tool.id}.title`)}
                       </h3>
                     </div>
                     <p className="text-sm text-gray-600 leading-relaxed">
-                      {tool.description}
+                      {tc(`items.${tool.id}.description`)}
                     </p>
                   </Link>
                 );
@@ -211,7 +182,7 @@ export function ToolsModal({ isOpen, onClose }: ToolsModalProps) {
               className="inline-flex items-center space-x-2 px-6 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group"
             >
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-              <span>Retour</span>
+              <span>{t('back')}</span>
             </button>
           </div>
         </div>

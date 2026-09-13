@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     switch (tool) {
       case 'video-convert': {
-        const format = String(formData.get('format') || 'mp4');
+        const format = String(formData.get('outputFormat') || formData.get('format') || 'mp4');
         const quality = String(formData.get('quality') || 'high');
 
         resultBuffer = await VideoConverter.convert(buffer, {
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
       }
 
       case 'audio-convert': {
-        const format = (formData.get('format') as string) || 'mp3';
+        const format = String(formData.get('outputFormat') || formData.get('format') || 'mp3');
         const bitrate = (formData.get('bitrate') as string) || '192k';
 
         resultBuffer = await AudioConverter.convert(buffer, {
@@ -168,11 +168,11 @@ export async function POST(request: NextRequest) {
         const isVideo = files[0].type.startsWith('video');
 
         if (isVideo) {
-          // Note: La fusion vidéo nécessite une implémentation plus complexe
-          resultBuffer = buffers[0]; // Placeholder
-          fileName = 'merged.mp4';
-          contentType = 'video/mp4';
-          outputFormat = 'mp4';
+          // La fusion vidéo (concat multi-fichiers) n'est pas encore implémentée.
+          return NextResponse.json(
+            { error: 'La fusion de vidéos n\'est pas encore disponible. Réessayez avec des fichiers audio.' },
+            { status: 501 }
+          );
         } else {
           resultBuffer = await AudioConverter.merge(buffers);
           fileName = 'merged.mp3';

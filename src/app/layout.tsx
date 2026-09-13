@@ -3,11 +3,8 @@ import { Inter } from 'next/font/google';
 import { Toaster } from 'sonner';
 import './globals.css';
 import { siteConfig } from '@/config/site';
-import { InstallPrompt } from '@/components/pwa/install-prompt';
 import { PwaRegister } from '@/components/pwa/pwa-register';
-import { CookieConsent } from '@/components/consent/cookie-consent';
 import { AdScript } from '@/components/ads/ad-script';
-
 const inter = Inter({ subsets: ['latin'] });
 
 const locales = ['en', 'fr', 'es', 'de', 'it', 'pt', 'hi', 'ru', 'sv', 'no'];
@@ -27,9 +24,11 @@ export const metadata: Metadata = {
   manifest: '/manifest.webmanifest',
   icons: {
     icon: [
-      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon-16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/favicon-512.png', sizes: '512x512', type: 'image/png' },
     ],
     apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
   },
@@ -106,10 +105,8 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         {children}
-        <InstallPrompt />
         <PwaRegister />
         <AdScript />
-        <CookieConsent />
         <Toaster 
           position="top-right" 
           richColors 

@@ -7,9 +7,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from '@/i18n/routing';
 import { User, LogOut, Settings, LayoutDashboard, ChevronDown } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function UserMenu() {
+  const t = useTranslations('userMenu');
   const { user, isAuthenticated, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -34,13 +36,13 @@ export default function UserMenu() {
           href="/login"
           className="text-sm font-medium text-muted-foreground hover:text-primary"
         >
-          Connexion
+          {t('login')}
         </Link>
         <Link
           href="/signup"
           className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90"
         >
-          S'Inscrire
+          {t('signup')}
         </Link>
       </div>
     );
@@ -76,7 +78,7 @@ export default function UserMenu() {
             onClick={() => setIsOpen(false)}
           >
             <LayoutDashboard className="w-4 h-4" />
-            <span>Tableau de bord</span>
+            <span>{t('dashboard')}</span>
           </Link>
 
           <Link
@@ -85,7 +87,7 @@ export default function UserMenu() {
             onClick={() => setIsOpen(false)}
           >
             <Settings className="w-4 h-4" />
-            <span>Paramètres</span>
+            <span>{t('settings')}</span>
           </Link>
 
           <div className="border-t border-border my-1"></div>
@@ -99,7 +101,7 @@ export default function UserMenu() {
             className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
           >
             <LogOut className="w-4 h-4" />
-            <span>Déconnexion</span>
+            <span>{t('logout')}</span>
           </button>
         </div>
       )}

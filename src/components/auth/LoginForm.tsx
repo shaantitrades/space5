@@ -10,6 +10,7 @@ import { Link } from '@/i18n/routing';
 import { useRouter } from '@/i18n/routing';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import RateLimiter from './RateLimiter';
+import { AuthError } from './auth-error';
 
 export default function LoginForm() {
   const router = useRouter();
@@ -69,12 +70,8 @@ export default function LoginForm() {
       {/* Rate Limiter */}
       <RateLimiter action="login" />
 
-      {/* Error Message */}
-      {error && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-800">{error}</p>
-        </div>
-      )}
+      {/* Erreur : bandeau fixe en bas de l'écran (toujours visible) */}
+      <AuthError message={error} onClose={() => setError('')} />
 
       {/* Email */}
       <div>

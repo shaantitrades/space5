@@ -7,9 +7,10 @@ import {
   Layers, Crop, Trash, Bookmark, FileCheck, Settings,
   Download, Upload, FilePlus, ImageIcon, AlignCenter,
   Type, Hash, Palette, Eraser, RefreshCw, Wrench,
-  FileX, Info, Grid3x3
+  FileX, Info, Grid3x3, QrCode
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 
 interface Tool {
   icon: any;
@@ -21,6 +22,13 @@ interface Tool {
 }
 
 export function QuickAccess() {
+  const t = useTranslations();
+  /** Traduit la clé si elle existe, sinon conserve le texte français d'origine */
+  const tr = (key: string, fallback: string): string => {
+    const fullKey = `home.${key}`;
+    return t.has(fullKey) ? (t(fullKey) as string) : fallback;
+  };
+
   // 3 cartes principales (gardées telles quelles)
   const mainFeatures: Tool[] = [
     {
@@ -52,53 +60,53 @@ export function QuickAccess() {
       icon: Edit,
       title: 'Modifier & Annoter',
       description: 'Personnalisez vos documents avec modifications et annotations',
-      link: '/convert?tool=edit&input=PDF',
+      link: '/pdf?tool=edit',
       badge: 'populaire',
     },
     {
       icon: FilePlus,
       title: 'Créer PDF',
       description: 'Rédiger un PDF professionnel depuis une page vierge (A4/Lettre) et exporter',
-      link: '/convert?tool=create-pdf&input=PDF',
+      link: '/pdf?tool=convert',
       badge: 'pro',
     },
     {
       icon: RotateCw,
       title: 'Convertir Format',
       description: 'Transformer entre PDF, Word, Excel, Images et plus',
-      link: '/convert?tool=convert',
+      link: '/pdf?tool=convert',
       badge: 'populaire',
     },
     {
       icon: ImageIcon,
       title: 'Image to ICO',
       description: 'Convertir vos images (PNG, JPG) en fichiers ICO pour favicons',
-      link: '/convert?input=IMAGE&output=ICO',
+      link: '/images?tool=favicon',
       badge: 'populaire',
     },
     {
       icon: Minimize2,
       title: 'Optimiser Taille',
       description: 'Réduire la taille de vos fichiers sans perte de qualité visible',
-      link: '/convert?tool=compress&input=PDF',
+      link: '/pdf?tool=compress',
     },
     {
       icon: FileSearch,
       title: 'Extraire Contenu',
       description: 'Obtenir un nouveau document avec seulement les pages souhaitées',
-      link: '/convert?tool=extract&input=PDF',
+      link: '/pdf?tool=split',
     },
     {
       icon: Layers,
       title: 'Reorganiser Pages',
       description: 'Gérez la structure de vos documents en réarrangeant les pages',
-      link: '/convert?tool=organize&input=PDF',
+      link: '/pdf?tool=organize',
     },
     {
       icon: Palette,
       title: 'Appliquer Filtres',
       description: 'Ajouter des effets visuels et transformations créatives',
-      link: '/convert?tool=filters&input=IMAGE',
+      link: '/images?tool=filters',
     },
   ];
 
@@ -108,31 +116,31 @@ export function QuickAccess() {
       icon: Combine,
       title: 'Fusionner Documents',
       description: 'Assemblez plusieurs PDF et images en un document unique',
-      link: '/convert?tool=merge&input=PDF',
+      link: '/pdf?tool=merge',
     },
     {
       icon: Scissors,
       title: 'Scinder PDF',
       description: 'Séparez votre PDF en plusieurs fichiers distincts selon vos besoins',
-      link: '/convert?tool=split&input=PDF',
+      link: '/pdf?tool=split',
     },
     {
       icon: Bookmark,
       title: 'Extraire par Sections',
       description: 'Extraire chapitres basés sur les signets de la table des matières',
-      link: '/convert?tool=extract-sections&input=PDF',
+      link: '/pdf?tool=split',
     },
     {
       icon: RefreshCw,
       title: 'Mélanger Pages',
       description: 'Alterner et mélanger les pages de plusieurs documents',
-      link: '/convert?tool=mix-pages&input=PDF',
+      link: '/pdf?tool=organize',
     },
     {
       icon: FilePlus,
       title: 'Ajouter Pages',
       description: 'Insérer des pages supplémentaires dans votre document PDF',
-      link: '/convert?tool=add-pages&input=PDF',
+      link: '/pdf?tool=merge',
     },
   ];
 
@@ -142,31 +150,38 @@ export function QuickAccess() {
       icon: PenLine,
       title: 'Finaliser & Valider',
       description: 'Remplir des formulaires PDF et apposer vos signatures électroniques',
-      link: '/convert?tool=sign&input=PDF',
+      link: '/pdf?tool=sign',
       badge: 'populaire',
     },
     {
       icon: Lock,
       title: 'Sécuriser Document',
       description: 'Protégez vos fichiers sensibles avec des mots de passe robustes',
-      link: '/convert?tool=protect&input=PDF',
+      link: '/pdf?tool=protect',
     },
     {
       icon: Unlock,
       title: 'Accéder Protégé',
       description: 'Retirez les restrictions d\'accès selon vos besoins légitimes',
-      link: '/convert?tool=unlock&input=PDF',
+      link: '/pdf?tool=unlock',
     },
     {
       icon: Droplet,
       title: 'Marquer Fichier',
       description: 'Marquez vos documents avec des filigranes textuels ou graphiques',
-      link: '/convert?tool=watermark&input=PDF',
+      link: '/pdf?tool=watermark',
     },
   ];
 
   // Groupe 4 : Conversion Intelligente (6 outils)
   const conversionTools: Tool[] = [
+    {
+      icon: QrCode,
+      title: 'QR Code Generator',
+      description: 'Générez des QR codes : URL, WiFi, vCard, email, téléphone, SMS, GPS',
+      link: '/qr',
+      badge: 'nouveau',
+    },
     {
       icon: FileText,
       title: 'Documents → PDF',
@@ -189,7 +204,7 @@ export function QuickAccess() {
       icon: Video,
       title: 'Media → Formats',
       description: 'Conversion vidéo et audio entre multiples formats',
-      link: '/convert?input=VIDEO&output=MP4',
+      link: '/media?tool=video-convert',
     },
     {
       icon: Type,
@@ -211,32 +226,32 @@ export function QuickAccess() {
       icon: Minimize2,
       title: 'Réduire Poids',
       description: 'Optimiser la taille de vos fichiers pour un partage plus rapide',
-      link: '/convert?tool=compress&input=PDF',
+      link: '/pdf?tool=compress',
     },
     {
       icon: FileSearch,
       title: 'Reconnaissance Texte',
       description: 'Extraire le texte de documents scannés avec précision',
-      link: '/convert?tool=ocr&input=PDF',
+      link: '/pdf?tool=ocr',
     },
     {
       icon: AlignCenter,
       title: 'Corriger Orientation',
       description: 'Redresser automatiquement les pages PDF numérisées inclinées',
-      link: '/convert?tool=straighten&input=PDF',
+      link: '/pdf?tool=rotate',
       badge: 'nouveau',
     },
     {
       icon: Palette,
       title: 'Transformer Couleurs',
       description: 'Convertir un PDF en niveau de gris ou ajuster les couleurs',
-      link: '/convert?tool=grayscale&input=PDF',
+      link: '/pdf?tool=convert',
     },
     {
       icon: Eraser,
       title: 'Nettoyer Annotations',
       description: 'Suppression en lot des surlignages et annotations d\'un PDF',
-      link: '/convert?tool=clean-annotations&input=PDF',
+      link: '/pdf?tool=redact',
     },
   ];
 
@@ -245,51 +260,51 @@ export function QuickAccess() {
     {
       icon: FileCheck,
       title: 'Créer Formulaires',
-      description: 'Créateur de formulaires PDF gratuit. Rendre les documents remplissables',
-      link: '/convert?tool=create-form&input=PDF',
+      description: 'Créateur de formulaires PDF gratuit, rendre les documents remplissables',
+      link: '/pdf?tool=sign',
       badge: 'nouveau',
     },
     {
       icon: Bookmark,
       title: 'Gérer Signets',
       description: 'Créer et organiser les signets PDF pour navigation facilitée',
-      link: '/convert?tool=bookmarks&input=PDF',
+      link: '/pdf?tool=organize',
     },
     {
       icon: Type,
       title: 'Ajouter En-têtes',
       description: 'Appliquer numéros de pages et étiquettes au fichier PDF',
-      link: '/convert?tool=headers&input=PDF',
+      link: '/pdf?tool=convert',
     },
     {
       icon: Hash,
       title: 'Numérotation Automatique',
       description: 'Ajouter des numéros de page au PDF automatiquement',
-      link: '/convert?tool=page-numbers&input=PDF',
+      link: '/pdf?tool=convert',
     },
     {
       icon: Settings,
       title: 'Éditer Informations',
       description: 'Changer auteur, titre, mots-clés et métadonnées du PDF',
-      link: '/convert?tool=metadata&input=PDF',
+      link: '/pdf?tool=convert',
     },
     {
       icon: ImageIcon,
       title: 'Extraire Visuels',
       description: 'Extraire toutes les images depuis un fichier PDF',
-      link: '/convert?tool=extract-images&input=PDF',
+      link: '/pdf?tool=convert',
     },
     {
       icon: Crop,
       title: 'Ajuster Dimensions',
       description: 'Rogner les marges et changer la taille de la page PDF',
-      link: '/convert?tool=crop&input=PDF',
+      link: '/pdf?tool=crop',
     },
     {
       icon: RotateCw,
       title: 'Orienter Pages',
       description: 'Pivoter et sauvegarder les pages PDF de façon permanente',
-      link: '/convert?tool=rotate&input=PDF',
+      link: '/pdf?tool=rotate',
     },
   ];
 
@@ -299,27 +314,27 @@ export function QuickAccess() {
       icon: Grid3x3,
       title: 'Mise en Page Multiple',
       description: 'Imprimer plusieurs pages par feuille de papier (N-up)',
-      link: '/convert?tool=n-up&input=PDF',
+      link: '/pdf?tool=convert',
       badge: 'nouveau',
     },
     {
       icon: Hash,
       title: 'Numérotation Bates',
       description: 'Numérotation automatique sur plusieurs fichiers en même temps',
-      link: '/convert?tool=bates&input=PDF',
+      link: '/pdf?tool=convert',
       badge: 'pro',
     },
     {
       icon: FileX,
       title: 'Aplatir Document',
-      description: 'Rendre les PDF remplissables en lecture seule. Imprimer en une étape',
-      link: '/convert?tool=flatten&input=PDF',
+      description: 'Rendre les PDF remplissables en lecture seule, imprimer en une étape',
+      link: '/pdf?tool=convert',
     },
     {
       icon: FileText,
       title: 'Préparer Impression',
       description: 'Combiner plusieurs actions pour préparer un PDF à l\'impression',
-      link: '/convert?tool=prepare-print&input=PDF',
+      link: '/pdf?tool=convert',
     },
   ];
 
@@ -329,20 +344,20 @@ export function QuickAccess() {
       icon: Wrench,
       title: 'Restaurer Fichier',
       description: 'Récupérer des données corrompues ou endommagées d\'un document PDF',
-      link: '/convert?tool=repair&input=PDF',
+      link: '/pdf?tool=convert',
       badge: 'pro',
     },
     {
       icon: FileText,
       title: 'Renommer Intelligent',
       description: 'Changer le nom de fichier basé sur le texte des pages PDF',
-      link: '/convert?tool=rename&input=PDF',
+      link: '/pdf?tool=convert',
     },
     {
       icon: RefreshCw,
       title: 'Améliorer Structure',
       description: 'Optimiser et améliorer la structure interne d\'un document PDF',
-      link: '/convert?tool=optimize-structure&input=PDF',
+      link: '/pdf?tool=compress',
     },
   ];
 
@@ -375,11 +390,11 @@ export function QuickAccess() {
   const getBadgeText = (badge?: string) => {
     switch (badge) {
       case 'populaire':
-        return 'Populaire';
+        return tr('badges.populaire', 'Populaire');
       case 'nouveau':
-        return 'Nouveau';
+        return tr('badges.nouveau', 'Nouveau');
       case 'pro':
-        return 'Pro';
+        return tr('badges.pro', 'Pro');
       default:
         return '';
     }
@@ -407,13 +422,13 @@ export function QuickAccess() {
                   <Icon className="w-7 h-7 text-primary" />
                 </div>
                 <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
-                  {feature.title}
+                  {tr(`mainTitles.${feature.title}`, feature.title)}
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                  {feature.description}
+                  {tr(`mainDescriptions.${feature.description}`, feature.description)}
                 </p>
                 <div className="flex items-center text-primary font-semibold text-sm group-hover:gap-2 transition-all">
-                  <span>Cliquez pour accéder</span>
+                  <span>{tr('cta', 'Cliquez pour accéder')}</span>
                   <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
                 </div>
               </Link>
@@ -426,7 +441,7 @@ export function QuickAccess() {
           {allToolGroups.slice(1).map((group, groupIndex) => (
             <div key={groupIndex}>
               <h3 className="text-2xl font-bold mb-6 text-center md:text-left">
-                {group.name}
+                {tr(`groups.${group.name}`, group.name)}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {group.tools.map((tool, index) => {
@@ -446,10 +461,10 @@ export function QuickAccess() {
                         <Icon className="w-6 h-6 text-primary" />
                       </div>
                       <h4 className="text-base font-semibold mb-1.5 group-hover:text-primary transition-colors line-clamp-1">
-                        {tool.title}
+                        {tr(`toolTitles.${tool.title}`, tool.title)}
                       </h4>
                       <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-                        {tool.description}
+                        {tr(`toolDescriptions.${tool.description}`, tool.description)}
                       </p>
                     </Link>
                   );

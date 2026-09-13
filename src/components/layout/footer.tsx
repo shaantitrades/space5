@@ -1,10 +1,23 @@
 'use client';
 
-import { Link } from '@/i18n/routing';
+import { Link, usePathname, useRouter } from '@/i18n/routing';
+import { useLocale, useTranslations } from 'next-intl';
 import { Facebook, Twitter, Linkedin, Github, Youtube, Instagram } from 'lucide-react';
 import { siteConfig } from '@/config/site';
+import { getAvailableLocales, LANGUAGES } from '@/config/i18n';
 
 export function Footer() {
+  const t = useTranslations();
+  const locale = useLocale();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  /** Traduit la clé si elle existe, sinon conserve le texte français d'origine */
+  const tr = (key: string, fallback: string): string => {
+    const fullKey = `footer.${key}`;
+    return t.has(fullKey) ? (t(fullKey) as string) : fallback;
+  };
+
   const footerLinks = {
     product: [
       { name: 'Fonctionnalités', href: '/features' },
@@ -45,12 +58,14 @@ export function Footer() {
     { name: 'Instagram', icon: Instagram, href: 'https://instagram.com/Multi Convert' },
   ];
 
-  const languages = [
-    { code: 'fr', name: 'Français' },
-    { code: 'en', name: 'English' },
-    { code: 'es', name: 'Español' },
-    { code: 'de', name: 'Deutsch' },
-  ];
+  const languageOrder = ['en', 'fr', 'es', 'de', 'it', 'pt', 'hi', 'ru', 'sv', 'no'];
+  const availableLocales = new Set(getAvailableLocales(1));
+  const languages = languageOrder
+    .filter((code) => availableLocales.has(code))
+    .map((code) => ({
+      code,
+      name: LANGUAGES[code]?.nativeName ?? code.toUpperCase(),
+    }));
 
   return (
     <footer className="border-t bg-muted/50">
@@ -59,7 +74,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {/* Colonne 1 : Produit */}
           <div>
-            <h4 className="font-bold mb-4 text-foreground">Produit</h4>
+            <h4 className="font-bold mb-4 text-foreground">{tr('product', 'Produit')}</h4>
             <ul className="space-y-3">
               {footerLinks.product.map((link) => (
                 <li key={link.href}>
@@ -67,7 +82,7 @@ export function Footer() {
                     href={link.href}
                     className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
-                    {link.name}
+                    {tr(`links.${link.name}`, link.name)}
                   </Link>
                 </li>
               ))}
@@ -76,7 +91,7 @@ export function Footer() {
 
           {/* Colonne 2 : Société */}
           <div>
-            <h4 className="font-bold mb-4 text-foreground">Société</h4>
+            <h4 className="font-bold mb-4 text-foreground">{tr('company', 'Société')}</h4>
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.href}>
@@ -84,7 +99,7 @@ export function Footer() {
                     href={link.href}
                     className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
-                    {link.name}
+                    {tr(`links.${link.name}`, link.name)}
                   </Link>
                 </li>
               ))}
@@ -93,7 +108,7 @@ export function Footer() {
 
           {/* Colonne 3 : Légal */}
           <div>
-            <h4 className="font-bold mb-4 text-foreground">Légal</h4>
+            <h4 className="font-bold mb-4 text-foreground">{tr('legal', 'Légal')}</h4>
             <ul className="space-y-3">
               {footerLinks.legal.map((link) => (
                 <li key={link.href}>
@@ -101,7 +116,7 @@ export function Footer() {
                     href={link.href}
                     className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
-                    {link.name}
+                    {tr(`links.${link.name}`, link.name)}
                   </Link>
                 </li>
               ))}
@@ -110,7 +125,7 @@ export function Footer() {
 
           {/* Colonne 4 : Ressources */}
           <div>
-            <h4 className="font-bold mb-4 text-foreground">Ressources</h4>
+            <h4 className="font-bold mb-4 text-foreground">{tr('resources', 'Ressources')}</h4>
             <ul className="space-y-3">
               {footerLinks.resources.map((link) => (
                 <li key={link.href}>
@@ -118,7 +133,7 @@ export function Footer() {
                     href={link.href}
                     className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
-                    {link.name}
+                    {tr(`links.${link.name}`, link.name)}
                   </Link>
                 </li>
               ))}
@@ -135,7 +150,7 @@ export function Footer() {
                 Multi Convert
               </div>
               <span className="text-sm text-muted-foreground">
-                © {new Date().getFullYear()} Tous droits réservés
+                © {new Date().getFullYear()} {tr('rights', 'Tous droits réservés')}
               </span>
             </div>
 
@@ -161,7 +176,12 @@ export function Footer() {
             {/* Sélecteur de langue */}
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">🌍</span>
-              <select className="text-sm bg-background border border-border rounded px-3 py-1 text-foreground">
+              <select
+                value={locale}
+                onChange={(e) => router.replace(pathname || '/', { locale: e.target.value })}
+                aria-label="Language"
+                className="text-sm bg-background border border-border rounded px-3 py-1 text-foreground"
+              >
                 {languages.map((lang) => (
                   <option key={lang.code} value={lang.code}>
                     {lang.name}
