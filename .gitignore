@@ -23,6 +23,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Dev auth (comptes locaux persistés en mode dev sans base de données)
+.dev-users.json
+
 # Local env files
 .env
 .env*.local
@@ -61,3 +64,6 @@ logs/
 *.key
 *.pem
 secrets/
+
+# Sauvegardes locales (lockfile corrompu / sauvegardes manuelles)
+*.bak
