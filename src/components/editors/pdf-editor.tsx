@@ -1086,6 +1086,52 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
     updateAnnotationLive(drag.id, patch as any);
   };
 
+  /**
+   * Agrandit ou reduit l'element selectionne de facon proportionnelle.
+   * Utilise par les boutons +/- : plus simple a decouvrir que les poignees.
+   * @param factor > 1 pour agrandir, < 1 pour reduire
+   */
+  const scaleSelectedAnnotation = (factor: number) => {
+    if (!selectedAnnotationId) return;
+
+    const a = (annotationsRef.current as any[]).find((x) => x.id === selectedAnnotationId);
+    if (!a) return;
+
+    if (TEXT_LIKE_TYPES.has(a.type)) {
+      const next = Math.round(Math.min(Math.max((a.fontSize || 16) * factor, 6), 240));
+      updateAnnotationLive(a.id, { fontSize: next } as any);
+    } else if (a.type === 'draw') {
+      // Le trace libre est une suite de points : on ajuste l'epaisseur du trait
+      updateAnnotationLive(a.id, { width: Math.min(Math.max((a.width || 3) * factor, 0.5), 40) } as any);
+    } else if (a.type === 'arrow' || a.type === 'double-arrow' || a.type === 'curve') {
+      // Mise a l'echelle des deux extremites autour du milieu
+      const cx = (a.x1 + a.x2) / 2;
+      const cy = (a.y1 + a.y2) / 2;
+      updateAnnotationLive(a.id, {
+        x1: cx + (a.x1 - cx) * factor,
+        y1: cy + (a.y1 - cy) * factor,
+        x2: cx + (a.x2 - cx) * factor,
+        y2: cy + (a.y2 - cy) * factor,
+      } as any);
+    } else if (a.type === 'image' || a.type === 'stamp') {
+      updateAnnotationLive(a.id, {
+        w: Math.max(MIN_ELEMENT_SIZE, (a.w || 0) * factor),
+        h: Math.max(MIN_ELEMENT_SIZE, (a.h || 0) * factor),
+      } as any);
+    } else if (a.type === 'circle') {
+      const size = Math.max(MIN_ELEMENT_SIZE, (a.width || (a.radius ? a.radius * 2 : 0) || 60) * factor);
+      updateAnnotationLive(a.id, { width: size, height: size, radius: size / 2 } as any);
+    } else {
+      updateAnnotationLive(a.id, {
+        width: Math.max(MIN_ELEMENT_SIZE, (a.width || 60) * factor),
+        height: Math.max(MIN_ELEMENT_SIZE, (a.height || 40) * factor),
+      } as any);
+    }
+
+    // Une entree d'historique par clic, pour que l'annulation reste previsible
+    commitAnnotations(annotationsRef.current);
+  };
+
   const closeContextMenu = () => {
     setContextMenu(null);
     setSelectedAnnotationId(null);
@@ -1178,6 +1224,7 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
       underline: style.underline ?? defaultStyle.underline,
     };
     commitAnnotations([...annotationsRef.current, ann]);
+    setSelectedAnnotationId(ann.id);
     setSelectedAnnotationId(id);
     if (opts?.openEditor !== false) {
       setEditingTextId(id);
@@ -1198,6 +1245,7 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
       fontSize: Math.max(20, defaultStyle.fontSize + 2),
     };
     commitAnnotations([...annotationsRef.current, ann]);
+    setSelectedAnnotationId(ann.id);
     setSelectedAnnotationId(id);
   };
 
@@ -1229,6 +1277,7 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
             src,
           };
           commitAnnotations([...annotationsRef.current, ann]);
+          setSelectedAnnotationId(ann.id);
         };
         img.src = src;
       };
@@ -1266,6 +1315,7 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
     } as any;
     setSelectedAnnotationId(id);
     setAnnotationsLive((prev) => [...prev, ann]);
+    setSelectedAnnotationId(ann.id);
     return id;
   };
 
@@ -1288,6 +1338,7 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
     };
     setSelectedAnnotationId(id);
     setAnnotationsLive((prev) => [...prev, ann]);
+    setSelectedAnnotationId(ann.id);
     return id;
   };
 
@@ -1303,6 +1354,7 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
     };
     setSelectedAnnotationId(id);
     setAnnotationsLive((prev) => [...prev, ann]);
+    setSelectedAnnotationId(ann.id);
     return id;
   };
 
@@ -3012,6 +3064,53 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                 #{currentPage}
               </div>
 
+              {/**
+               * Options de l'element selectionne.
+               * Apparait des qu'un element est selectionne : les actions
+               * essentielles sont ainsi visibles sans chercher les poignees.
+               */}
+              {selectedAnnotationId && (() => {
+                const selected = annotations.find((a) => a.id === selectedAnnotationId);
+                if (!selected || (selected as any).page !== currentPage) return null;
+
+                return (
+                  <div
+                    data-pdf-element-toolbar
+                    className="absolute -top-8 left-0 z-30 flex items-center gap-1 bg-white border border-primary/40 rounded-lg shadow-lg px-1.5 py-1"
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => scaleSelectedAnnotation(1.15)}
+                      className="p-1.5 rounded hover:bg-muted transition-colors"
+                      title="Agrandir l'element"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => scaleSelectedAnnotation(1 / 1.15)}
+                      className="p-1.5 rounded hover:bg-muted transition-colors"
+                      title="Reduire l'element"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => deleteSelected()}
+                      className="p-1.5 rounded hover:bg-red-50 text-red-600 transition-colors"
+                      title="Supprimer l'element"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                    <span className="hidden md:inline text-xs text-muted-foreground pl-1 pr-1.5 whitespace-nowrap">
+                      Glissez pour deplacer, ou un coin bleu pour redimensionner
+                    </span>
+                  </div>
+                );
+              })()}
+
               {/* Bouton ajouter page en haut */}
               <button
                 onClick={handleInsertPagesClick}
@@ -3085,10 +3184,13 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
 
                   if (hit) {
                     // Drag sur éléments quand l'outil "Déplacer texte" est actif
-                    // Tous les types positionnes par x/y peuvent etre deplaces.
-                    // Les fleches et le dessin libre gardent leur propre logique.
+                    // Tous les types positionnes par x/y peuvent etre deplaces,
+                    // quel que soit l'outil actif : cliquer sur un element existant
+                    // le selectionne et permet de le faire glisser directement.
+                    // (Avant, il fallait d'abord basculer sur l'outil Deplacer/Modifier,
+                    // ce qui rendait le deplacement impossible a decouvrir.)
                     const isMovable = !['arrow', 'double-arrow', 'curve', 'draw'].includes(hit.type as string);
-                    if ((currentTool === 'select' || currentTool === 'edit-pdf') && isMovable) {
+                    if (isMovable) {
                       e.preventDefault();
                       // Capturer le pointeur pour un drag fluide
                       try {
@@ -3174,6 +3276,7 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                       textColor: activeStamp.textColor,
                     };
                     commitAnnotations([...annotationsRef.current, ann]);
+                    setSelectedAnnotationId(ann.id);
                     return;
                   }
                   if (currentTool === 'check') {
@@ -3348,6 +3451,9 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                   const drag = toolDragRef.current;
                   if (!drag || drag.pointerId !== e.pointerId) return;
                   toolDragRef.current = null;
+                  // La forme qui vient d'etre dessinee devient selectionnee :
+                  // le contour, les poignees et les options apparaissent aussitot.
+                  setSelectedAnnotationId(drag.id);
                   // Commit final state (une seule entr�e historique)
                   commitAnnotations(annotationsRef.current);
                   // Apr�s une action "drag tool", on ferme la toolbar si elle �tait ouverte
