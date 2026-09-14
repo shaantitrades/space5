@@ -13,17 +13,20 @@
 | IP du serveur | `95.111.230.185` |
 | Domaine | `https://multi-convert.com` (enregistrement A → `95.111.230.185`) |
 | Orchestrateur | **Coolify** |
-| Fichier d'orchestration | `docker-compose.coolify.yml` |
+| Fichier d'orchestration | **`docker-compose.prod.yml`** (c'est ce fichier que Coolify utilise — vérifié dans les logs de déploiement) |
 | Image applicative | construite par Coolify depuis le `Dockerfile` |
-| Base de données | conteneur **PostgreSQL 16** |
-| Cache / files | conteneur **Redis 7** |
+| Base de données | conteneur **PostgreSQL 16** (`mc_postgres`) |
+| Cache / files | conteneur **Redis 7** (`mc_redis`) |
 | Déclenchement | **`git push` sur `main` → Coolify déploie automatiquement** |
+| Healthcheck | `GET /api/health` → `{"status":"ok","service":"Multi Convert"}` |
 
-### Services du `docker-compose.coolify.yml`
-- `app` — l'application Next.js (build depuis `Dockerfile`)
-- `postgres` — base de données (volume `pgdata_v3`)
-- `redis` — cache et rate limiting (volume `redis_data`)
-- réseaux `internal` / `proxy`
+> ℹ️ `docker-compose.coolify.yml` **n'est pas utilisé** par Coolify (il pointe vers `docker-compose.prod.yml`).
+> Ce fichier est conservé à titre indicatif ; ne pas s'y fier pour le déploiement.
+
+### Services du `docker-compose.prod.yml`
+- `app` — l'application Next.js (build depuis `Dockerfile`, tag local `${IMAGE:-multi-convert:latest}`)
+- `mc_postgres` — base de données PostgreSQL 16
+- `mc_redis` — cache et rate limiting
 
 ---
 
@@ -125,6 +128,26 @@ docker exec -it <conteneur_postgres> psql -U <POSTGRES_USER> -d <POSTGRES_DB> -c
 
 ## 5. Vérifications après déploiement
 
+### ✅ Statut vérifié le 14/09/2026 (déploiement `main` → commit `573d3fb`)
+
+| Contrôle | Résultat constaté |
+|---|---|
+| `https://multi-convert.com/` | **200** — titre EN localisé |
+| `https://multi-convert.com/fr` | **200** — titre FR localisé |
+| `https://multi-convert.com/fr/entreprise` | **200** — « Solutions entreprise », 0 affirmation interdite |
+| `https://multi-convert.com/fr/contact` | **200** |
+| `https://multi-convert.com/api/health` | **200** — `{"status":"ok","service":"Multi Convert"}` |
+| `https://multi-convert.com/sitemap.xml` | **200** — 193 Ko, 170 URLs, 10 langues + `x-default` |
+| `https://multi-convert.com/robots.txt` | **200** |
+| `POST https://multi-convert.com/api/leads` | **201** avec un `leadId` UUID → **table `leads` créée, capture fonctionnelle** |
+| `hreflang` sur `/fr` | **11 balises** (10 langues + `x-default`) |
+| `canonical` sur `/fr` | `https://multi-convert.com/fr` |
+| Mots-clés sur `/fr` | **45** |
+| Mode local | présent sur `/fr/convert` |
+| Lien « Entreprise » dans le menu | présent (`/fr/entreprise`) |
+
+### Contrôles à refaire à chaque déploiement
+
 | Contrôle | Attendu |
 |---|---|
 | Le site répond | `https://multi-convert.com` → 200, page d'accueil Multi Convert |
@@ -135,6 +158,7 @@ docker exec -it <conteneur_postgres> psql -U <POSTGRES_USER> -d <POSTGRES_DB> -c
 | Robots | `https://multi-convert.com/robots.txt` → pages privées exclues |
 | Conversion simple | envoyer une image sur `/convert` → fichier téléchargé |
 | Migration Prisma | aucune erreur au démarrage (`docker logs`) |
+| Healthcheck | `GET /api/health` → `status: ok` |
 
 Puis : **Google Search Console** → ajouter la propriété et soumettre `sitemap.xml`.
 
