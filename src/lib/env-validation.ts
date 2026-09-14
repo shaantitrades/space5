@@ -45,6 +45,12 @@ const envSchema = z.object({
   
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   ADMIN_EMAILS: z.string().default(''),
+
+  // Emails applicatifs (expéditeur + destinataires des leads)
+  EMAIL_FROM: z.string().default('noreply@multi-convert.com'),
+  CONTACT_EMAIL: z.string().default('contact@multi-convert.com'),
+  LEADS_NOTIFICATION_EMAIL: z.string().optional(),
+
   SENTRY_DSN: optionalUrl,
   SENDGRID_API_KEY: z.string().optional(),
   STRIPE_SECRET_KEY: z.string().optional(),
@@ -117,6 +123,8 @@ export const env = (() => {
         ENCRYPTION_KEY: 'dev-encryption-key-32chars-minimum-local!!',
         NODE_ENV: 'development' as const,
         ADMIN_EMAILS: '',
+        EMAIL_FROM: 'noreply@multi-convert.com',
+        CONTACT_EMAIL: 'contact@multi-convert.com',
         AWS_REGION: 'eu-west-1',
         NEXT_PUBLIC_VERSION: '1.0.0',
         ALLOWED_ORIGINS: 'http://localhost:3000',

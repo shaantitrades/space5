@@ -2,10 +2,9 @@
 
 import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { useLocale, useTranslations } from 'next-intl';
-import { Facebook, Twitter, Linkedin, Github, Youtube, Instagram } from 'lucide-react';
+import { Twitter, Github } from 'lucide-react';
 import { siteConfig } from '@/config/site';
 import { getAvailableLocales, LANGUAGES } from '@/config/i18n';
-
 export function Footer() {
   const t = useTranslations();
   const locale = useLocale();
@@ -21,41 +20,36 @@ export function Footer() {
   const footerLinks = {
     product: [
       { name: 'Fonctionnalités', href: '/features' },
+      { name: 'Tous les outils', href: '/tools' },
       ...(siteConfig.features.showPricing ? [{ name: 'Tarifs', href: '/pricing' }] : []),
       { name: 'API', href: '/documentation' },
-      { name: 'Applications', href: '/apps' },
-      { name: 'Intégrations', href: '/integrations' },
+      { name: 'Générateur QR', href: '/qr' },
     ],
     company: [
-      { name: 'À propos', href: '/about' },
-      { name: 'Sécurité', href: '/security' },
       { name: 'Entreprise', href: '/entreprise' },
       { name: 'Blog', href: '/blog' },
-      { name: 'Carrières', href: '/careers' },
+      { name: 'Archive', href: '/archive' },
     ],
     legal: [
       { name: 'Confidentialité', href: '/privacy' },
       { name: 'Conditions', href: '/terms' },
-      { name: 'RGPD', href: '/gdpr' },
       { name: 'Cookies', href: '/cookies' },
       { name: 'Mentions légales', href: '/legal' },
     ],
     resources: [
-      { name: 'Documentation', href: '/docs' },
-      { name: 'Aide', href: '/help' },
+      { name: 'Documentation', href: '/documentation' },
       { name: 'Contact', href: '/contact' },
-      { name: 'Statut', href: '/status' },
-      { name: 'Changelog', href: '/changelog' },
     ],
   };
 
+  /**
+   * Réseaux sociaux : uniquement des comptes réellement tenus.
+   * Un lien mort (ou un compte inexistant) est immédiatement repéré
+   * par un prospect et décrédibilise le site.
+   */
   const socialLinks = [
-    { name: 'Twitter', icon: Twitter, href: 'https://twitter.com/Multi Convert' },
-    { name: 'Facebook', icon: Facebook, href: 'https://facebook.com/Multi Convert' },
-    { name: 'LinkedIn', icon: Linkedin, href: 'https://linkedin.com/company/Multi Convert' },
-    { name: 'GitHub', icon: Github, href: 'https://github.com/Multi Convert' },
-    { name: 'YouTube', icon: Youtube, href: 'https://youtube.com/Multi Convert' },
-    { name: 'Instagram', icon: Instagram, href: 'https://instagram.com/Multi Convert' },
+    { name: 'Twitter', icon: Twitter, href: siteConfig.links.twitter },
+    { name: 'GitHub', icon: Github, href: siteConfig.links.github },
   ];
 
   const languageOrder = ['en', 'fr', 'es', 'de', 'it', 'pt', 'hi', 'ru', 'sv', 'no'];

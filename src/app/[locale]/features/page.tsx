@@ -136,7 +136,7 @@ export default function FeaturesPage() {
         {
           icon: Code,
           name: 'API REST Complète',
-          description: 'Intégrez OMNIVERSA dans vos applications en quelques lignes',
+          description: 'Intégrez Multi Convert dans vos applications en quelques lignes',
         },
         {
           icon: Zap,
@@ -197,7 +197,7 @@ export default function FeaturesPage() {
               Fonctionnalités Complètes
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Découvrez toutes les fonctionnalités qui font d'OMNIVERSA la plateforme 
+              Découvrez toutes les fonctionnalités qui font de Multi Convert la plateforme 
               de conversion la plus complète du marché
             </p>
           </div>

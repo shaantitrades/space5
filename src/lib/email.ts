@@ -19,8 +19,6 @@ function getTransporter() {
   if (transporter) return transporter;
 
   // Préférer SendGrid si disponible, sinon SMTP générique
-  const isProduction = process.env.NODE_ENV === 'production';
-  
   if (env.SENDGRID_API_KEY) {
     transporter = nodemailer.createTransport({
       host: 'smtp.sendgrid.net',
@@ -85,7 +83,7 @@ export async function sendVerificationEmail(
     const transporter = getTransporter();
 
     await transporter.sendMail({
-      from: 'noreply@Multi Convert.com',
+      from: env.EMAIL_FROM || 'noreply@multi-convert.com',
       to: email,
       subject: 'Vérifiez votre email - Multi Convert',
       html: `
@@ -172,7 +170,7 @@ export async function sendPasswordResetEmail(
     const transporter = getTransporter();
 
     await transporter.sendMail({
-      from: 'noreply@Multi Convert.com',
+      from: env.EMAIL_FROM || 'noreply@multi-convert.com',
       to: email,
       subject: 'Réinitialiser votre mot de passe - Multi Convert',
       html: `
@@ -189,6 +187,108 @@ export async function sendPasswordResetEmail(
     return true;
   } catch (error) {
     console.error('❌ Erreur lors de l\'envoi de l\'email de réinitialisation:', error);
+    return false;
+  }
+}
+
+// ========== LEADS B2B ==========
+
+export interface LeadPayload {
+  company: string;
+  name: string;
+  email: string;
+  phone?: string | null;
+  employees?: string | null;
+  message?: string | null;
+  source?: string;
+  locale?: string | null;
+}
+
+/**
+ * Destinataires internes des notifications de leads.
+ * Priorité : LEADS_NOTIFICATION_EMAIL > CONTACT_EMAIL > ADMIN_EMAILS.
+ */
+function getLeadRecipients(): string[] {
+  const explicit = (env.LEADS_NOTIFICATION_EMAIL || env.CONTACT_EMAIL || '').split(',');
+  const admins = (env.ADMIN_EMAILS || '').split(',');
+  return [...explicit, ...admins]
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0 && value.includes('@'));
+}
+
+/** Échappe le HTML pour éviter toute injection dans l'email de notification */
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
+ * Notifier l'équipe qu'une nouvelle demande entreprise est arrivée.
+ * Ne bloque jamais la réponse HTTP : l'appelant ignore le retour.
+ */
+export async function sendLeadNotificationEmail(lead: LeadPayload): Promise<boolean> {
+  const recipients = getLeadRecipients();
+
+  if (recipients.length === 0) {
+    console.warn(
+      '⚠️  Aucun destinataire pour la notification de lead. ' +
+        'Définissez LEADS_NOTIFICATION_EMAIL ou ADMIN_EMAILS dans .env.local'
+    );
+    return false;
+  }
+
+  const row = (label: string, value?: string | null) =>
+    value
+      ? `<tr><td style="padding:4px 12px 4px 0;color:#666">${label}</td><td style="padding:4px 0"><strong>${escapeHtml(
+          value
+        )}</strong></td></tr>`
+      : '';
+
+  const html = `
+    <h2>Nouvelle demande entreprise 🚀</h2>
+    <table style="border-collapse:collapse">
+      ${row('Entreprise', lead.company)}
+      ${row('Contact', lead.name)}
+      ${row('Email', lead.email)}
+      ${row('Téléphone', lead.phone)}
+      ${row('Effectif', lead.employees)}
+      ${row('Source', lead.source)}
+      ${row('Langue', lead.locale)}
+    </table>
+    <p style="margin-top:16px"><strong>Message :</strong></p>
+    <p style="white-space:pre-wrap">${escapeHtml(lead.message || '(aucun message)')}</p>
+  `;
+
+  // En dev / en l'absence de configuration SMTP, on trace simplement le lead.
+  if (isDevMode() || (!env.SENDGRID_API_KEY && !process.env.SMTP_PASSWORD)) {
+    console.log('🔧 [LEAD] Notification non envoyée (mode dev ou SMTP non configuré) :', {
+      company: lead.company,
+      email: lead.email,
+      recipients,
+    });
+    return false;
+  }
+
+  try {
+    const transporter = getTransporter();
+
+    await transporter.sendMail({
+      from: env.EMAIL_FROM || 'noreply@multi-convert.com',
+      to: recipients.join(','),
+      replyTo: lead.email,
+      subject: `[Entreprise] ${lead.company} — ${lead.name}`,
+      html,
+      text: `Nouvelle demande entreprise\n\nEntreprise: ${lead.company}\nContact: ${lead.name}\nEmail: ${lead.email}\nTéléphone: ${lead.phone || '-'}\nEffectif: ${lead.employees || '-'}\n\n${lead.message || '(aucun message)'}`,
+    });
+
+    console.log(`✅ Notification de lead envoyée à ${recipients.join(', ')}`);
+    return true;
+  } catch (error) {
+    console.error('❌ Erreur lors de l\'envoi de la notification de lead:', error);
     return false;
   }
 }

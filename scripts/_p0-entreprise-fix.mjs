@@ -1,88 +1,50 @@
-'use client';
+/**
+ * Script P0 — Page /entreprise
+ *
+ * Objectif : supprimer toutes les affirmations invérifiables (logos clients
+ * fictifs, certifications non obtenues, métriques inventées, témoignages
+ * fabriqués) et câbler le formulaire sur l'API /api/leads.
+ *
+ * Usage : node scripts/_p0-entreprise-fix.mjs
+ */
+import fs from 'node:fs';
 
-import { useState } from 'react';
-import { Check, Users, Shield, Zap, Mail, MessageSquare, TrendingUp, Lock, Globe, Server, ChevronDown, ChevronUp, Loader2, AlertCircle, Rocket, FlaskConical } from 'lucide-react';
-import { Link } from '@/i18n/routing';
-import { siteConfig } from '@/config/site';
+const FILE = 'src/app/[locale]/entreprise/page.tsx';
+let src = fs.readFileSync(FILE, 'utf8');
+const initialLength = src.length;
+let failures = 0;
 
-type SubmitState = 'idle' | 'loading' | 'success' | 'error';
+function swap(label, startMarker, endMarker, replacement) {
+  const start = src.indexOf(startMarker);
+  if (start === -1) {
+    failures++;
+    console.error(`❌ ${label} — ancre de début introuvable : ${startMarker}`);
+    return;
+  }
+  const end = endMarker ? src.indexOf(endMarker, start) : src.length;
+  if (end === -1) {
+    failures++;
+    console.error(`❌ ${label} — ancre de fin introuvable : ${endMarker}`);
+    return;
+  }
+  src = src.slice(0, start) + replacement + src.slice(end);
+  console.log(`✅ ${label}`);
+}
 
-export default function EntreprisePage() {
-  const [formData, setFormData] = useState({
-    company: '',
-    name: '',
-    email: '',
-    phone: '',
-    employees: '',
-    message: '',
-    /** Champ leurre anti-robot (doit rester vide) */
-    website: '',
-  });
+// ---------------------------------------------------------------------------
+// 1. Imports : Building n’est plus utilisé
+// ---------------------------------------------------------------------------
+swap(
+  'imports',
+  "import { Check, Building, Users, Shield, Zap, Mail, MessageSquare, TrendingUp, Lock, Globe, Server, ChevronDown, ChevronUp, Loader2, AlertCircle, Rocket, FlaskConical } from 'lucide-react';",
+  'import { Link } from',
+  "import { Check, Users, Shield, Zap, Mail, MessageSquare, TrendingUp, Lock, Globe, Server, ChevronDown, ChevronUp, Loader2, AlertCircle, Rocket, FlaskConical } from 'lucide-react';\n"
+);
 
-  const [submitState, setSubmitState] = useState<SubmitState>('idle');
-  const [submitError, setSubmitError] = useState<string | null>(null);
-
-  // ROI Calculator State
-  const [roiData, setRoiData] = useState({
-    monthlyConversions: 5000,
-    currentCostPerConversion: 0.05,
-  });
-
-  // FAQ State
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitState('loading');
-    setSubmitError(null);
-
-    try {
-      const response = await fetch('/api/leads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, source: 'entreprise' }),
-      });
-
-      const result = await response.json().catch(() => null);
-
-      if (!response.ok || !result?.success) {
-        const details = Array.isArray(result?.errors)
-          ? result.errors.map((err: { message: string }) => err.message).join(', ')
-          : result?.error;
-        throw new Error(details || "L'envoi a échoué. Merci de réessayer.");
-      }
-
-      setSubmitState('success');
-      setFormData({
-        company: '',
-        name: '',
-        email: '',
-        phone: '',
-        employees: '',
-        message: '',
-        website: '',
-      });
-    } catch (error) {
-      setSubmitState('error');
-      setSubmitError(error instanceof Error ? error.message : 'Erreur inconnue');
-    }
-  };
-
-  /**
-   * ROI : pendant le pilote, la prestation est offerte.
-   * On compare donc le coût actuel du prospect à zéro, sans inventer de prix public.
-   */
-  const calculateROI = () => {
-    const currentMonthlyCost = roiData.monthlyConversions * roiData.currentCostPerConversion;
-    return {
-      currentMonthlyCost: currentMonthlyCost.toFixed(0),
-      yearlyCost: (currentMonthlyCost * 12).toFixed(0),
-    };
-  };
-
-  const roiResults = calculateROI();
-
-  /** Ce qui est réellement inclus dans le programme pilote */
+// ---------------------------------------------------------------------------
+// 2. Jeux de données : remplacement des contenus fabriqués
+// ---------------------------------------------------------------------------
+const dataBlocks = `  /** Ce qui est réellement inclus dans le programme pilote */
   const pilotIncludes = [
     'Accès complet aux outils PDF, Images et Média',
     'Jusqu’à 10 000 conversions par mois',
@@ -165,7 +127,13 @@ export default function EntreprisePage() {
     { name: 'Déploiement on-premise', status: 'À l’étude', detail: 'Étudié au cas par cas selon les contraintes.' },
   ];
 
-  // FAQ
+`;
+swap('jeux de données', '  const enterpriseFeatures = [', '  // FAQ Data', dataBlocks);
+
+// ---------------------------------------------------------------------------
+// 3. FAQ : réponses honnêtes (plus de SLA 99,99 % ni de conformité garantie)
+// ---------------------------------------------------------------------------
+const faqBlock = `  // FAQ
   const faqData = [
     {
       question: "Combien de temps prend la mise en place ?",
@@ -204,9 +172,13 @@ export default function EntreprisePage() {
     },
   ];
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Hero */}
+`;
+swap('FAQ', '  // FAQ Data', '  return (', faqBlock);
+
+// ---------------------------------------------------------------------------
+// 4. Hero : suppression du « SLA 99,9 % » et du positionnement grand compte
+// ---------------------------------------------------------------------------
+const heroBlock = `      {/* Hero */}
       <section className="py-16 bg-gradient-to-b from-primary/10 to-background">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
@@ -237,7 +209,13 @@ export default function EntreprisePage() {
         </div>
       </section>
 
-      {/* Chiffres vérifiables uniquement */}
+`;
+swap('hero', '      {/* Hero */}', '      {/* Métriques en temps réel */}', heroBlock);
+
+// ---------------------------------------------------------------------------
+// 5. Métriques : remplacement de « 50M+ / 99,99 % / 500+ / 24/7 »
+// ---------------------------------------------------------------------------
+const metricsBlock = `      {/* Chiffres vérifiables uniquement */}
       <section className="py-12 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-6xl mx-auto">
@@ -261,7 +239,13 @@ export default function EntreprisePage() {
         </div>
       </section>
 
-      {/* Segments ciblés */}
+`;
+swap('métriques', '      {/* Métriques en temps réel */}', '      {/* Logos Clients */}', metricsBlock);
+
+// ---------------------------------------------------------------------------
+// 6. Logos clients fictifs -> segments réellement servis
+// ---------------------------------------------------------------------------
+const segmentsBlock = `      {/* Segments ciblés */}
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-4">Pour quels métiers l’outil est-il conçu ?</h2>
@@ -287,7 +271,13 @@ export default function EntreprisePage() {
         </div>
       </section>
 
-      {/* Conformité : état réel, sans certification inventée */}
+`;
+swap('segments', '      {/* Logos Clients */}', '      {/* Sécurité & Certifications */}', segmentsBlock);
+
+// ---------------------------------------------------------------------------
+// 7. Certifications inventées -> état de conformité réel
+// ---------------------------------------------------------------------------
+const complianceBlock = `      {/* Conformité : état réel, sans certification inventée */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-4">Conformité : où nous en sommes réellement</h2>
@@ -346,7 +336,13 @@ export default function EntreprisePage() {
         </div>
       </section>
 
-      {/* Intégrations */}
+`;
+swap('conformité', '      {/* Sécurité & Certifications */}', '      {/* Intégrations */}', complianceBlock);
+
+// ---------------------------------------------------------------------------
+// 8. Intégrations « natives » -> feuille de route assumée
+// ---------------------------------------------------------------------------
+const integrationsBlock = `      {/* Intégrations */}
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-4">Intégrations : ce qui existe et ce qui vient</h2>
@@ -381,7 +377,13 @@ export default function EntreprisePage() {
         </div>
       </section>
 
-      {/* ROI Calculator */}
+`;
+swap('intégrations', '      {/* Intégrations */}', '      {/* ROI Calculator */}', integrationsBlock);
+
+// ---------------------------------------------------------------------------
+// 9. ROI : plus de « $299 » ni de fausse remise sur un prix non publié
+// ---------------------------------------------------------------------------
+const roiBlock = `      {/* ROI Calculator */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
@@ -464,7 +466,13 @@ export default function EntreprisePage() {
         </div>
       </section>
 
-      {/* FAQ */}
+`;
+swap('ROI', '      {/* ROI Calculator */}', '      {/* FAQ Enterprise */}', roiBlock);
+
+// ---------------------------------------------------------------------------
+// 10. FAQ : titre et accroche sans promesse de « clients entreprise »
+// ---------------------------------------------------------------------------
+const faqSectionBlock = `      {/* FAQ */}
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
@@ -515,7 +523,13 @@ export default function EntreprisePage() {
         </div>
       </section>
 
-      {/* Périmètre du pilote */}
+`;
+swap('FAQ (section)', '      {/* FAQ Enterprise */}', '      {/* Comparaison Enterprise vs Business */}', faqSectionBlock);
+
+// ---------------------------------------------------------------------------
+// 11. Comparaison tarifaire inventée -> périmètre explicite du pilote
+// ---------------------------------------------------------------------------
+const perimeterBlock = `      {/* Périmètre du pilote */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-12">Le périmètre du pilote, sans ambiguïté</h2>
@@ -558,7 +572,13 @@ export default function EntreprisePage() {
         </div>
       </section>
 
-      {/* Programme pilote */}
+`;
+swap('périmètre', '      {/* Comparaison Enterprise vs Business */}', '      {/* Cas clients */}', perimeterBlock);
+
+// ---------------------------------------------------------------------------
+// 12. Faux cas clients -> déroulé réel du pilote
+// ---------------------------------------------------------------------------
+const pilotProgramBlock = `      {/* Programme pilote */}
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-4">Comment se déroule le pilote</h2>
@@ -601,7 +621,13 @@ export default function EntreprisePage() {
         </div>
       </section>
 
-      {/* Formulaire de contact */}
+`;
+swap('programme pilote', '      {/* Cas clients */}', '      {/* Formulaire de contact */}', pilotProgramBlock);
+
+// ---------------------------------------------------------------------------
+// 13. Formulaire : envoi réel vers /api/leads + coordonnées non fictives
+// ---------------------------------------------------------------------------
+const formBlockTop = `      {/* Formulaire de contact */}
       <section id="contact" className="py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
@@ -690,7 +716,9 @@ export default function EntreprisePage() {
                       placeholder="+33 6 12 34 56 78"
                     />
                   </div>
+`;
 
+const formBlockBottom = `
                   <div>
                     <label className="block text-sm font-medium mb-2">Nombre d’employés</label>
                     <select
@@ -738,7 +766,9 @@ export default function EntreprisePage() {
                       'Demander une place pilote'
                     )}
                   </button>
+`;
 
+const formBlockFooter = `
                   <p className="text-xs text-muted-foreground">
                     En envoyant ce formulaire, vous acceptez que nous utilisions ces informations pour vous recontacter.
                     Aucun fichier ne vous est demandé à cette étape.
@@ -802,3 +832,43 @@ export default function EntreprisePage() {
     </div>
   );
 }
+`;
+
+swap('formulaire', '      {/* Formulaire de contact */}', null, formBlockTop + formBlockBottom + formBlockFooter);
+
+// ---------------------------------------------------------------------------
+// Écriture + bilan
+// ---------------------------------------------------------------------------
+if (failures > 0) {
+  console.error(`\n❌ ${failures} remplacement(s) en échec — fichier NON écrit.`);
+  process.exit(1);
+}
+
+const leftovers = src
+  .split(/\r?\n/)
+  .map((line, index) => ({ line, index: index + 1 }))
+  .filter(({ line }) =>
+    /OMNIVERSA|omniversa|99\.99|50M\+|HIPAA|Fortune 500|Entreprises clientes|TechCorp|MediaPro|HealthCare|SLA 99,9|Microsoft|Amazon Web|Salesforce|Oracle|Adobe|Enterprise vs Business|\$299|\$59,99/i.test(
+      line
+    )
+  );
+
+if (leftovers.length > 0) {
+  console.error('\n❌ Affirmations résiduelles détectées — fichier NON écrit :');
+  leftovers.forEach(({ index, line }) => console.error(`  ligne ${index}: ${line.trim()}`));
+  process.exit(1);
+}
+
+fs.writeFileSync(FILE, src, 'utf8');
+console.log(`\n✅ Fichier écrit : ${FILE}`);
+console.log(`   ${initialLength} → ${src.length} caractères`);
+
+
+
+
+
+
+
+
+
+

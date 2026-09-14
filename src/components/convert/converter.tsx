@@ -1,12 +1,18 @@
 'use client';
 
-import { useState } from 'react';
-import { Upload, Download, File, Loader2, X, Settings, History, AlertCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Upload, Download, File, Loader2, X, Settings, History, AlertCircle, Lock, Cloud } from 'lucide-react';
 import { toast } from 'sonner';
 import { FileUpload } from './file-upload';
 import { FormatSelector } from './format-selector';
 import { Link } from '@/i18n/routing';
 import { useAuth } from '@/hooks/useAuth';
+import {
+  canConvertLocally,
+  convertImageLocally,
+  isLocalEngineAvailable,
+  normalizeImageFormat,
+} from '@/lib/client/local-converters';
 
 export function Converter() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -14,9 +20,19 @@ export function Converter() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [downloadUrls, setDownloadUrls] = useState<string[]>([]);
   const [showOptions, setShowOptions] = useState(false);
+  /** Préférer le traitement dans le navigateur quand c’est possible */
+  const [localMode, setLocalMode] = useState(true);
+  /** Renseigné après chaque traitement : true = aucun fichier n’a quitté l’appareil */
+  const [lastRunWasLocal, setLastRunWasLocal] = useState<boolean | null>(null);
+  /** Détecté après montage pour éviter toute divergence d’hydratation */
+  const [localAvailable, setLocalAvailable] = useState(false);
+
+  useEffect(() => {
+    setLocalAvailable(isLocalEngineAvailable());
+  }, []);
   const { isAuthenticated: isLoggedIn, isLoading: authLoading } = useAuth();
   const [conversionsUsed, setConversionsUsed] = useState(12); // TODO: Récupérer de l'API
-  const [conversionsLimit, setConversionsLimit] = useState(25); // TODO: Récupérer du plan
+  const [conversionsLimit] = useState(25); // TODO: Récupérer du plan
 
   const handleFileSelect = (file: File) => {
     setSelectedFiles([...selectedFiles, file]);
@@ -49,8 +65,22 @@ export function Converter() {
     setIsProcessing(true);
     try {
       const urls: string[] = [];
-      
+      let usedServer = false;
+
       for (const file of selectedFiles) {
+        // 🔒 Mode local : l’image est convertie dans le navigateur,
+        // le fichier n’est jamais transmis au serveur.
+        if (localMode && canConvertLocally(file, outputFormat)) {
+          const format = normalizeImageFormat(outputFormat);
+          if (format) {
+            const blob = await convertImageLocally(file, { format, quality: 0.92 });
+            urls.push(URL.createObjectURL(blob));
+            continue;
+          }
+        }
+
+        // ☁️ Mode serveur (PDF, documents, médias, formats non gérables localement)
+        usedServer = true;
         const formData = new FormData();
         formData.append('file', file);
         formData.append('outputFormat', outputFormat);
@@ -69,6 +99,7 @@ export function Converter() {
         urls.push(url);
       }
 
+      setLastRunWasLocal(!usedServer);
       setDownloadUrls(urls);
       setConversionsUsed(conversionsUsed + selectedFiles.length);
     } catch (error) {
@@ -116,13 +147,54 @@ export function Converter() {
             </div>
           </div>
 
+          {/* Choix du mode de traitement : local ou serveur */}
+          <div className="p-4 mb-4 rounded-lg border border-border bg-card flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <div className="flex items-start gap-3">
+              {localMode && localAvailable ? (
+                <Lock className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+              ) : (
+                <Cloud className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              )}
+              <div>
+                <p className="text-sm font-semibold">
+                  {localMode && localAvailable
+                    ? 'Traitement sur votre appareil'
+                    : 'Traitement sur nos serveurs (UE)'}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {localMode && localAvailable
+                    ? 'Les images sont converties dans votre navigateur : aucun fichier n’est envoyé. Les PDF, documents, vidéos et fichiers audio passent par nos serveurs.'
+                    : 'Vos fichiers sont téléversés, traités puis supprimés. À éviter pour des documents confidentiels.'}
+                </p>
+              </div>
+            </div>
+            <label className="flex items-center gap-2 text-sm whitespace-nowrap cursor-pointer sm:pt-1">
+              <input
+                type="checkbox"
+                checked={localMode && localAvailable}
+                disabled={!localAvailable}
+                onChange={(event) => setLocalMode(event.target.checked)}
+                className="h-4 w-4"
+              />
+              Mode local
+            </label>
+          </div>
+
+          {lastRunWasLocal !== null && (
+            <p className="text-xs text-muted-foreground mb-4">
+              {lastRunWasLocal
+                ? '🔒 Dernière conversion : 100 % locale, aucun fichier transmis.'
+                : '☁️ Dernière conversion : traitée sur nos serveurs puis supprimée.'}
+            </p>
+          )}
+
           {/* Limite de conversions */}
           {authLoading ? null : !isLoggedIn ? (
             <div className="p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
               <div className="flex-1">
                 <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">
-                  Vous n'êtes pas connecté
+                  Vous n’êtes pas connecté
                 </p>
                 <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
                   Connectez-vous pour accéder à plus de fonctionnalités : traitement par lot, historique, API...
@@ -132,7 +204,7 @@ export function Converter() {
                     href="/signup"
                     className="text-sm px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
                   >
-                    S'inscrire gratuitement
+                    S’inscrire gratuitement
                   </Link>
                   <Link
                     href="/login"
@@ -290,7 +362,7 @@ export function Converter() {
                 {!isLoggedIn && (
                   <div className="p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
                     <p className="text-sm text-blue-900 dark:text-blue-100">
-                      💡 <strong>Inscrivez-vous</strong> pour garder vos fichiers plus longtemps et accéder à l'historique !
+                      💡 <strong>Inscrivez-vous</strong> pour garder vos fichiers plus longtemps et accéder à l’historique !
                     </p>
                   </div>
                 )}

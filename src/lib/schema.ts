@@ -15,7 +15,7 @@ export function generateOrganizationSchema() {
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'Customer Support',
-      email: 'support@Multi Convert.com',
+      email: siteConfig.contact.supportEmail,
     },
   };
 }
@@ -34,13 +34,11 @@ export function generateWebApplicationSchema() {
       price: '0',
       priceCurrency: 'USD',
     },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.9',
-      ratingCount: '2847',
-      bestRating: '5',
-      worstRating: '1',
-    },
+    /**
+     * ⚠️ Aucun `aggregateRating` ici : publier une note et un nombre d'avis
+     * inventés viole les règles de Google sur les données structurées et
+     * constitue une pratique commerciale trompeuse.
+     */
     featureList: [
       'PDF Conversion',
       'Image Conversion',
@@ -48,10 +46,9 @@ export function generateWebApplicationSchema() {
       'Audio Conversion',
       'Document Conversion',
       'Batch Processing',
-      'Cloud Integration',
-      '100% Local Processing',
-      'No File Size Limits',
-      'GDPR Compliant',
+      'OCR',
+      'PDF Compression',
+      'Watermarking',
     ],
   };
 }

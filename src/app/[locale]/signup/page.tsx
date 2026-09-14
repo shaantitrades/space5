@@ -4,11 +4,27 @@ import AuthLayout from '@/components/auth/AuthLayout';
 import SecurityBadges from '@/components/auth/SecurityBadges';
 import { Link } from '@/i18n/routing';
 import SocialLoginButtons from '@/components/auth/SocialLoginButtons';
+import { getSeo } from '@/config/seo';
+import { buildMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Créer un compte - Omniversa',
-  description: 'Rejoignez la plateforme de conversion tout-en-un la plus avancée',
-};
+/** Page privée : exclue des moteurs de recherche */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const seo = getSeo(locale);
+
+  return buildMetadata({
+    locale,
+    path: '/signup',
+    title: seo.defaultTitle,
+    description: seo.defaultDescription,
+    keywords: [],
+    noIndex: true,
+  });
+}
 
 export default function SignupPage() {
   return (

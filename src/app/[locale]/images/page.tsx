@@ -429,7 +429,7 @@ export default function ImagesPage() {
               {selectedTool === 'watermark' && files.length > 0 && (
                 <div className="mb-6 p-4 bg-muted rounded-lg">
                   <h3 className="font-semibold mb-3">Texte du filigrane</h3>
-                  <input type="text" placeholder="OMNIVERSA" className="w-full px-4 py-3 border-2 border-border rounded-lg" />
+                  <input type="text" placeholder="Multi Convert" className="w-full px-4 py-3 border-2 border-border rounded-lg" />
                 </div>
               )}
 

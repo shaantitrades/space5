@@ -1,10 +1,14 @@
 import type { Metadata } from 'next';
+import { buildLabeledPageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Conditions générales d\u2019utilisation',
-  description:
-    "Conditions générales d'utilisation de Multi Convert : description du service, responsabilité et règles.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return buildLabeledPageMetadata(locale, '/terms', 'terms');
+}
 
 export default function TermsPage() {
   return (

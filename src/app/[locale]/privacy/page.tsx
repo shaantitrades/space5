@@ -1,10 +1,14 @@
 import type { Metadata } from 'next';
+import { buildLabeledPageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Politique de confidentialité',
-  description:
-    "Politique de confidentialité de Multi Convert : données collectées, cookies, publicité et droits RGPD.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return buildLabeledPageMetadata(locale, '/privacy', 'privacy');
+}
 
 export default function PrivacyPage() {
   return (
@@ -24,11 +28,22 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold mb-2">2. Données collectées</h2>
+            <h2 className="text-xl font-semibold mb-2">2. Traitement de vos fichiers</h2>
             <p className="text-muted-foreground">
-              Nos outils de conversion traitent les fichiers <strong>localement dans votre navigateur</strong>.
-              Vos fichiers ne sont <strong>pas envoyés sur nos serveurs</strong>. Nous ne stockons donc pas le
-              contenu de vos documents, images, vidéos ou autres fichiers.
+              Lorsque vous utilisez un outil de conversion, votre fichier est transmis à nos serveurs
+              (hébergés dans l&apos;Union européenne) pour y être traité. Il est conservé uniquement le temps
+              nécessaire à l&apos;opération, puis supprimé. Nous ne constituons aucune base documentaire à partir
+              de vos fichiers et nous ne les analysons pas à d&apos;autres fins.
+            </p>
+            <p className="text-muted-foreground mt-3">
+              Nous ne transmettons pas vos fichiers à des services tiers d&apos;intelligence artificielle. À ce jour,
+              certains outils supposent donc un envoi de fichier ; ne les utilisez pas pour des documents dont
+              l&apos;export est contractuellement interdit.
+            </p>
+            <p className="text-muted-foreground mt-3">
+              <strong>Un mode de traitement 100 % local</strong>, exécuté dans votre navigateur sans aucun envoi de
+              fichier, est en cours de développement. Nous préférons l&apos;annoncer comme objectif plutôt que comme
+              fonctionnalité disponible.
             </p>
           </section>
 

@@ -7,7 +7,6 @@ import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { Navbar } from '@/components/layout/navbar';
-import { SearchBar } from '@/components/layout/search-bar';
 import { PageBack } from '@/components/layout/page-back';
 import { HtmlLang } from '@/components/layout/html-lang';
 import { Footer } from '@/components/layout/footer';

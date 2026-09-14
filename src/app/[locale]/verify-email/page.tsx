@@ -41,7 +41,7 @@ export default function VerifyEmailPage() {
           </h4>
           <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
             <li>Ouvrez votre boîte de réception</li>
-            <li>Cherchez l'email de OMNIVERSA</li>
+            <li>Cherchez l&apos;email de Multi Convert</li>
             <li>Cliquez sur le lien de vérification</li>
             <li>Connectez-vous à votre compte</li>
           </ol>

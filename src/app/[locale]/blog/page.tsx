@@ -1,7 +1,27 @@
 export const dynamic = 'force-dynamic';
 
+import type { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import { Link } from '@/i18n/routing';
+import { getSeo } from '@/config/seo';
+import { buildMetadata } from '@/lib/seo';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const seo = getSeo(locale);
+
+  return buildMetadata({
+    locale,
+    path: '/blog',
+    title: `Blog — ${seo.defaultTitle}`,
+    description: seo.defaultDescription,
+    keywords: ['blog', ...seo.keywords.slice(0, 20)],
+  });
+}
 
 
 export default async function BlogIndexPage() {

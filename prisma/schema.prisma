@@ -161,6 +161,40 @@ model ApiKey {
 }
 
 // ============================================
+// LEADS (Prospects B2B / demandes de démo)
+// ============================================
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  PILOT
+  WON
+  LOST
+}
+
+model Lead {
+  id        String     @id @default(uuid())
+  company   String
+  name      String
+  email     String
+  phone     String?
+  employees String?
+  message   String?
+  source    String     @default("entreprise")
+  locale    String?
+  status    LeadStatus @default(NEW)
+  ipAddress String?    @map("ip_address")
+  userAgent String?    @map("user_agent")
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([email])
+  @@map("leads")
+}
+
+// ============================================
 // SECURITY & LOGS
 // ============================================
 

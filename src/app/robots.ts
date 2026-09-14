@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
+import { siteConfig } from '@/config/site';
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://multi-convert.com';
+const BASE_URL = siteConfig.url;
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -11,14 +12,21 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           '/api/',
           '/admin/',
-          '/*?apiKey=*',
-          '/*?token=*',
-          '/dashboard/settings',
+          '/dashboard',
+          '/login',
+          '/signup',
+          '/credits',
+          '/verify',
           '/verify-email',
           '/forgot-password',
           '/403',
+          '/pricing',
+          '/*?apiKey=*',
+          '/*?token=*',
         ],
       },
+      // Robots d’entraînement IA : le contenu éditorial n’est pas offert
+      // gratuitement comme corpus d’entraînement.
       {
         userAgent: 'GPTBot',
         disallow: '/',
@@ -39,7 +47,12 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: 'Claude-Web',
         disallow: '/',
       },
+      {
+        userAgent: 'Google-Extended',
+        disallow: '/',
+      },
     ],
     sitemap: `${BASE_URL}/sitemap.xml`,
+    host: BASE_URL,
   };
 }

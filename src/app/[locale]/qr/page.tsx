@@ -1,12 +1,15 @@
 import type { Metadata } from 'next';
 import { QrGenerator } from '@/components/qr/qr-generator';
+import { buildToolMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Générateur de QR Code gratuit',
-  description:
-    'Générez des QR codes gratuitement : URL, WiFi, vCard, email, téléphone, SMS et géolocalisation. Export PNG et SVG.',
-  keywords: ['QR code', 'générateur QR code', 'QR code WiFi', 'QR code vCard', 'QR code URL'],
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return buildToolMetadata('qr-generator', locale);
+}
 
 export default function QrPage() {
   return (

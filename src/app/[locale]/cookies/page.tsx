@@ -1,10 +1,14 @@
 import type { Metadata } from 'next';
+import { buildLabeledPageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Politique de cookies',
-  description:
-    "Politique de cookies de Multi Convert : types de cookies utilisés, publicité et gestion des préférences.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return buildLabeledPageMetadata(locale, '/cookies', 'cookies');
+}
 
 export default function CookiesPage() {
   return (
