@@ -236,6 +236,14 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
     offsetX: number;
     offsetY: number;
     isDragging: boolean;
+    /** 'move' (deplacement) ou 'resize' (redimensionnement par une poignee) */
+    mode?: 'move' | 'resize';
+    /** Coin saisi lors d'un redimensionnement */
+    handle?: 'nw' | 'ne' | 'sw' | 'se';
+    /** Boite de depart, pour calculer la nouvelle taille */
+    startBounds?: { x: number; y: number; w: number; h: number };
+    /** Taille de police initiale (texte / symboles) */
+    startFontSize?: number;
   } | null>(null);
 
   // Outils "drag" (surligner/effacer/caviarder/fl�che/dessiner)
@@ -519,10 +527,19 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
           .forEach((annotation) => {
             drawAnnotation(ctx, annotation);
           });
+
+        // Element selectionne : contour + poignees de redimensionnement.
+        // Masque pendant l'edition inline du texte (le curseur doit rester lisible).
+        if (selectedAnnotationId && editingTextId !== selectedAnnotationId) {
+          const selected = annotations.find((a) => a.id === selectedAnnotationId);
+          if (selected && (selected as any).page === currentPage) {
+            drawSelectionOverlay(ctx, selected);
+          }
+        }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pdfPages, currentPage, zoom, annotations]);
+  }, [pdfPages, currentPage, zoom, annotations, selectedAnnotationId, editingTextId]);
 
   // Fermer le menu d�roulant quand on clique en dehors
   useEffect(() => {
@@ -546,26 +563,6 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
       };
     }
   }, [showMoreMenu]);
-
-  const drawPage = (pageCanvas: HTMLCanvasElement) => {
-    const canvas = canvasRef.current;
-    if (!canvas || !pageCanvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Ajuster la taille du canvas selon le zoom
-    canvas.width = pageCanvas.width * (zoom / 100);
-    canvas.height = pageCanvas.height * (zoom / 100);
-
-    // Dessiner la page PDF
-    ctx.drawImage(pageCanvas, 0, 0, canvas.width, canvas.height);
-
-    // Dessiner les annotations
-    annotations.forEach((annotation) => {
-      drawAnnotation(ctx, annotation);
-    });
-  };
 
   const drawAnnotation = (ctx: CanvasRenderingContext2D, annotation: EditorAnnotation) => {
     ctx.save();
@@ -869,6 +866,226 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
     setAnnotationsLive((prev) => prev.map((a) => (a.id === id ? ({ ...a, ...(patch as any) } as any) : a)));
   };
 
+  // ==========================================================================
+  // REDIMENSIONNEMENT DES ÉLÉMENTS
+  // ==========================================================================
+
+  /** Taille des poignées dessinées aux coins de l'élément sélectionné (px) */
+  const RESIZE_HANDLE_SIZE = 9;
+  /** Marge de saisie autour d'une poignée, pour la rendre facile à attraper */
+  const RESIZE_HANDLE_TOLERANCE = 12;
+  /** Taille minimale d'un élément redimensionné */
+  const MIN_ELEMENT_SIZE = 8;
+  /** Types sans boîte : leur taille se règle via la police */
+  const TEXT_LIKE_TYPES = new Set(['text', 'symbol']);
+
+  type ResizeHandle = 'nw' | 'ne' | 'sw' | 'se';
+
+  /**
+   * Boîte englobante d'une annotation, dans les coordonnées du canvas.
+   * Chaque type stocke sa géométrie différemment : on unifie ici pour
+   * pouvoir dessiner la sélection et calculer un redimensionnement.
+   */
+  const getAnnotationBounds = (
+    annotation: EditorAnnotation
+  ): { x: number; y: number; w: number; h: number } | null => {
+    const a = annotation as any;
+    const ctx = canvasRef.current?.getContext('2d');
+
+    switch (a.type) {
+      case 'text': {
+        if (!ctx) return null;
+        ctx.save();
+        ctx.font = `${a.italic ? 'italic ' : ''}${a.bold ? 'bold ' : ''}${a.fontSize || 16}px Arial`;
+        const w = ctx.measureText(a.text || '').width;
+        ctx.restore();
+        const h = a.fontSize || 16;
+        return { x: a.x, y: a.y - h, w, h };
+      }
+      case 'symbol': {
+        if (!ctx) return null;
+        ctx.save();
+        ctx.font = `${a.fontSize || 22}px Arial`;
+        const w = ctx.measureText(a.symbol || '').width;
+        ctx.restore();
+        const h = a.fontSize || 22;
+        return { x: a.x, y: a.y - h, w, h };
+      }
+      case 'circle': {
+        const w = a.width || (a.radius ? a.radius * 2 : 0);
+        const h = a.height || (a.radius ? a.radius * 2 : 0);
+        return { x: a.x, y: a.y, w, h };
+      }
+      case 'stamp':
+      case 'image':
+        return { x: a.x, y: a.y, w: a.w || 0, h: a.h || 0 };
+      case 'arrow':
+      case 'double-arrow':
+      case 'curve':
+        return {
+          x: Math.min(a.x1, a.x2),
+          y: Math.min(a.y1, a.y2),
+          w: Math.abs(a.x2 - a.x1),
+          h: Math.abs(a.y2 - a.y1),
+        };
+      case 'draw': {
+        const points = a.points || [];
+        if (!points.length) return null;
+        let minX = points[0].x;
+        let maxX = points[0].x;
+        let minY = points[0].y;
+        let maxY = points[0].y;
+        for (const point of points) {
+          minX = Math.min(minX, point.x);
+          maxX = Math.max(maxX, point.x);
+          minY = Math.min(minY, point.y);
+          maxY = Math.max(maxY, point.y);
+        }
+        return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+      }
+      default:
+        // rectangle, triangle, hexagone, pentagone, étoile, nuage,
+        // surlignage, effacement, caviardage
+        return { x: a.x, y: a.y, w: a.width || 0, h: a.height || 0 };
+    }
+  };
+
+  /** Les 4 coins d'une boîte, avec le nom de la poignée correspondante */
+  const cornerHandles = (bounds: { x: number; y: number; w: number; h: number }) => [
+    { handle: 'nw' as ResizeHandle, x: bounds.x, y: bounds.y },
+    { handle: 'ne' as ResizeHandle, x: bounds.x + bounds.w, y: bounds.y },
+    { handle: 'sw' as ResizeHandle, x: bounds.x, y: bounds.y + bounds.h },
+    { handle: 'se' as ResizeHandle, x: bounds.x + bounds.w, y: bounds.y + bounds.h },
+  ];
+
+  /** Le pointeur est-il sur une poignée de l'élément sélectionné ? */
+  const hitTestResizeHandle = (x: number, y: number): { id: string; handle: ResizeHandle } | null => {
+    if (!selectedAnnotationId) return null;
+
+    const selected = annotationsRef.current.find((a) => a.id === selectedAnnotationId);
+    if (!selected || (selected as any).page !== currentPage) return null;
+
+    const bounds = getAnnotationBounds(selected);
+    if (!bounds) return null;
+
+    for (const corner of cornerHandles(bounds)) {
+      if (
+        Math.abs(x - corner.x) <= RESIZE_HANDLE_TOLERANCE &&
+        Math.abs(y - corner.y) <= RESIZE_HANDLE_TOLERANCE
+      ) {
+        return { id: selectedAnnotationId, handle: corner.handle };
+      }
+    }
+    return null;
+  };
+
+  /** Contour de sélection + poignées, dessinés sur le canvas */
+  const drawSelectionOverlay = (ctx: CanvasRenderingContext2D, annotation: EditorAnnotation) => {
+    const bounds = getAnnotationBounds(annotation);
+    if (!bounds) return;
+
+    const { x, y, w, h } = bounds;
+
+    ctx.save();
+    ctx.strokeStyle = '#2563eb';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([5, 4]);
+    ctx.strokeRect(x - 1, y - 1, w + 2, h + 2);
+    ctx.setLineDash([]);
+
+    // Poignées : des carrés blancs bordés de bleu aux quatre coins
+    const half = RESIZE_HANDLE_SIZE / 2;
+    for (const corner of cornerHandles(bounds)) {
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.rect(corner.x - half, corner.y - half, RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE);
+      ctx.fill();
+      ctx.stroke();
+    }
+    ctx.restore();
+  };
+
+  /**
+   * Applique un redimensionnement selon la poignée saisie.
+   * Le coin opposé reste fixe et la taille ne descend jamais sous MIN_ELEMENT_SIZE.
+   */
+  const applyResize = (
+    drag: {
+      id: string;
+      handle?: ResizeHandle;
+      startBounds?: { x: number; y: number; w: number; h: number };
+      startFontSize?: number;
+    },
+    pointerX: number,
+    pointerY: number
+  ) => {
+    const start = drag.startBounds;
+    if (!start || !drag.handle) return;
+
+    const annotation = (annotationsRef.current as any[]).find((a) => a.id === drag.id);
+    if (!annotation) return;
+
+    const isLeftEdge = drag.handle === 'nw' || drag.handle === 'sw';
+    const isTopEdge = drag.handle === 'nw' || drag.handle === 'ne';
+    const right = start.x + start.w;
+    const bottom = start.y + start.h;
+
+    const newX = isLeftEdge ? Math.min(pointerX, right - MIN_ELEMENT_SIZE) : start.x;
+    const newY = isTopEdge ? Math.min(pointerY, bottom - MIN_ELEMENT_SIZE) : start.y;
+    const newW = Math.max(MIN_ELEMENT_SIZE, isLeftEdge ? right - newX : pointerX - start.x);
+    const newH = Math.max(MIN_ELEMENT_SIZE, isTopEdge ? bottom - newY : pointerY - start.y);
+
+    // Texte et symboles : pas de boîte, on agit sur la taille de la police
+    if (TEXT_LIKE_TYPES.has(annotation.type)) {
+      const startDistance = Math.hypot(start.w, start.h) || 1;
+      const newDistance = Math.hypot(newW, newH) || startDistance;
+      const scale = Math.min(Math.max(newDistance / startDistance, 0.25), 8);
+      const base = drag.startFontSize ?? annotation.fontSize ?? 16;
+      updateAnnotationLive(drag.id, {
+        fontSize: Math.round(Math.min(Math.max(base * scale, 6), 240)),
+      } as any);
+      return;
+    }
+
+    const scaleX = start.w > 0 ? newW / start.w : 1;
+    const scaleY = start.h > 0 ? newH / start.h : 1;
+    const patch: Record<string, unknown> = {};
+
+    if (annotation.type === 'arrow' || annotation.type === 'double-arrow' || annotation.type === 'curve') {
+      patch.x1 = newX + (annotation.x1 - start.x) * scaleX;
+      patch.y1 = newY + (annotation.y1 - start.y) * scaleY;
+      patch.x2 = newX + (annotation.x2 - start.x) * scaleX;
+      patch.y2 = newY + (annotation.y2 - start.y) * scaleY;
+    } else if (annotation.type === 'draw') {
+      patch.points = (annotation.points || []).map((point: { x: number; y: number }) => ({
+        x: newX + (point.x - start.x) * scaleX,
+        y: newY + (point.y - start.y) * scaleY,
+      }));
+    } else if (annotation.type === 'image' || annotation.type === 'stamp') {
+      patch.x = newX;
+      patch.y = newY;
+      patch.w = newW;
+      patch.h = newH;
+    } else if (annotation.type === 'circle') {
+      // Un cercle reste rond : on retient la plus grande dimension
+      const size = Math.max(newW, newH);
+      patch.x = newX;
+      patch.y = newY;
+      patch.width = size;
+      patch.height = size;
+      patch.radius = size / 2;
+    } else {
+      patch.x = newX;
+      patch.y = newY;
+      patch.width = newW;
+      patch.height = newH;
+    }
+
+    updateAnnotationLive(drag.id, patch as any);
+  };
+
   const closeContextMenu = () => {
     setContextMenu(null);
     setSelectedAnnotationId(null);
@@ -1158,6 +1375,13 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       
+      // Redimensionnement par une poignee : on ne deplace pas l'element,
+      // on modifie sa taille (ou sa police pour le texte).
+      if (d.mode === 'resize') {
+        applyResize(d, x, y);
+        return;
+      }
+
       const newX = x - d.offsetX;
       const newY = y - d.offsetY;
 
@@ -1197,7 +1421,8 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
       dragRef.current = null;
       setAlignmentGuides(null); // Cacher les guides
       // Enregistrer une seule entrée d'historique à la fin du drag
-      commitAnnotations(annotations);
+      // (annotationsRef est toujours à jour, y compris après un redimensionnement)
+      commitAnnotations(annotationsRef.current);
     };
 
     document.addEventListener('mousemove', onMove);
@@ -2188,9 +2413,15 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                 e.stopPropagation();
                 if (menuButtonRef.current) {
                   const rect = menuButtonRef.current.getBoundingClientRect();
+                  // Le menu fait jusqu'à 500 px de large. S'il est aligné sur la
+                  // gauche du bouton et que celui-ci est proche du bord droit,
+                  // il déborde hors de l'écran : on le décale vers la gauche
+                  // juste ce qu'il faut pour qu'il reste entièrement visible.
+                  const menuWidth = Math.min(500, window.innerWidth - 24);
+                  const maxLeft = window.innerWidth - menuWidth - 12;
                   setMenuPosition({
                     top: rect.bottom + 8, // 8px en dessous du bouton
-                    left: rect.left, // Align� � gauche du bouton
+                    left: Math.max(12, Math.min(rect.left, maxLeft)),
                   });
                 }
                 setShowMoreMenu(!showMoreMenu);
@@ -2810,6 +3041,32 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                   const y = e.clientY - rect.top;
 
                   const hit = hitTestAnnotation(x, y);
+
+                  // Poignee de redimensionnement : prioritaire sur tout le reste
+                  const handleHit = hitTestResizeHandle(x, y);
+                  if (handleHit) {
+                    e.preventDefault();
+                    const target = annotationsRef.current.find((a) => a.id === handleHit.id);
+                    const bounds = target ? getAnnotationBounds(target) : null;
+                    if (target && bounds) {
+                      try {
+                        (e.target as HTMLElement).setPointerCapture(e.pointerId);
+                      } catch {}
+                      dragRef.current = {
+                        id: handleHit.id,
+                        offsetX: 0,
+                        offsetY: 0,
+                        isDragging: true,
+                        mode: 'resize',
+                        handle: handleHit.handle,
+                        startBounds: bounds,
+                        startFontSize: (target as any).fontSize,
+                      };
+                      setSelectedAnnotationId(handleHit.id);
+                      setEditingTextId(null);
+                      return;
+                    }
+                  }
                   
                   // Ne fermer la zone d'édition que si on clique vraiment ailleurs (pas sur un élément existant en édition)
                   if (!hit || hit.id !== editingTextId) {
@@ -2821,7 +3078,10 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
 
                   if (hit) {
                     // Drag sur éléments quand l'outil "Déplacer texte" est actif
-                    if ((currentTool === 'select' || currentTool === 'edit-pdf') && (hit.type === 'text' || hit.type === 'symbol' || hit.type === 'image')) {
+                    // Tous les types positionnes par x/y peuvent etre deplaces.
+                    // Les fleches et le dessin libre gardent leur propre logique.
+                    const isMovable = !['arrow', 'double-arrow', 'curve', 'draw'].includes(hit.type as string);
+                    if ((currentTool === 'select' || currentTool === 'edit-pdf') && isMovable) {
                       e.preventDefault();
                       // Capturer le pointeur pour un drag fluide
                       try {
@@ -2829,8 +3089,8 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                       } catch {}
                       dragRef.current = {
                         id: hit.id,
-                        offsetX: x - hit.x,
-                        offsetY: y - hit.y,
+                        offsetX: x - (hit as any).x,
+                        offsetY: y - (hit as any).y,
                         isDragging: true,
                       };
                       // Sélectionner l'élément immédiatement
@@ -3411,7 +3671,9 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
               )}
 
               {/* Option insertion en bas de page */}
-              <div className="absolute -bottom-24 left-1/2 transform -translate-x-1/2">
+              {/* -bottom-25 : suffisamment d'écart avec la barre de navigation
+                  ci-dessous, sinon le bouton semble collé au bouton « Page suivante ». */}
+              <div className="absolute -bottom-[6.5rem] left-1/2 transform -translate-x-1/2">
                 <button
                   onClick={handleInsertPagesClick}
                   className="flex items-center gap-2 px-4 py-2 bg-background border border-primary text-primary rounded-lg hover:bg-primary/5 transition-colors shadow"
