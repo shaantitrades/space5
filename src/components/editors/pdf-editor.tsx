@@ -529,8 +529,9 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
           });
 
         // Element selectionne : contour + poignees de redimensionnement.
-        // Masque pendant l'edition inline du texte (le curseur doit rester lisible).
-        if (selectedAnnotationId && editingTextId !== selectedAnnotationId) {
+        // Toujours affiche, y compris pendant l'edition d'un texte : sinon
+        // les poignees restaient invisibles et l'element semblait figé.
+        if (selectedAnnotationId) {
           const selected = annotations.find((a) => a.id === selectedAnnotationId);
           if (selected && (selected as any).page === currentPage) {
             drawSelectionOverlay(ctx, selected);
