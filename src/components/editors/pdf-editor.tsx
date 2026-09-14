@@ -1427,9 +1427,16 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
 
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onUp);
+    // Filets de securite : si l'evenement souris est intercepte par un element
+    // qui capture le pointeur, ces evenements permettent tout de meme de
+    // terminer le glissement (l'element ne reste plus colle au curseur).
+    document.addEventListener('pointerup', onUp);
+    document.addEventListener('pointercancel', onUp);
     return () => {
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
+      document.removeEventListener('pointerup', onUp);
+      document.removeEventListener('pointercancel', onUp);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [annotations]);
@@ -3328,6 +3335,16 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                   }
                 }}
                 onPointerUp={(e) => {
+                  // Fin du deplacement / redimensionnement d'un element.
+                  // On termine le geste ici aussi : avec la capture du pointeur,
+                  // l'evenement mouseup au niveau de document peut ne jamais arriver,
+                  // et le glissement ne se liberait donc pas.
+                  if (dragRef.current?.isDragging) {
+                    dragRef.current = null;
+                    setAlignmentGuides(null);
+                    commitAnnotations(annotationsRef.current);
+                  }
+
                   const drag = toolDragRef.current;
                   if (!drag || drag.pointerId !== e.pointerId) return;
                   toolDragRef.current = null;
@@ -3335,6 +3352,17 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                   commitAnnotations(annotationsRef.current);
                   // Apr�s une action "drag tool", on ferme la toolbar si elle �tait ouverte
                   setContextMenu(null);
+                }}
+                onLostPointerCapture={() => {
+                  // Filet de securite supplementaire : la capture du pointeur est
+                  // relachee a la fin du geste, ou si le navigateur l'interrompt
+                  // (changement d'onglet, sortie de fenetre, appui long...).
+                  // Sans cela, un element pouvait rester colle au curseur.
+                  if (dragRef.current?.isDragging) {
+                    dragRef.current = null;
+                    setAlignmentGuides(null);
+                    commitAnnotations(annotationsRef.current);
+                  }
                 }}
                 onClick={(e) => {
                   // Fallback: certains navigateurs/overlays peuvent bloquer onPointerDown
