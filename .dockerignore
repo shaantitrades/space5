@@ -16,11 +16,13 @@ dist
 .gitattributes
 
 # ── Env / secrets ─────────────────────────────────────────────
+# Toutes les variantes sont exclues : les variables d'environnement sont
+# injectees par Coolify a l'execution, le conteneur n'a pas besoin de ces
+# fichiers (et .env.prod ne doit surtout pas se retrouver dans une couche
+# de l'image Docker).
 .env
-.env*.local
-.env.production
-.env.yaml
-.env.development
+.env.*
+*.env
 
 # ── Docs & scripts locaux ─────────────────────────────────────
 *.md
