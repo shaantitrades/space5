@@ -29,6 +29,12 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+      # Emails applicatifs : sans ces variables, le code retombe sur
+      # "noreply@multi-convert.com", que SendGrid refuse si l'adresse
+      # n'est pas verifiee chez lui.
+      EMAIL_FROM: ${EMAIL_FROM}
+      CONTACT_EMAIL: ${CONTACT_EMAIL}
+      LEADS_NOTIFICATION_EMAIL: ${LEADS_NOTIFICATION_EMAIL}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}

@@ -305,7 +305,13 @@ export async function sendLeadNotificationEmail(lead: LeadPayload): Promise<bool
     console.log(`✅ Notification de lead envoyée à ${recipients.join(', ')}`);
     return true;
   } catch (error) {
-    console.error('❌ Erreur lors de l\'envoi de la notification de lead:', error);
+    // On indique l'expediteur et les destinataires : la cause la plus
+    // frequente d'echec est un expediteur non verifie chez le fournisseur.
+    console.error(
+      `❌ [LEAD] Echec de l'envoi a ${recipients.join(', ')} ` +
+        `depuis "${env.EMAIL_FROM || 'noreply@multi-convert.com'}" :`,
+      error
+    );
     return false;
   }
 }
