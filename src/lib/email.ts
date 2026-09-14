@@ -206,14 +206,27 @@ export interface LeadPayload {
 
 /**
  * Destinataires internes des notifications de leads.
- * Priorité : LEADS_NOTIFICATION_EMAIL > CONTACT_EMAIL > ADMIN_EMAILS.
+ *
+ * Priorité **exclusive** (et non cumulative) : envoyer à une adresse qui
+ * n'existe pas peut faire rejeter le message entier par le fournisseur.
+ *   1. LEADS_NOTIFICATION_EMAIL (destinataire dédié)
+ *   2. ADMIN_EMAILS (adresses réellement surveillées)
+ *   3. CONTACT_EMAIL (dernier recours seulement)
  */
 function getLeadRecipients(): string[] {
-  const explicit = (env.LEADS_NOTIFICATION_EMAIL || env.CONTACT_EMAIL || '').split(',');
-  const admins = (env.ADMIN_EMAILS || '').split(',');
-  return [...explicit, ...admins]
-    .map((value) => value.trim())
-    .filter((value) => value.length > 0 && value.includes('@'));
+  const parse = (value?: string): string[] =>
+    (value || '')
+      .split(',')
+      .map((entry) => entry.trim())
+      .filter((entry) => entry.includes('@'));
+
+  const explicit = parse(env.LEADS_NOTIFICATION_EMAIL);
+  if (explicit.length > 0) return explicit;
+
+  const admins = parse(env.ADMIN_EMAILS);
+  if (admins.length > 0) return admins;
+
+  return parse(env.CONTACT_EMAIL);
 }
 
 /** Échappe le HTML pour éviter toute injection dans l'email de notification */
@@ -263,13 +276,17 @@ export async function sendLeadNotificationEmail(lead: LeadPayload): Promise<bool
     <p style="white-space:pre-wrap">${escapeHtml(lead.message || '(aucun message)')}</p>
   `;
 
-  // En dev / en l'absence de configuration SMTP, on trace simplement le lead.
+  // Aucun moyen d'envoi configuré : on le dit explicitement dans les logs.
+  // Le lead reste enregistré en base, mais personne n'est prévenu.
   if (isDevMode() || (!env.SENDGRID_API_KEY && !process.env.SMTP_PASSWORD)) {
-    console.log('🔧 [LEAD] Notification non envoyée (mode dev ou SMTP non configuré) :', {
-      company: lead.company,
-      email: lead.email,
-      recipients,
-    });
+    console.warn(
+      '⚠️  [LEAD] Aucun email envoyé : ' +
+        (isDevMode()
+          ? 'mode développement actif.'
+          : "SENDGRID_API_KEY (ou SMTP_PASSWORD) n'est pas configurée dans Coolify.") +
+        ` Destinataires prévus : ${recipients.join(', ') || 'aucun'}.` +
+        ' Le lead est bien enregistré en base.'
+    );
     return false;
   }
 
