@@ -112,9 +112,9 @@
   },
   "home": {
     "stats": {
-      "converted": "🎯 2 млн+ сконвертированных файлов",
-      "rating": "⭐ 4.9/5",
-      "gdpr": "🔐 Сертифицировано по GDPR"
+      "noInstall": "🖥️ Без установки",
+      "languages": "🌍 Доступно на 10 языках",
+      "https": "🔒 Шифрованное соединение (HTTPS)"
     },
     "cta": "Нажмите, чтобы открыть",
     "badges": {
@@ -146,16 +146,17 @@
     "features": {
       "title": "Ключевые функции",
       "subtitle": "Всё необходимое для профессиональной конвертации",
-      "IA-Powered": "На базе ИИ",
-      "Sécurité Militaire": "Военная безопасность",
       "10 Langues": "10 языков",
-      "Workflows": "Рабочие процессы",
       "Traitement par lot": "Пакетная обработка",
-      "Suggestions automatiques, amélioration qualité intelligente": "Автоматические подсказки, умное улучшение качества",
-      "Chiffrement, geo-blocking, protection fraude, RGPD": "Шифрование, геоблокировка, защита от мошенничества, GDPR",
       "Interface internationalisée pour marchés premium": "Локализованный интерфейс для премиум-рынков",
-      "Pipelines visuels automatisés pour conversions complexes": "Автоматизированные визуальные конвейеры для сложных конвертаций",
-      "100+ fichiers simultanément avec gestion de queue": "Более 100 файлов одновременно с управлением очередью"
+      "Traitement immédiat": "Мгновенная обработка",
+      "Fichiers non conservés": "Файлы не сохраняются",
+      "Une cinquantaine d’outils": "Около пятидесяти инструментов",
+      "La conversion démarre dès l’import, sans installation ni compte obligatoire": "Конвертация начинается сразу: без установки и без аккаунта",
+      "Traitement à la demande, aucune base documentaire, aucune revente de données": "Обработка по запросу: без базы документов и без продажи данных",
+      "Interface et outils traduits dans 10 langues": "Интерфейс и инструменты на 10 языках",
+      "PDF, images, vidéo, audio, archives et QR code réunis sur une seule plateforme": "PDF, изображения, видео, аудио, архивы и QR-коды на одной платформе",
+      "Plusieurs fichiers traités en une seule fois": "Несколько файлов за один раз"
     },
     "toolTitles": {
       "Modifier & Annoter": "Редактировать и аннотировать",

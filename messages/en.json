@@ -83,9 +83,9 @@
   },
   "home": {
     "stats": {
-      "converted": "🎯 2M+ files converted",
-      "rating": "⭐ 4.9/5",
-      "gdpr": "🔐 GDPR Certified"
+      "noInstall": "🖥️ No installation required",
+      "languages": "🌍 Available in 10 languages",
+      "https": "🔒 Encrypted connection (HTTPS)"
     },
     "cta": "Click to access",
     "badges": {
@@ -117,16 +117,17 @@
     "features": {
       "title": "Key Features",
       "subtitle": "Everything you need for professional conversion",
-      "IA-Powered": "AI-Powered",
-      "Sécurité Militaire": "Military-Grade Security",
       "10 Langues": "10 Languages",
-      "Workflows": "Workflows",
       "Traitement par lot": "Batch Processing",
-      "Suggestions automatiques, amélioration qualité intelligente": "Automatic suggestions, smart quality enhancement",
-      "Chiffrement, geo-blocking, protection fraude, RGPD": "Encryption, geo-blocking, fraud protection, GDPR",
       "Interface internationalisée pour marchés premium": "Localized interface for premium markets",
-      "Pipelines visuels automatisés pour conversions complexes": "Automated visual pipelines for complex conversions",
-      "100+ fichiers simultanément avec gestion de queue": "100+ files simultaneously with queue management"
+      "Traitement immédiat": "Instant processing",
+      "Fichiers non conservés": "Files are not retained",
+      "Une cinquantaine d’outils": "Around fifty tools",
+      "La conversion démarre dès l’import, sans installation ni compte obligatoire": "Conversion starts as soon as the file is dropped — no installation, no account needed",
+      "Traitement à la demande, aucune base documentaire, aucune revente de données": "Processed on demand: no document database, no data resold",
+      "Interface et outils traduits dans 10 langues": "Interface and tools translated into 10 languages",
+      "PDF, images, vidéo, audio, archives et QR code réunis sur une seule plateforme": "PDF, images, video, audio, archives and QR codes on one platform",
+      "Plusieurs fichiers traités en une seule fois": "Several files processed in a single run"
     },
     "toolTitles": {
       "Modifier & Annoter": "Edit & Annotate",

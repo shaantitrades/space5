@@ -8,28 +8,33 @@
 import { Shield, Lock, Check, Globe } from 'lucide-react';
 
 export default function SecurityBadges() {
+  /**
+   * Badges de confiance affichés sur les pages de connexion et d'inscription.
+   * ⚠️ N'afficher ici que des faits vérifiables : aucune certification non
+   * obtenue (ISO 27001, SOC 2, « certifié RGPD ») ne doit y figurer.
+   */
   const badges = [
     {
       icon: Shield,
-      text: 'Chiffrement AES-256',
+      text: 'Chiffrement en transit (HTTPS)',
       color: 'text-green-600',
       bgColor: 'bg-green-50',
     },
     {
       icon: Lock,
-      text: 'Certifié RGPD',
+      text: 'Aucune installation',
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
     },
     {
       icon: Check,
-      text: '2FA Disponible',
+      text: 'Aucune donnée revendue',
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
     },
     {
       icon: Globe,
-      text: 'Conforme ISO 27001',
+      text: 'Disponible en 10 langues',
       color: 'text-indigo-600',
       bgColor: 'bg-indigo-50',
     },

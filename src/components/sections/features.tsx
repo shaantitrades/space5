@@ -9,23 +9,23 @@ export function Features() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           <div className="flex flex-col items-center text-center">
             <Zap className="w-12 h-12 text-primary mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Lightning Fast</h3>
+            <h3 className="text-lg font-semibold mb-2">Aucune installation</h3>
             <p className="text-sm text-muted-foreground">
-              Convert files in seconds with our optimized processing engine
+              Tout se passe dans le navigateur : rien à installer, aucun compte obligatoire pour convertir un fichier
             </p>
           </div>
           <div className="flex flex-col items-center text-center">
             <Shield className="w-12 h-12 text-primary mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Military Security</h3>
+            <h3 className="text-lg font-semibold mb-2">Vos fichiers ne sont pas revendus</h3>
             <p className="text-sm text-muted-foreground">
-              Enterprise-grade security with geo-blocking and fraud protection
+              Les fichiers sont traités à la demande, sans base documentaire constituée, et ne sont jamais revendus
             </p>
           </div>
           <div className="flex flex-col items-center text-center">
             <Globe className="w-12 h-12 text-primary mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Global Platform</h3>
+            <h3 className="text-lg font-semibold mb-2">Disponible en 10 langues</h3>
             <p className="text-sm text-muted-foreground">
-              Available in 10 languages, optimized for premium markets
+              Interface et outils traduits, pour vos équipes comme pour vos clients
             </p>
           </div>
         </div>

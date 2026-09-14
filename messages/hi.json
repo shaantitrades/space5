@@ -112,9 +112,9 @@
   },
   "home": {
     "stats": {
-      "converted": "🎯 2 मिलियन+ फ़ाइलें कन्वर्ट की गईं",
-      "rating": "⭐ 4.9/5",
-      "gdpr": "🔐 GDPR प्रमाणित"
+      "noInstall": "🖥️ इंस्टॉल की ज़रूरत नहीं",
+      "languages": "🌍 10 भाषाओं में उपलब्ध",
+      "https": "🔒 एन्क्रिप्टेड कनेक्शन (HTTPS)"
     },
     "cta": "खोलने के लिए क्लिक करें",
     "badges": {
@@ -146,16 +146,17 @@
     "features": {
       "title": "मुख्य विशेषताएँ",
       "subtitle": "पेशेवर कन्वर्ज़न के लिए आपको जो चाहिए",
-      "IA-Powered": "AI-संचालित",
-      "Sécurité Militaire": "सैन्य-स्तरीय सुरक्षा",
       "10 Langues": "10 भाषाएँ",
-      "Workflows": "वर्कफ़्लो",
       "Traitement par lot": "बैच प्रोसेसिंग",
-      "Suggestions automatiques, amélioration qualité intelligente": "स्वतः सुझाव, स्मार्ट गुणवत्ता सुधार",
-      "Chiffrement, geo-blocking, protection fraude, RGPD": "एन्क्रिप्शन, जियो-ब्लॉकिंग, धोखाधड़ी सुरक्षा, GDPR",
       "Interface internationalisée pour marchés premium": "प्रीमियम बाज़ारों के लिए स्थानीयकृत इंटरफ़ेस",
-      "Pipelines visuels automatisés pour conversions complexes": "जटिल कन्वर्ज़न के लिए स्वचालित विज़ुअल पाइपलाइन",
-      "100+ fichiers simultanément avec gestion de queue": "कतार प्रबंधन के साथ एक साथ 100+ फ़ाइलें"
+      "Traitement immédiat": "तुरंत प्रोसेसिंग",
+      "Fichiers non conservés": "फ़ाइलें सहेजी नहीं जातीं",
+      "Une cinquantaine d’outils": "लगभग पचास टूल",
+      "La conversion démarre dès l’import, sans installation ni compte obligatoire": "फ़ाइल डालते ही कन्वर्ज़न शुरू — इंस्टॉल या अकाउंट की ज़रूरत नहीं",
+      "Traitement à la demande, aucune base documentaire, aucune revente de données": "मांग पर प्रोसेसिंग: कोई दस्तावेज़ डेटाबेस नहीं, डेटा की बिक्री नहीं",
+      "Interface et outils traduits dans 10 langues": "इंटरफ़ेस और टूल 10 भाषाओं में",
+      "PDF, images, vidéo, audio, archives et QR code réunis sur une seule plateforme": "PDF, इमेज, वीडियो, ऑडियो, आर्काइव और QR कोड — एक ही प्लेटफ़ॉर्म पर",
+      "Plusieurs fichiers traités en une seule fois": "एक बार में कई फ़ाइलें"
     },
     "toolTitles": {
       "Modifier & Annoter": "संपादित करें और एनोटेट करें",

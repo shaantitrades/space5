@@ -219,7 +219,7 @@ export function Pricing() {
             </span>
             <span className="flex items-center gap-1">
               <Check className="w-4 h-4 text-green-500" />
-              Sécurité GDPR
+              Connexion chiffrée (HTTPS)
             </span>
             <span className="flex items-center gap-1">
               <Check className="w-4 h-4 text-green-500" />

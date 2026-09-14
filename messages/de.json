@@ -83,9 +83,9 @@
   },
   "home": {
     "stats": {
-      "converted": "🎯 2 Mio.+ konvertierte Dateien",
-      "rating": "⭐ 4.9/5",
-      "gdpr": "🔐 DSGVO-zertifiziert"
+      "noInstall": "🖥️ Keine Installation nötig",
+      "languages": "🌍 In 10 Sprachen verfügbar",
+      "https": "🔒 Verschlüsselte Verbindung (HTTPS)"
     },
     "cta": "Zum Öffnen klicken",
     "badges": {
@@ -117,16 +117,17 @@
     "features": {
       "title": "Hauptfunktionen",
       "subtitle": "Alles, was Sie für professionelle Konvertierung brauchen",
-      "IA-Powered": "KI-gestützt",
-      "Sécurité Militaire": "Militärische Sicherheit",
       "10 Langues": "10 Sprachen",
-      "Workflows": "Workflows",
       "Traitement par lot": "Stapelverarbeitung",
-      "Suggestions automatiques, amélioration qualité intelligente": "Automatische Vorschläge, intelligente Qualitätsverbesserung",
-      "Chiffrement, geo-blocking, protection fraude, RGPD": "Verschlüsselung, Geo-Blocking, Betrugsschutz, DSGVO",
       "Interface internationalisée pour marchés premium": "Lokalisierte Oberfläche für Premium-Märkte",
-      "Pipelines visuels automatisés pour conversions complexes": "Automatisierte visuelle Pipelines für komplexe Konvertierungen",
-      "100+ fichiers simultanément avec gestion de queue": "Über 100 Dateien gleichzeitig mit Warteschlangenverwaltung"
+      "Traitement immédiat": "Sofortige Verarbeitung",
+      "Fichiers non conservés": "Dateien werden nicht gespeichert",
+      "Une cinquantaine d’outils": "Rund fünfzig Werkzeuge",
+      "La conversion démarre dès l’import, sans installation ni compte obligatoire": "Die Konvertierung startet sofort — keine Installation, kein Konto nötig",
+      "Traitement à la demande, aucune base documentaire, aucune revente de données": "Verarbeitung auf Anfrage: keine Dokumentdatenbank, kein Datenverkauf",
+      "Interface et outils traduits dans 10 langues": "Oberfläche und Werkzeuge in 10 Sprachen",
+      "PDF, images, vidéo, audio, archives et QR code réunis sur une seule plateforme": "PDF, Bilder, Video, Audio, Archive und QR-Codes auf einer Plattform",
+      "Plusieurs fichiers traités en une seule fois": "Mehrere Dateien in einem Durchgang"
     },
     "toolTitles": {
       "Modifier & Annoter": "Bearbeiten & Annotieren",

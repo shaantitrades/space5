@@ -112,9 +112,9 @@
   },
   "home": {
     "stats": {
-      "converted": "🎯 2 mill+ konverterte filer",
-      "rating": "⭐ 4.9/5",
-      "gdpr": "🔐 GDPR-sertifisert"
+      "noInstall": "🖥️ Ingen installasjon",
+      "languages": "🌍 Tilgjengelig på 10 språk",
+      "https": "🔒 Kryptert tilkobling (HTTPS)"
     },
     "cta": "Klikk for å åpne",
     "badges": {
@@ -146,16 +146,17 @@
     "features": {
       "title": "Nøkkelfunksjoner",
       "subtitle": "Alt du trenger for profesjonell konvertering",
-      "IA-Powered": "AI-drevet",
-      "Sécurité Militaire": "Militær sikkerhet",
       "10 Langues": "10 språk",
-      "Workflows": "Arbeidsflyter",
       "Traitement par lot": "Batchbehandling",
-      "Suggestions automatiques, amélioration qualité intelligente": "Automatiske forslag, smart kvalitetsforbedring",
-      "Chiffrement, geo-blocking, protection fraude, RGPD": "Kryptering, geoblokkering, svindelbeskyttelse, GDPR",
       "Interface internationalisée pour marchés premium": "Lokalisert grensesnitt for premiummarkeder",
-      "Pipelines visuels automatisés pour conversions complexes": "Automatiserte visuelle pipelines for komplekse konverteringer",
-      "100+ fichiers simultanément avec gestion de queue": "Over 100 filer samtidig med købehandling"
+      "Traitement immédiat": "Umiddelbar behandling",
+      "Fichiers non conservés": "Filer lagres ikke",
+      "Une cinquantaine d’outils": "Rundt femti verktøy",
+      "La conversion démarre dès l’import, sans installation ni compte obligatoire": "Konverteringen starter med en gang: ingen installasjon, ingen konto",
+      "Traitement à la demande, aucune base documentaire, aucune revente de données": "Behandling på forespørsel: ingen dokumentdatabase, ingen videresalg av data",
+      "Interface et outils traduits dans 10 langues": "Grensesnitt og verktøy på 10 språk",
+      "PDF, images, vidéo, audio, archives et QR code réunis sur une seule plateforme": "PDF, bilder, video, lyd, arkiver og QR-koder på én plattform",
+      "Plusieurs fichiers traités en une seule fois": "Fler filer i én omgang"
     },
     "toolTitles": {
       "Modifier & Annoter": "Rediger og kommenter",

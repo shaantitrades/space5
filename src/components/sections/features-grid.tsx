@@ -12,35 +12,40 @@ export function FeaturesGrid() {
     return t.has(fullKey) ? (t(fullKey) as string) : fallback;
   };
 
+  /**
+   * Fonctionnalités mises en avant sur la page d'accueil.
+   * ⚠️ Uniquement des capacités réellement implémentées : ni IA (aucun modèle
+   * n'est intégré), ni « sécurité militaire », ni pipeline visuel.
+   */
   const features = [
     {
       icon: Zap,
-      title: 'IA-Powered',
-      description: 'Suggestions automatiques, amélioration qualité intelligente',
+      title: 'Traitement immédiat',
+      description: 'La conversion démarre dès l’import, sans installation ni compte obligatoire',
       clickable: false,
     },
     {
       icon: Lock,
-      title: 'Sécurité Militaire',
-      description: 'Chiffrement, geo-blocking, protection fraude, RGPD',
+      title: 'Fichiers non conservés',
+      description: 'Traitement à la demande, aucune base documentaire, aucune revente de données',
       clickable: false,
     },
     {
       icon: Globe2,
       title: '10 Langues',
-      description: 'Interface internationalisée pour marchés premium',
+      description: 'Interface et outils traduits dans 10 langues',
       clickable: false,
     },
     {
       icon: Workflow,
-      title: 'Workflows',
-      description: 'Pipelines visuels automatisés pour conversions complexes',
+      title: 'Une cinquantaine d’outils',
+      description: 'PDF, images, vidéo, audio, archives et QR code réunis sur une seule plateforme',
       clickable: false,
     },
     {
       icon: Music,
       title: 'Traitement par lot',
-      description: '100+ fichiers simultanément avec gestion de queue',
+      description: 'Plusieurs fichiers traités en une seule fois',
       clickable: false,
     },
   ];

@@ -33,10 +33,12 @@ export function Hero() {
             </div>
           </div>
 
-          <div className="flex justify-center gap-4 text-sm font-semibold">
-            <span>{th.has('home.stats.converted') ? th('home.stats.converted') : '🎯 2M+ fichiers convertis'}</span>
-            <span>{th.has('home.stats.rating') ? th('home.stats.rating') : '⭐ 4.9/5'}</span>
-            <span>{th.has('home.stats.gdpr') ? th('home.stats.gdpr') : '🔐 Certifié GDPR'}</span>
+          {/* Faits vérifiables uniquement : aucun chiffre d'usage ni
+              certification non démontrée ne doit apparaître ici. */}
+          <div className="flex flex-wrap justify-center gap-4 text-sm font-semibold">
+            <span>{th.has('home.stats.noInstall') ? th('home.stats.noInstall') : '🖥️ Aucune installation'}</span>
+            <span>{th.has('home.stats.languages') ? th('home.stats.languages') : '🌍 Disponible en 10 langues'}</span>
+            <span>{th.has('home.stats.https') ? th('home.stats.https') : '🔒 Connexion chiffrée (HTTPS)'}</span>
           </div>
 
           {/* Barre de recherche : trouver un outil rapidement */}

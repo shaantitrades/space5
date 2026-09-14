@@ -112,9 +112,9 @@
   },
   "home": {
     "stats": {
-      "converted": "🎯 2 milj+ konverterade filer",
-      "rating": "⭐ 4.9/5",
-      "gdpr": "🔐 GDPR-certifierad"
+      "noInstall": "🖥️ Ingen installation",
+      "languages": "🌍 Tillgängligt på 10 språk",
+      "https": "🔒 Krypterad anslutning (HTTPS)"
     },
     "cta": "Klicka för att öppna",
     "badges": {
@@ -146,16 +146,17 @@
     "features": {
       "title": "Nyckelfunktioner",
       "subtitle": "Allt du behöver för professionell konvertering",
-      "IA-Powered": "AI-driven",
-      "Sécurité Militaire": "Militär säkerhet",
       "10 Langues": "10 språk",
-      "Workflows": "Arbetsflöden",
       "Traitement par lot": "Batchbearbetning",
-      "Suggestions automatiques, amélioration qualité intelligente": "Automatiska förslag, smart kvalitetsförbättring",
-      "Chiffrement, geo-blocking, protection fraude, RGPD": "Kryptering, geoblockering, bedrägeriskydd, GDPR",
       "Interface internationalisée pour marchés premium": "Lokaliserat gränssnitt för premiummarknader",
-      "Pipelines visuels automatisés pour conversions complexes": "Automatiserade visuella pipelines för komplexa konverteringar",
-      "100+ fichiers simultanément avec gestion de queue": "Över 100 filer samtidigt med köhantering"
+      "Traitement immédiat": "Omedelbar bearbetning",
+      "Fichiers non conservés": "Filer sparas inte",
+      "Une cinquantaine d’outils": "Cirka femtio verktyg",
+      "La conversion démarre dès l’import, sans installation ni compte obligatoire": "Konverteringen startar direkt: ingen installation, inget konto",
+      "Traitement à la demande, aucune base documentaire, aucune revente de données": "Bearbetning på begäran: ingen dokumentdatabas, ingen vidareförsäljning av data",
+      "Interface et outils traduits dans 10 langues": "Gränssnitt och verktyg på 10 språk",
+      "PDF, images, vidéo, audio, archives et QR code réunis sur une seule plateforme": "PDF, bilder, video, ljud, arkiv och QR-koder på en plattform",
+      "Plusieurs fichiers traités en une seule fois": "Flera filer i en enda körning"
     },
     "toolTitles": {
       "Modifier & Annoter": "Redigera och kommentera",

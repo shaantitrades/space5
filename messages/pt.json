@@ -112,9 +112,9 @@
   },
   "home": {
     "stats": {
-      "converted": "🎯 2 M+ ficheiros convertidos",
-      "rating": "⭐ 4.9/5",
-      "gdpr": "🔐 Certificado RGPD"
+      "noInstall": "🖥️ Sem instalação",
+      "languages": "🌍 Disponível em 10 idiomas",
+      "https": "🔒 Ligação encriptada (HTTPS)"
     },
     "cta": "Clique para aceder",
     "badges": {
@@ -146,16 +146,17 @@
     "features": {
       "title": "Funcionalidades principais",
       "subtitle": "Tudo o que precisa para uma conversão profissional",
-      "IA-Powered": "Com IA",
-      "Sécurité Militaire": "Segurança militar",
       "10 Langues": "10 idiomas",
-      "Workflows": "Fluxos de trabalho",
       "Traitement par lot": "Processamento em lote",
-      "Suggestions automatiques, amélioration qualité intelligente": "Sugestões automáticas, melhoria inteligente da qualidade",
-      "Chiffrement, geo-blocking, protection fraude, RGPD": "Encriptação, geobloqueio, proteção antifraude, RGPD",
       "Interface internationalisée pour marchés premium": "Interface localizada para mercados premium",
-      "Pipelines visuels automatisés pour conversions complexes": "Pipelines visuais automatizados para conversões complexas",
-      "100+ fichiers simultanément avec gestion de queue": "Mais de 100 ficheiros em simultâneo com gestão de filas"
+      "Traitement immédiat": "Processamento imediato",
+      "Fichiers non conservés": "Ficheiros não conservados",
+      "Une cinquantaine d’outils": "Cerca de cinquenta ferramentas",
+      "La conversion démarre dès l’import, sans installation ni compte obligatoire": "A conversão começa logo após o envio: sem instalação nem conta",
+      "Traitement à la demande, aucune base documentaire, aucune revente de données": "Processamento a pedido: sem base documental nem revenda de dados",
+      "Interface et outils traduits dans 10 langues": "Interface e ferramentas traduzidas em 10 idiomas",
+      "PDF, images, vidéo, audio, archives et QR code réunis sur une seule plateforme": "PDF, imagens, vídeo, áudio, arquivos e códigos QR numa só plataforma",
+      "Plusieurs fichiers traités en une seule fois": "Vários ficheiros processados de uma só vez"
     },
     "toolTitles": {
       "Modifier & Annoter": "Editar e anotar",

@@ -100,24 +100,24 @@ export default function FeaturesPage() {
     {
       id: 'security',
       title: 'SÉCURITÉ & CONFORMITÉ',
-      description: 'Protection de niveau militaire pour vos données',
+      description: 'Ce que nous protégeons, et comment',
       icon: Shield,
       color: 'from-green-500 to-emerald-500',
       features: [
         {
           icon: Lock,
-          name: 'Chiffrement AES-256',
-          description: 'Toutes les données sont chiffrées en transit et au repos',
+          name: 'Chiffrement en transit',
+          description: 'HTTPS/TLS sur tous les échanges. Le chiffrement au repos n’est pas encore généralisé.',
         },
         {
           icon: CheckCircle,
-          name: 'Suppression Auto',
-          description: 'Fichiers supprimés automatiquement selon votre plan (24h à permanent)',
+          name: 'Aucune conservation par défaut',
+          description: 'Les fichiers traités ne constituent pas une base documentaire.',
         },
         {
           icon: Shield,
-          name: 'Conformité RGPD, SOC2',
-          description: 'Certifications et audits de sécurité réguliers',
+          name: 'Conformité RGPD',
+          description: 'Minimisation des données et registre de traitement',
         },
         {
           icon: Globe,

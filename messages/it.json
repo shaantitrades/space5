@@ -112,9 +112,9 @@
   },
   "home": {
     "stats": {
-      "converted": "🎯 2 Mln+ file convertiti",
-      "rating": "⭐ 4.9/5",
-      "gdpr": "🔐 Certificato GDPR"
+      "noInstall": "🖥️ Nessuna installazione",
+      "languages": "🌍 Disponibile in 10 lingue",
+      "https": "🔒 Connessione cifrata (HTTPS)"
     },
     "cta": "Fai clic per accedere",
     "badges": {
@@ -146,16 +146,17 @@
     "features": {
       "title": "Funzioni principali",
       "subtitle": "Tutto ciò che serve per una conversione professionale",
-      "IA-Powered": "Con IA",
-      "Sécurité Militaire": "Sicurezza militare",
       "10 Langues": "10 lingue",
-      "Workflows": "Workflow",
       "Traitement par lot": "Elaborazione in batch",
-      "Suggestions automatiques, amélioration qualité intelligente": "Suggerimenti automatici, miglioramento intelligente della qualità",
-      "Chiffrement, geo-blocking, protection fraude, RGPD": "Crittografia, geoblocking, protezione antifrode, GDPR",
       "Interface internationalisée pour marchés premium": "Interfaccia localizzata per mercati premium",
-      "Pipelines visuels automatisés pour conversions complexes": "Pipeline visive automatizzate per conversioni complesse",
-      "100+ fichiers simultanément avec gestion de queue": "Oltre 100 file contemporaneamente con gestione delle code"
+      "Traitement immédiat": "Elaborazione immediata",
+      "Fichiers non conservés": "File non conservati",
+      "Une cinquantaine d’outils": "Circa cinquanta strumenti",
+      "La conversion démarre dès l’import, sans installation ni compte obligatoire": "La conversione parte subito: nessuna installazione né account",
+      "Traitement à la demande, aucune base documentaire, aucune revente de données": "Elaborazione su richiesta: nessun archivio documentale, nessuna rivendita di dati",
+      "Interface et outils traduits dans 10 langues": "Interfaccia e strumenti tradotti in 10 lingue",
+      "PDF, images, vidéo, audio, archives et QR code réunis sur une seule plateforme": "PDF, immagini, video, audio, archivi e codici QR su un’unica piattaforma",
+      "Plusieurs fichiers traités en une seule fois": "Più file elaborati in una sola volta"
     },
     "toolTitles": {
       "Modifier & Annoter": "Modifica e annota",
