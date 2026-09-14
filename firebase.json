@@ -1,9 +1,0 @@
-{
-  "apphosting": {
-    "site": "space5",
-    "source": {
-      "projectId": "convert-multimedia",
-      "location": "europe-west4"
-    }
-  }
-}

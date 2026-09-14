@@ -33,16 +33,10 @@ scripts/
 *.bat
 !docker-entrypoint.sh
 
-# ── CI / cloud configs ────────────────────────────────────────
+# ── CI / scripts locaux ───────────────────────────────────────
 .github/
-.firebase/
-.firebaserc
-firebase.json
-apphosting.yaml
-*.firebaserc*
 deploy-*.ps1
 deploy-*.sh
-init-firebase.*
 setup-*.*
 configure-*.*
 
