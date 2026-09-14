@@ -67,8 +67,18 @@ ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL \
     NEXT_BUILD_PHASE=1
 
 # Limite le heap Node pour éviter l'OOM sur un petit VPS.
-# 2048 = OK pour 4 Go ; baissez à 1024–1536 sur un VPS 2 Go si OOM.
-ENV NODE_OPTIONS="--max-old-space-size=2048"
+#
+# Constaté en production : le build échouait à l'étape
+# « Collecting build traces » (exit code 255, sans message d'erreur),
+# c'est-à-dire l'étape la plus gourmande en mémoire de Next.js.
+# Cause probable : mémoire insuffisante sur le VPS pendant le build
+# (Coolify + l'ancien conteneur app + postgres + redis tournent en parallèle).
+#
+# 2048 = OK pour 4 Go ; 1024–1536 sur un VPS 2 Go.
+# La valeur est surchargeable au build sans modifier le fichier :
+#   --build-arg NODE_MAX_OLD_SPACE_SIZE=2048
+ARG NODE_MAX_OLD_SPACE_SIZE=1536
+ENV NODE_OPTIONS="--max-old-space-size=${NODE_MAX_OLD_SPACE_SIZE}"
 
 RUN npm run build
 
