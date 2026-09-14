@@ -44,12 +44,10 @@ export function Navbar() {
     { href: '/tools', label: t('tools') },
     { href: '/convert', label: t('convert') },
     { href: '/archive', label: t('archive') },
-    ...(siteConfig.features.showPricing
-      ? [
-          { href: '/pricing', label: t('pricing') },
-          { href: '/enterprise', label: t('enterprise') },
-        ]
-      : []),
+    ...(siteConfig.features.showPricing ? [{ href: '/pricing', label: t('pricing') }] : []),
+    // La page pilote entreprise reste accessible même quand les tarifs sont masqués :
+    // c'est une page d'offre commerciale, pas une grille tarifaire.
+    { href: '/entreprise', label: t('enterprise') },
     { href: '/features', label: t('features') },
   ];
 
