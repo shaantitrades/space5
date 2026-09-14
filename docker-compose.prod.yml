@@ -2,7 +2,20 @@ version: '3.8'
 
 services:
   app:
-    image: ${IMAGE:-ghcr.io/${GITHUB_OWNER:-your-org}/space5:latest}
+    # Le code deploye est compile ICI, depuis ce depot.
+    # AVANT : il n'y avait que `image:` (sans `build:`) -> Coolify ne
+    # recompilait jamais le depot et relancait une image locale ancienne,
+    # ce qui servait une vieille version du site (d'ou /api/health fige au
+    # 7 septembre et l'ancien docker-entrypoint.sh dans les logs).
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+        NEXT_PUBLIC_VERSION: ${NEXT_PUBLIC_VERSION:-1.0.0}
+    # Tag local par defaut : plus aucune dependance a une image GHCR.
+    image: ${IMAGE:-multi-convert:latest}
     restart: unless-stopped
     environment:
       NODE_ENV: production
@@ -39,8 +52,8 @@ services:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
       interval: 30s
       timeout: 10s
-      start_period: 60s
-      retries: 3
+      start_period: 120s
+      retries: 5
     networks:
       - internal
       - proxy
