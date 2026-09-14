@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense, lazy } from 'react';
+import { useState, useEffect, Suspense, lazy, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   Image as ImageIcon,
@@ -95,12 +95,34 @@ export default function ImagesPage() {
     },
   ];
 
+  /** Zone de dépôt : cible du défilement automatique au choix d'un outil */
+  const uploadZoneRef = useRef<HTMLDivElement>(null);
+  /** Évite de défiler en boucle si l'effet ci-dessous se relance */
+  const lastHandledToolRef = useRef<string | null>(null);
+
+  /** Fait descendre la page jusqu'à la zone de traitement */
+  const scrollToUploadZone = () => {
+    // Léger délai : le panneau de l'outil doit être rendu avant de défiler
+    setTimeout(() => {
+      uploadZoneRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  };
+
   // Détecte le paramètre ?tool= dans l'URL et sélectionne l'outil correspondant
   useEffect(() => {
     const toolParam = searchParams.get('tool');
-    if (toolParam && tools.some((t) => t.id === toolParam)) {
-      setSelectedTool(toolParam as ImageTool);
-    }
+    if (!toolParam || !tools.some((t) => t.id === toolParam)) return;
+
+    setSelectedTool(toolParam as ImageTool);
+
+    // Ne défiler qu'une seule fois par valeur de ?tool= :
+    // cela évite tout défilement répété si l'effet se relance.
+    if (lastHandledToolRef.current === toolParam) return;
+    lastHandledToolRef.current = toolParam;
+
+    // Arriver via un lien direct (ex. /images?tool=favicon) doit aussi
+    // amener l'utilisateur jusqu'à la zone de traitement.
+    scrollToUploadZone();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
@@ -203,7 +225,7 @@ export default function ImagesPage() {
             Images & Logos - Studio Professionnel
           </h1>
           <p className="text-xl text-muted-foreground">
-            Conversion, optimisation et édition d'images en un clic
+            Conversion, optimisation et édition d’images en un clic
           </p>
         </div>
 
@@ -216,7 +238,10 @@ export default function ImagesPage() {
             return (
               <button
                 key={tool.id}
-                onClick={() => setSelectedTool(tool.id)}
+                onClick={() => {
+                  setSelectedTool(tool.id);
+                  scrollToUploadZone();
+                }}
                 className={`p-6 rounded-lg border-2 transition-all text-left ${
                   isSelected
                     ? 'border-primary bg-primary/10 shadow-lg scale-105'
@@ -251,7 +276,10 @@ export default function ImagesPage() {
               <div className="mb-6">
                 {/* Zone principale drag-and-drop */}
                 <label className="block w-full mb-4">
-                  <div className="border-2 border-dashed border-primary/50 rounded-lg p-12 text-center hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer">
+                  <div
+                    ref={uploadZoneRef}
+                    className="border-2 border-dashed border-primary/50 rounded-lg p-12 text-center hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer"
+                  >
                     <Upload className="w-12 h-12 text-primary mx-auto mb-4" />
                     <p className="text-xl font-bold mb-4">
                       Déposez votre fichier ici

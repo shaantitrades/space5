@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import {
@@ -29,7 +29,6 @@ export default function MediaPage() {
   const [selectedVideoFormat, setSelectedVideoFormat] = useState<string>('');
   const [selectedAudioFormat, setSelectedAudioFormat] = useState<string>('');
   const [processedFile, setProcessedFile] = useState<{ blob: Blob; filename: string } | null>(null);
-  const [downloadedFiles, setDownloadedFiles] = useState<Set<number>>(new Set());
   const [downloadSuccess, setDownloadSuccess] = useState(false);
 
   const tools = [
@@ -89,12 +88,34 @@ export default function MediaPage() {
     },
   ];
 
+  /** Zone de dépôt : cible du défilement automatique au choix d'un outil */
+  const uploadZoneRef = useRef<HTMLDivElement>(null);
+  /** Évite de défiler en boucle si l'effet ci-dessous se relance */
+  const lastHandledToolRef = useRef<string | null>(null);
+
+  /** Fait descendre la page jusqu'à la zone de traitement */
+  const scrollToUploadZone = () => {
+    // Léger délai : le panneau de l'outil doit être rendu avant de défiler
+    setTimeout(() => {
+      uploadZoneRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  };
+
   // Détecte le paramètre ?tool= dans l'URL et sélectionne l'outil correspondant
   useEffect(() => {
     const toolParam = searchParams.get('tool');
-    if (toolParam && tools.some((t) => t.id === toolParam)) {
-      setSelectedTool(toolParam as MediaTool);
-    }
+    if (!toolParam || !tools.some((t) => t.id === toolParam)) return;
+
+    setSelectedTool(toolParam as MediaTool);
+
+    // Ne défiler qu'une seule fois par valeur de ?tool= :
+    // cela évite tout défilement répété si l'effet se relance.
+    if (lastHandledToolRef.current === toolParam) return;
+    lastHandledToolRef.current = toolParam;
+
+    // Arriver via un lien direct (ex. /media?tool=video-convert) doit aussi
+    // amener l'utilisateur jusqu'à la zone de traitement.
+    scrollToUploadZone();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
@@ -119,6 +140,7 @@ export default function MediaPage() {
   const handleCloudImport = (provider: 'google-drive' | 'dropbox' | 'onedrive') => {
     // Pour l'instant, utiliser la sélection de fichiers locale comme fallback
     // TODO: Implémenter l'intégration réelle avec les APIs cloud (Google Picker API, Dropbox Chooser, Microsoft Graph API)
+    console.info(`Import cloud « ${provider} » non implémenté : sélection locale utilisée à la place.`);
     // Déclencher la sélection de fichiers locale comme alternative temporaire
     triggerFileSelection();
   };
@@ -243,6 +265,7 @@ export default function MediaPage() {
                   setSelectedTool(tool.id);
                   setProcessedFile(null); // Réinitialiser le fichier traité lors du changement d'outil
                   setDownloadSuccess(false); // Réinitialiser le statut de téléchargement
+                  scrollToUploadZone();
                 }}
                 className={`p-6 rounded-lg border-2 transition-all text-left ${
                   isSelected
@@ -276,7 +299,10 @@ export default function MediaPage() {
               <div className="mb-6">
                 {/* Zone principale drag-and-drop */}
                 <label className="block w-full mb-4">
-                  <div className="border-2 border-dashed border-primary/50 rounded-lg p-12 text-center hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer">
+                  <div
+                    ref={uploadZoneRef}
+                    className="border-2 border-dashed border-primary/50 rounded-lg p-12 text-center hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer"
+                  >
                     <Upload className="w-12 h-12 text-primary mx-auto mb-4" />
                     <p className="text-xl font-bold mb-4">
                       Déposez votre fichier ici
