@@ -7,6 +7,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { BLOCKED_COUNTRIES, SECURITY_ACTIONS, SUSPICIOUS_ASNS } from './config/security';
+import { relativeRedirect } from './lib/relative-redirect';
 import createMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
 
@@ -218,11 +219,11 @@ export async function middleware(request: NextRequest) {
         path,
       });
 
-      // Rediriger vers une page de vérification
+      // Rediriger vers une page de vérification.
+      // Redirection RELATIVE : `new URL(path, request.url)` exposait l'adresse
+      // interne du conteneur (http://0.0.0.0:3000) → ERR_ADDRESS_INVALID.
       if (!path.startsWith('/verify')) {
-        const verifyUrl = new URL('/verify', request.url);
-        verifyUrl.searchParams.set('reason', 'threat_score');
-        return NextResponse.redirect(verifyUrl);
+        return relativeRedirect('/verify?reason=threat_score');
       }
     }
 
@@ -236,9 +237,7 @@ export async function middleware(request: NextRequest) {
       });
 
       if (!path.startsWith('/verify')) {
-        const verifyUrl = new URL('/verify', request.url);
-        verifyUrl.searchParams.set('reason', 'suspicious_behavior');
-        return NextResponse.redirect(verifyUrl);
+        return relativeRedirect('/verify?reason=suspicious_behavior');
       }
     }
 
