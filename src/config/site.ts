@@ -1,7 +1,41 @@
+/**
+ * URL canonique du site.
+ *
+ * Le sitemap, les balises `canonical`, les `hreflang` et les JSON-LD DOIVENT
+ * pointer vers https://multi-convert.com : jamais `http://`, jamais de « / »
+ * final (sinon Google reçoit des URLs en double et rejette le sitemap).
+ *
+ * On normalise donc systématiquement la variable d'environnement :
+ * - espaces et « / » finaux supprimés ;
+ * - passage forcé en `https` (exception : développement local sur localhost) ;
+ * - schéma ajouté si absent ;
+ * - repli sur l'URL canonique de production si la variable est vide.
+ */
+export const CANONICAL_SITE_URL = 'https://multi-convert.com';
+
+function normalizeSiteUrl(raw: string | undefined | null): string {
+  const value = (raw || '').trim().replace(/\/+$/, '');
+
+  if (!value) {
+    return CANONICAL_SITE_URL;
+  }
+
+  const withProtocol = /^https?:\/\//i.test(value) ? value : `https://${value}`;
+
+  // En développement, http://localhost:3000 reste autorisé (sinon les liens
+  // locaux et metadataBase seraient cassés).
+  const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?$/i.test(withProtocol);
+  if (isLocalhost) {
+    return withProtocol;
+  }
+
+  return withProtocol.replace(/^http:\/\//i, 'https://');
+}
+
 export const siteConfig = {
   name: 'Multi Convert',
   description: 'The Universal Conversion Suite. All formats, one platform. Convert PDF, images, videos, audio and documents instantly.',
-  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://multi-convert.com',
+  url: normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL),
   ogImage: '/og-image.png',
   links: {
     twitter: 'https://twitter.com/multiconvert',

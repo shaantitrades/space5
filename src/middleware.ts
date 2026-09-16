@@ -13,6 +13,48 @@ import { routing } from './i18n/routing';
 // Middleware i18n
 const intlMiddleware = createMiddleware(routing);
 
+/**
+ * Routes techniques servies telles quelles (XML / texte) : elles ne doivent
+ * jamais passer par le middleware i18n (aucune langue à préfixer) ni être
+ * redirigées, sinon Google reçoit du HTML au lieu du sitemap XML.
+ */
+const TECHNICAL_ROUTES = new Set(['/sitemap.xml', '/robots.txt', '/manifest.webmanifest', '/sw.js']);
+
+/**
+ * Robots d'indexation légitimes : ils DOIVENT pouvoir explorer le site.
+ * Sans cette liste, la règle trop large `/bot/i` les redirigeait vers /verify
+ * (307) et Google Search Console ne pouvait plus rien récupérer.
+ */
+const LEGITIMATE_CRAWLERS = [
+  /googlebot/i,
+  /google-inspectiontool/i,
+  /storebot-google/i,
+  /googleother/i,
+  /google-sitemaps/i,
+  /bingbot/i,
+  /bingpreview/i,
+  /duckduckbot/i,
+  /yandex/i,
+  /applebot/i,
+  /baiduspider/i,
+  /slurp/i,
+  /sogou/i,
+  /exabot/i,
+  /ia_archiver/i,
+  /facebookexternalhit/i,
+  /twitterbot/i,
+  /linkedinbot/i,
+  /pinterest/i,
+  /whatsapp/i,
+  /telegrambot/i,
+  /discordbot/i,
+];
+
+/** Vrai si le User-Agent est un moteur de recherche légitime. */
+function isLegitimateCrawler(userAgent: string): boolean {
+  return LEGITIMATE_CRAWLERS.some((pattern) => pattern.test(userAgent));
+}
+
 interface GeoData {
   country: string;
   asn?: string;
@@ -59,6 +101,12 @@ async function isSuspiciousBehavior(request: NextRequest): Promise<boolean> {
   const userAgent = request.headers.get('user-agent') || '';
   const path = request.nextUrl.pathname;
 
+  // Les moteurs de recherche légitimes ne sont jamais considérés comme suspects
+  // (Googlebot contient « bot » : la règle générique /bot/i le bloquait).
+  if (isLegitimateCrawler(userAgent)) {
+    return false;
+  }
+
   // Patterns suspects
   const suspiciousPatterns = [
     /sqlmap/i,
@@ -68,7 +116,6 @@ async function isSuspiciousBehavior(request: NextRequest): Promise<boolean> {
     /zap/i,
     /burp/i,
     /scanner/i,
-    /bot/i,
   ];
 
   // Vérifier user-agent suspect
@@ -109,6 +156,12 @@ async function logSecurityEvent(
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const ip = request.ip || request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+
+  // Routes techniques (sitemap.xml, robots.txt…) : servies telles quelles,
+  // sans réécriture i18n ni redirection possible.
+  if (TECHNICAL_ROUTES.has(path)) {
+    return NextResponse.next();
+  }
 
   // Skip pour les fichiers statiques et API internes
   if (
@@ -216,7 +269,9 @@ export const config = {
      * - _next/image (optimisation d'image)
      * - favicon.ico (favicon)
      */
-    /* Exclut aussi tous les fichiers statiques (chemins contenant un point) : /icon-192.png, /manifest.webmanifest, /sw.js, etc. */
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)',
+    /* Exclut aussi tous les fichiers statiques (chemins contenant un point) : /icon-192.png, /manifest.webmanifest, /sw.js, etc.
+     * Les routes SEO (/sitemap.xml, /robots.txt) sont listées explicitement pour
+     * qu'aucune évolution du middleware ne les intercepte. */
+    '/((?!api|_next/static|_next/image|favicon.ico|robots\\.txt|sitemap\\.xml|manifest\\.webmanifest|sw\\.js|.*\\..*).*)',
   ],
 };
