@@ -17,7 +17,11 @@ const HINTS: Record<string, string> = {
   P1001:
     "Base de données injoignable → vérifiez DATABASE_URL (hôte « mc_postgres » pour docker-compose.prod.yml) et l'état du conteneur Postgres.",
   P1000:
-    'Authentification refusée par PostgreSQL → vérifiez utilisateur / mot de passe dans DATABASE_URL.',
+    'Authentification refusée par PostgreSQL → le mot de passe de DATABASE_URL ne correspond pas à celui du volume Postgres. ' +
+    'POSTGRES_PASSWORD n’est appliqué qu’à la première initialisation du volume : soit alignez DATABASE_URL sur le mot de passe initial, ' +
+    'soit changez-le dans la base (« ALTER USER postgres WITH PASSWORD \'…\'; »), puis redémarrez l’app.',
+  P1013:
+    'Chaîne de connexion invalide → vérifiez DATABASE_URL/DIRECT_URL (mot de passe encodé en URL : @ → %40, : → %3A, / → %2F, # → %23).',
   P1002:
     "Délai dépassé en joignant la base → vérifiez le réseau interne du stack (mc_postgres) et les règles du pare-feu.",
   P1012: 'DATABASE_URL ou DIRECT_URL invalide (schéma manquant, variable vide…).',

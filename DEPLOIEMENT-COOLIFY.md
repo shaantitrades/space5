@@ -169,15 +169,41 @@ Puis : **Google Search Console** → ajouter la propriété et soumettre `sitema
 ### Le conteneur redémarre en boucle
 → Une variable obligatoire manque. Les logs indiquent laquelle : `docker logs <conteneur_app>`.
 
-### `Can't reach database server`
-→ `DATABASE_URL` doit pointer vers le **nom du service** (`postgres`), pas vers `localhost`.
+### `Can't reach database server` (Prisma `P1001`)
+→ `DATABASE_URL` doit pointer vers le **nom du service** (`mc_postgres`), pas vers `localhost`.
+
+### `password authentication failed for user "postgres"` (Prisma `P1000`)
+→ Le mot de passe de `DATABASE_URL` ne correspond pas à celui du **volume** Postgres.
+`POSTGRES_PASSWORD` n'est appliqué qu'à la **première** initialisation du volume : le
+changer dans Coolify ensuite n'a **aucun effet** sur une base déjà créée
+(log : `PostgreSQL Database directory appears to contain a database; Skipping initialization`).
+Deux solutions, puis **redémarrer le conteneur app** (le `prisma db push` du démarrage
+recréera les tables manquantes) :
+
+```bash
+# A) Reprendre le mot de passe initial dans DATABASE_URL et DIRECT_URL
+#    (si POSTGRES_PASSWORD n'avait jamais été défini au premier démarrage : MultiConvert2026)
+
+# B) Ou aligner la base sur ce que Coolify envoie
+docker exec -it <conteneur_postgres> psql -U postgres -c \
+  "ALTER USER postgres WITH PASSWORD 'LE_MOT_DE_PASSE';"
+```
+
+⚠️ Ne supprimez **pas** le volume Postgres pour « repartir de zéro » : perte des comptes
+et des leads. Si le mot de passe contient des caractères spéciaux, encodez-les dans
+l'URL (`@` → `%40`, `:` → `%3A`, `/` → `%2F`, `#` → `%23`).
 
 ### Le site répond mais renvoie une erreur 500
-→ Migration Prisma non appliquée, ou `NEXTAUTH_SECRET` absent.
+→ Base injoignable (`P1001`), identifiants refusés (`P1000`) ou schéma en retard (`P2022`).
+→ Diagnostic immédiat : `GET /api/health` (champ `database` avec le code et, le cas
+échéant, la liste `missingColumns`).
 
 ### Le formulaire enregistre mais aucun email n'arrive
-→ `SENDGRID_API_KEY` (ou SMTP) non configurée, ou `LEADS_NOTIFICATION_EMAIL` vide.
-→ Le contrôle est tracé dans les logs : `🔧 [LEAD] Notification non envoyée…`.
+→ Aucun fournisseur configuré : `RESEND_API_KEY` (recommandé), `SENDGRID_API_KEY` ou SMTP.
+→ Vérifier aussi que `DEV_MODE` / `SKIP_DB` ne sont **pas** définis en production
+(ils remplacent la base par un mock et n'envoient aucun email).
+→ Le contrôle est tracé dans les logs : `✅ Email envoyé via resend à …` ou
+`❌ Resend a refusé l'email (HTTP 422) : …`.
 
 ### Le domaine ne répond pas du tout
 → Vérifier que l'enregistrement A pointe vers `95.111.230.185`, que le proxy Coolify est actif
