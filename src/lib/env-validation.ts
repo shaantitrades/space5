@@ -53,6 +53,15 @@ const envSchema = z.object({
 
   SENTRY_DSN: optionalUrl,
   SENDGRID_API_KEY: z.string().optional(),
+  // Resend — fournisseur d'emails recommandé (RESEND_API_KEY suffit)
+  RESEND_API_KEY: z.string().optional(),
+  /** Override de l'API Resend (tests locaux / proxy) — laisser vide en production */
+  RESEND_BASE_URL: optionalUrl,
+  // SMTP générique (repli, ou SMTP Resend : smtp.resend.com / 587 / user « resend »)
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.string().optional(),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASSWORD: z.string().optional(),
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_PUBLISHABLE_KEY: z.string().optional(),
   AWS_ACCESS_KEY_ID: z.string().optional(),

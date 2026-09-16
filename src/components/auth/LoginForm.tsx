@@ -5,10 +5,10 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from '@/i18n/routing';
 import { useRouter } from '@/i18n/routing';
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { CheckCircle, Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import RateLimiter from './RateLimiter';
 import { AuthError } from './auth-error';
 
@@ -17,6 +17,15 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+
+  // Message de confirmation après un clic sur le lien reçu par email :
+  // /api/auth/verify redirige vers /login?verified=1
+  useEffect(() => {
+    if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('verified') === '1') {
+      setNotice('Votre email est confirmé. Vous pouvez vous connecter.');
+    }
+  }, []);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -69,6 +78,14 @@ export default function LoginForm() {
     <form onSubmit={handleSubmit} className="space-y-5">
       {/* Rate Limiter */}
       <RateLimiter action="login" />
+
+      {/* Confirmation d'email : bandeau vert */}
+      {notice && (
+        <div className="flex items-start space-x-2 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">
+          <CheckCircle className="h-5 w-5 flex-shrink-0 text-green-600" />
+          <span>{notice}</span>
+        </div>
+      )}
 
       {/* Erreur : bandeau fixe en bas de l'écran (toujours visible) */}
       <AuthError message={error} onClose={() => setError('')} />

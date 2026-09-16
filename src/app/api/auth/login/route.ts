@@ -8,6 +8,7 @@ import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { DevAuth, isDevMode, createDevToken } from '@/lib/dev-auth';
+import { describeDatabaseError } from '@/lib/db-error';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -60,7 +61,11 @@ export async function POST(request: NextRequest) {
       where: { email: email.toLowerCase() },
     });
 
-    if (!user || !user.password) {
+    // Le hash vit dans `passwordHash` (colonne de référence) ; l'ancienne
+    // colonne `password` reste lue pour les comptes créés avant la migration.
+    const passwordHash = user?.passwordHash || user?.password;
+
+    if (!user || !passwordHash) {
       return NextResponse.json(
         { message: 'Email ou mot de passe incorrect' },
         { status: 401 }
@@ -68,7 +73,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Vérifier le mot de passe
-    const isValidPassword = await bcrypt.compare(password, user.password);
+    const isValidPassword = await bcrypt.compare(password, passwordHash);
 
     if (!isValidPassword) {
       return NextResponse.json(
@@ -130,9 +135,10 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error) {
-    console.error('Erreur login:', error);
+    const dbError = describeDatabaseError(error);
+    console.error('Erreur login:', dbError.summary, error);
     return NextResponse.json(
-      { message: 'Erreur lors de la connexion' },
+      { message: 'Erreur lors de la connexion', code: dbError.code },
       { status: 500 }
     );
   }

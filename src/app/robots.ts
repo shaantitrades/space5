@@ -19,6 +19,7 @@ export default function robots(): MetadataRoute.Robots {
           '/verify',
           '/verify-email',
           '/forgot-password',
+          '/reset-password',
           '/403',
           '/pricing',
           '/*?apiKey=*',

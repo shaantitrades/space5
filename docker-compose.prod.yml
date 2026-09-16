@@ -29,8 +29,11 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       SENDGRID_API_KEY: ${SENDGRID_API_KEY}
-      # Emails applicatifs : sans ces variables, le code retombe sur
-      # "noreply@multi-convert.com", que SendGrid refuse si l'adresse
+      # Resend (fournisseur principal) : une seule variable suffit.
+      # Le domaine d'EMAIL_FROM doit être verifie dans le compte Resend.
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      # Emails applicatifs : sans EMAIL_FROM, le code retombe sur
+      # "noreply@multi-convert.com", que le fournisseur refuse si l'adresse
       # n'est pas verifiee chez lui.
       EMAIL_FROM: ${EMAIL_FROM}
       CONTACT_EMAIL: ${CONTACT_EMAIL}

@@ -1,14 +1,15 @@
 /**
- * Multi Convert - API Forgot Password
- * Route de mot de passe oublié
+ * ✉️  RENVOI DE L'EMAIL DE CONFIRMATION - Multi Convert
  *
- * Envoie réellement l'email de réinitialisation (Resend / SendGrid / SMTP).
+ * POST /api/auth/resend-verification  { email }
+ *
+ * Génère un nouveau token (24 h) et renvoie l'email de confirmation.
  * La réponse est toujours identique pour ne pas révéler l'existence d'un compte.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { sendPasswordResetEmail } from '@/lib/email';
+import { sendVerificationEmail } from '@/lib/email';
 import { isDevMode } from '@/lib/dev-auth';
 import { rateLimitByIP } from '@/lib/rate-limiter';
 import { describeDatabaseError } from '@/lib/db-error';
@@ -17,15 +18,15 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const GENERIC_MESSAGE =
-  'Si un compte existe avec cet email, un lien de réinitialisation a été envoyé';
+  "Si un compte non vérifié existe avec cet email, un nouvel email de confirmation a été envoyé";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(request: NextRequest) {
   try {
-    // Anti-abus : 5 demandes par heure et par IP
+    // Anti-abus : 5 renvois par heure et par IP
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
-    const limit = rateLimitByIP(`forgot-password:${ip}`, 5, 60 * 60 * 1000);
+    const limit = rateLimitByIP(`resend-verification:${ip}`, 5, 60 * 60 * 1000);
 
     if (!limit.allowed) {
       return NextResponse.json(
@@ -41,32 +42,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Email requis' }, { status: 400 });
     }
 
-    // 🔧 MODE DEV: réponse simulée (pas de base de données)
     if (isDevMode()) {
-      console.log(`🔧 [DEV MODE] Forgot password pour ${email}`);
+      console.log(`🔧 [DEV MODE] Renvoi de l'email de vérification pour ${email}`);
       return NextResponse.json({ message: GENERIC_MESSAGE }, { status: 200 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
+    const user = await prisma.user.findUnique({ where: { email } });
 
-    // Toujours la même réponse, même si l'email n'existe pas
-    if (!user) {
+    // Déjà vérifié ou inexistant : même réponse
+    if (!user || user.emailVerified) {
       return NextResponse.json({ message: GENERIC_MESSAGE }, { status: 200 });
     }
 
-    const sent = await sendPasswordResetEmail(user.email, user.id);
+    const sent = await sendVerificationEmail(user.email, user.id);
 
     if (!sent) {
-      // Visible dans les logs serveur uniquement : aucune fuite côté client
-      console.error(`⚠️  Lien de réinitialisation non envoyé pour ${user.email}`);
+      console.error(`⚠️  Email de vérification non renvoyé pour ${user.email}`);
     }
 
     return NextResponse.json({ message: GENERIC_MESSAGE }, { status: 200 });
   } catch (error) {
     const dbError = describeDatabaseError(error);
-    console.error('Erreur forgot-password:', dbError.summary, error);
+    console.error('Erreur resend-verification:', dbError.summary, error);
     return NextResponse.json(
       { message: 'Erreur lors de l\'envoi', code: dbError.code },
       { status: 500 }

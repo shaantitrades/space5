@@ -6,6 +6,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sendVerificationEmail } from '@/lib/email';
+import { passwordSchema } from '@/lib/password-schema';
+import { describeDatabaseError } from '@/lib/db-error';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { DevAuth, isDevMode, createDevToken } from '@/lib/dev-auth';
@@ -14,14 +16,8 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 // ========== VALIDATION SCHEMA ==========
-
-const passwordSchema = z.string()
-  .min(8, 'Minimum 8 caractères')
-  .max(128)
-  .regex(/[A-Z]/, 'Minimum 1 majuscule')
-  .regex(/[a-z]/, 'Minimum 1 minuscule')
-  .regex(/[0-9]/, 'Minimum 1 chiffre')
-  .regex(/[!@#$%^&*()_+=\[\]{};:'",.<>?\/\\|-]/, 'Minimum 1 caractère spécial');
+// Les règles du mot de passe sont partagées avec la réinitialisation
+// (src/lib/password-schema.ts) : un mot de passe accepté ici doit l'être là-bas.
 
 const signupSchema = z.object({
   fullName: z.string().min(2, 'Minimum 2 caractères').max(100),
@@ -90,18 +86,21 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await bcrypt.hash(data.password, 12);
 
     // Créer l'utilisateur
+    // `passwordHash` est la colonne de référence ; `password` est conservée
+    // (même hash bcrypt) pour la compatibilité avec l'existant.
     const user = await prisma.user.create({
       data: {
         email: data.email.toLowerCase(),
         name: data.fullName,
         passwordHash: hashedPassword,
+        password: hashedPassword,
         acceptMarketing: data.acceptMarketing,
         emailVerified: null, // Email non vérifié
         role: 'USER',
       },
     });
 
-    // ✅ Envoyer l'email de vérification
+    // ✅ Envoyer l'email de confirmation d'inscription
     const emailSent = await sendVerificationEmail(user.email, user.id);
 
     if (!emailSent) {
@@ -110,7 +109,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
-        message: 'Inscription réussie. Vérifiez votre email pour continuer.',
+        message: emailSent
+          ? 'Inscription réussie. Vérifiez votre email pour continuer.'
+          : "Inscription réussie, mais l'email de confirmation n'a pas pu être envoyé. Utilisez « Renvoyer l'email » sur la page de vérification.",
+        emailSent,
         user: {
           id: user.id,
           email: user.email,
@@ -134,9 +136,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('Erreur signup:', error);
+    const dbError = describeDatabaseError(error);
+    console.error('Erreur signup:', dbError.summary, error);
     return NextResponse.json(
-      { message: 'Erreur lors de l\'inscription' },
+      { message: 'Erreur lors de l\'inscription', code: dbError.code },
       { status: 500 }
     );
   }

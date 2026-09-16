@@ -82,7 +82,7 @@ Le conteneur **ne lit aucun fichier `.env`** : tout est injecté par Coolify à 
 | `EMAIL_FROM` | Expéditeur des emails | repli sur `noreply@multi-convert.com` |
 | `CONTACT_EMAIL` | Adresse publique affichée sur le site | repli sur `contact@multi-convert.com` |
 | `LEADS_NOTIFICATION_EMAIL` | Destinataire des **demandes entreprise** | aucun email envoyé (le lead est tout de même enregistré) |
-| `SENDGRID_API_KEY` **ou** SMTP (`SMTP_HOST`/`SMTP_USER`/`SMTP_PASSWORD`) | Envoi réel des emails | ⚠️ **aucun email ne part** : ni vérification de compte, ni notification de lead |
+| `RESEND_API_KEY` **(recommandé)** ou `SENDGRID_API_KEY` ou SMTP (`SMTP_HOST`/`SMTP_USER`/`SMTP_PASSWORD`) | Envoi réel des emails | ⚠️ **aucun email ne part** : ni confirmation d'inscription, ni réinitialisation de mot de passe, ni notification de lead |
 | `ADMIN_EMAILS` | Accès à l'administration | administration inaccessible |
 
 ### Optionnelles (fonctionnalités désactivées si vides)
