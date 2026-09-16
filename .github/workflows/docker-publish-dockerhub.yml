@@ -35,6 +35,12 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/space5:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/space5:${{ github.sha }}
           platforms: linux/amd64,linux/arm64
+          # NEXT_PUBLIC_* sont inlinées au build (sinon http://localhost:3000)
+          build-args: |
+            NEXT_PUBLIC_APP_URL=https://multi-convert.com
+            NEXT_PUBLIC_API_URL=https://multi-convert.com
+            NEXT_PUBLIC_VERSION=1.0.0
+            NODE_MAX_OLD_SPACE_SIZE=4096
 
       - name: Output image
         run: echo "IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/space5:latest"

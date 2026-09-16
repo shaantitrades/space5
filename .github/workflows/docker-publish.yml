@@ -39,6 +39,17 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/space5:latest
             ghcr.io/${{ github.repository_owner }}/space5:${{ github.sha }}
           platforms: linux/amd64,linux/arm64
+          # NEXT_PUBLIC_* sont inlinées au build : sans ces valeurs, l'image
+          # pointerait sur http://localhost:3000 (liens et métadonnées).
+          # NEXT_PUBLIC_SITE_URL n'est pas nécessaire : le code retombe sur
+          # l'URL canonique https://multi-convert.com.
+          # NODE_MAX_OLD_SPACE_SIZE : les runners GitHub ont la RAM nécessaire
+          # pour les 329 pages pré-rendues (le VPS, non).
+          build-args: |
+            NEXT_PUBLIC_APP_URL=https://multi-convert.com
+            NEXT_PUBLIC_API_URL=https://multi-convert.com
+            NEXT_PUBLIC_VERSION=1.0.0
+            NODE_MAX_OLD_SPACE_SIZE=4096
 
       - name: Output image
         run: echo "IMAGE=ghcr.io/${{ github.repository_owner }}/space5:latest"
