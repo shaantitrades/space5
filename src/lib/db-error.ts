@@ -45,19 +45,45 @@ export function describeDatabaseError(error: unknown): DescribedDatabaseError {
         : null;
 
   // Les messages Prisma sont multi-lignes : la dernière ligne utile est la cause
-  const lines =
-    error instanceof Error
-      ? error.message.split('\n').map((line) => line.trim()).filter(Boolean)
-      : [String(error)];
+  const message = extractMessage(error);
+  const lines = message.split('\n').map((line) => line.trim()).filter(Boolean);
 
-  const cause = lines[lines.length - 1] || 'Erreur inconnue';
-  const code = explicitCode ?? inferCodeFromMessage(error instanceof Error ? error.message : cause);
+  const cause = pickCause(lines);
+  const code = explicitCode ?? inferCodeFromMessage(message);
   const hint = code && HINTS[code] ? ` → ${HINTS[code]}` : '';
 
   return {
     code,
     summary: `${code ? `[${code}] ` : ''}${cause}${hint}`,
   };
+}
+
+/** Récupère le message même quand l'erreur n'est pas une instance d'Error (objets Prisma). */
+function extractMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof (error as { message?: unknown }).message === 'string'
+  ) {
+    return (error as { message: string }).message;
+  }
+
+  return String(error);
+}
+
+/** Les erreurs Prisma finissent parfois par « Validation Error Count: 1 » : on préfère la 1re ligne. */
+function pickCause(lines: string[]): string {
+  if (lines.length === 0) return 'Erreur inconnue';
+
+  const last = lines[lines.length - 1];
+  if (/^Validation Error Count/i.test(last) || last.length < 20) {
+    return lines[0];
+  }
+
+  return last;
 }
 
 /** Certaines erreurs d'initialisation Prisma n'exposent pas de code : on le déduit. */

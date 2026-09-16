@@ -10,6 +10,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { describeDatabaseError } from '@/lib/db-error';
+import { envProblems } from '@/lib/env-validation';
+import { getEmailProvider } from '@/lib/email';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -37,6 +39,10 @@ export async function GET() {
     timestamp: new Date().toISOString(),
     service: 'Multi Convert',
   };
+
+  // Configuration : variables invalides + fournisseur d'email réellement actif
+  payload.env = { ok: envProblems.length === 0, problems: envProblems };
+  payload.email = { provider: getEmailProvider() };
 
   if (isDevMode) {
     payload.database = {

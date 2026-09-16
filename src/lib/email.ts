@@ -76,6 +76,21 @@ export interface EmailMessage {
 }
 
 /**
+ * URL de base de l'API Resend. Une valeur mal formée ne doit jamais casser
+ * l'envoi (ni le démarrage) : on retombe sur l'API officielle.
+ */
+function resolveResendBaseUrl(): string {
+  const configured = (env.RESEND_BASE_URL || '').trim().replace(/\/+$/, '');
+
+  if (!configured) return 'https://api.resend.com';
+
+  if (/^https?:\/\/[^\s]+$/i.test(configured)) return configured;
+
+  console.warn(`⚠️  RESEND_BASE_URL ignorée (URL http(s) attendue) : « ${configured} »`);
+  return 'https://api.resend.com';
+}
+
+/**
  * Envoi bas niveau — Resend si configuré, sinon SendGrid / SMTP.
  * Retourne `true` uniquement si le fournisseur a accepté le message.
  */
@@ -99,7 +114,7 @@ export async function sendEmail(message: EmailMessage): Promise<boolean> {
 
   try {
     if (provider === 'resend') {
-      const baseUrl = (env.RESEND_BASE_URL || 'https://api.resend.com').replace(/\/+$/, '');
+      const baseUrl = resolveResendBaseUrl();
       const response = await fetch(`${baseUrl}/emails`, {
         method: 'POST',
         headers: {

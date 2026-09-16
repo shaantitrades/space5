@@ -56,7 +56,7 @@ const envSchema = z.object({
   // Resend — fournisseur d'emails recommandé (RESEND_API_KEY suffit)
   RESEND_API_KEY: z.string().optional(),
   /** Override de l'API Resend (tests locaux / proxy) — laisser vide en production */
-  RESEND_BASE_URL: optionalUrl,
+  RESEND_BASE_URL: z.string().optional(),
   // SMTP générique (repli, ou SMTP Resend : smtp.resend.com / 587 / user « resend »)
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.string().optional(),
@@ -84,32 +84,84 @@ export type Env = z.infer<typeof envSchema>;
 // ✅ Parser et valider au démarrage
 let cachedEnv: Env | null = null;
 
+/** Problèmes de configuration détectés (exposés par /api/health) */
+export const envProblems: string[] = [];
+
+/**
+ * Configuration « au mieux » quand une variable est invalide.
+ *
+ * ⚠️ On ne termine JAMAIS le processus pour une variable mal orthographiée :
+ * cela faisait tomber TOUT le site en 502 « Bad Gateway » alors qu'une seule
+ * fonctionnalité était concernée. Les routes touchées échouent désormais avec un
+ * message explicite, et /api/health expose la liste des problèmes.
+ */
+function bestEffortEnv(): Env {
+  const raw = process.env;
+
+  return {
+    DATABASE_URL: raw.DATABASE_URL || 'postgresql://localhost:5432/dev',
+    DIRECT_URL: raw.DIRECT_URL || raw.DATABASE_URL || 'postgresql://localhost:5432/dev',
+    REDIS_URL: raw.REDIS_URL || 'redis://localhost:6379',
+    NEXTAUTH_SECRET: raw.NEXTAUTH_SECRET || 'invalid-configuration-secret',
+    JWT_SECRET: raw.JWT_SECRET || 'invalid-configuration-secret',
+    GOOGLE_CLIENT_ID: raw.GOOGLE_CLIENT_ID || '',
+    GOOGLE_CLIENT_SECRET: raw.GOOGLE_CLIENT_SECRET || '',
+    ENCRYPTION_KEY: raw.ENCRYPTION_KEY || 'invalid-configuration-key',
+    NODE_ENV: (raw.NODE_ENV as Env['NODE_ENV']) || 'production',
+    DEV_MODE: raw.DEV_MODE,
+    SKIP_DB: raw.SKIP_DB,
+    ADMIN_EMAILS: raw.ADMIN_EMAILS || '',
+    EMAIL_FROM: raw.EMAIL_FROM || 'noreply@multi-convert.com',
+    CONTACT_EMAIL: raw.CONTACT_EMAIL || 'contact@multi-convert.com',
+    LEADS_NOTIFICATION_EMAIL: raw.LEADS_NOTIFICATION_EMAIL,
+    SENDGRID_API_KEY: raw.SENDGRID_API_KEY,
+    RESEND_API_KEY: raw.RESEND_API_KEY,
+    RESEND_BASE_URL: raw.RESEND_BASE_URL,
+    SMTP_HOST: raw.SMTP_HOST,
+    SMTP_PORT: raw.SMTP_PORT,
+    SMTP_USER: raw.SMTP_USER,
+    SMTP_PASSWORD: raw.SMTP_PASSWORD,
+    NEXT_PUBLIC_APP_URL: raw.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_API_URL: raw.NEXT_PUBLIC_API_URL,
+    NEXT_PUBLIC_VERSION: raw.NEXT_PUBLIC_VERSION || '1.0.0',
+    ALLOWED_ORIGINS: raw.ALLOWED_ORIGINS || 'https://multi-convert.com',
+    AWS_REGION: raw.AWS_REGION || 'us-east-1',
+    AWS_ACCESS_KEY_ID: raw.AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY: raw.AWS_SECRET_ACCESS_KEY,
+    S3_BUCKET: raw.S3_BUCKET,
+    STRIPE_SECRET_KEY: raw.STRIPE_SECRET_KEY,
+    STRIPE_PUBLISHABLE_KEY: raw.STRIPE_PUBLISHABLE_KEY,
+    SENTRY_DSN: raw.SENTRY_DSN,
+  } as Env;
+}
+
 export function getEnv(): Env {
   if (!cachedEnv) {
-    try {
-      cachedEnv = envSchema.parse(process.env);
-      
+    const parsed = envSchema.safeParse(process.env);
+
+    if (parsed.success) {
+      cachedEnv = parsed.data;
+
       // Log en développement
       if (process.env.NODE_ENV !== 'production') {
         console.log('✅ Variables d\'env validées avec succès');
       }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        console.error('❌ ERREUR: Variables d\'environnement manquantes ou invalides:');
-        error.errors.forEach((err) => {
-          console.error(`  - ${err.path.join('.')}: ${err.message}`);
-        });
+    } else {
+      console.error('❌ ERREUR: Variables d\'environnement manquantes ou invalides:');
+      for (const issue of parsed.error.errors) {
+        const line = `${issue.path.join('.')}: ${issue.message}`;
+        console.error(`  - ${line}`);
+        if (!envProblems.includes(line)) envProblems.push(line);
       }
-      
-      // En production, terminer le processus
-      if (process.env.NODE_ENV === 'production') {
-        process.exit(1);
-      }
-      
-      throw error;
+      console.error(
+        '⚠️  Le serveur continue malgré tout : seules les fonctionnalités ' +
+          'concernées échoueront. Voir /api/health pour la liste à corriger.'
+      );
+
+      cachedEnv = bestEffortEnv();
     }
   }
-  
+
   return cachedEnv;
 }
 
@@ -143,12 +195,8 @@ export const env = (() => {
   }
 })();
 
-// Valider au module load (non-blocking)
+// Valider au chargement du module : journalisation seule, JAMAIS de crash
+// volontaire (une variable erronée ne doit pas faire tomber le site en 502).
 if (process.env.NODE_ENV === 'production' && !isBuildPhase) {
-  try {
-    getEnv();
-  } catch (error) {
-    console.error('❌ ERREUR FATALE: Configuration invalide');
-    process.exit(1);
-  }
+  getEnv();
 }
