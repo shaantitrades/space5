@@ -8,6 +8,7 @@ import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { DevAuth, isDevMode, createDevToken } from '@/lib/dev-auth';
 import { describeDatabaseError } from '@/lib/db-error';
+import { isSuspended, suspensionMessage } from '@/lib/account-status';
 import {
   applySessionCookie,
   signSessionToken,
@@ -92,6 +93,14 @@ export async function POST(request: NextRequest) {
           message: 'Veuillez vérifier votre email avant de vous connecter',
           requiresVerification: true 
         },
+        { status: 403 }
+      );
+    }
+
+    // Compte suspendu temporairement (par son propriétaire ou l'administration)
+    if (isSuspended(user.role)) {
+      return NextResponse.json(
+        { message: suspensionMessage(), suspended: true },
         { status: 403 }
       );
     }

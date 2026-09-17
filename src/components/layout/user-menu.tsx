@@ -6,15 +6,20 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Link } from '@/i18n/routing';
-import { User, LogOut, Settings, LayoutDashboard, ChevronDown } from 'lucide-react';
+import { User, LogOut, Settings, LayoutDashboard, ChevronDown, AlertTriangle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
+import ConfirmDialog from '@/components/ui/confirm-dialog';
+import { isSuspended } from '@/lib/account-status';
 
 export default function UserMenu() {
   const t = useTranslations('userMenu');
   const { user, isAuthenticated, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const suspended = isSuspended(user?.role);
 
   // Fermer le menu si on clique en dehors
   useEffect(() => {
@@ -69,6 +74,12 @@ export default function UserMenu() {
           <div className="px-4 py-3 border-b border-border">
             <p className="text-sm font-medium">{user?.fullName}</p>
             <p className="text-xs text-muted-foreground">{user?.email}</p>
+            {suspended && (
+              <p className="mt-1 flex items-center text-xs text-amber-700">
+                <AlertTriangle className="w-3 h-3 mr-1" />
+                Compte suspendu
+              </p>
+            )}
           </div>
 
           {/* Menu Items */}
@@ -92,11 +103,11 @@ export default function UserMenu() {
 
           <div className="border-t border-border my-1"></div>
 
-          {/* Logout */}
+          {/* Logout (avec confirmation) */}
           <button
             onClick={() => {
-              logout();
               setIsOpen(false);
+              setConfirmLogout(true);
             }}
             className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
           >
@@ -105,6 +116,19 @@ export default function UserMenu() {
           </button>
         </div>
       )}
+
+      {/* Confirmation avant de déconnecter */}
+      <ConfirmDialog
+        open={confirmLogout}
+        title="Se déconnecter ?"
+        description="Vous devrez saisir votre email et votre mot de passe pour vous reconnecter."
+        confirmLabel="Se déconnecter"
+        onCancel={() => setConfirmLogout(false)}
+        onConfirm={() => {
+          setConfirmLogout(false);
+          logout();
+        }}
+      />
     </div>
   );
 }

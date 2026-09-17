@@ -15,8 +15,22 @@ import { useEffect, useState } from 'react';
 import { useRouter } from '@/i18n/routing';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthError } from '@/components/auth/auth-error';
+import ConfirmDialog, { type ConfirmDialogValues } from '@/components/ui/confirm-dialog';
 import { PASSWORD_REQUIREMENTS, passwordSchema } from '@/lib/password-schema';
-import { CheckCircle, Loader2, Lock, Mail, LogOut, User } from 'lucide-react';
+import { DELETE_CONFIRMATION_TEXT, isSuspended } from '@/lib/account-status';
+import {
+  AlertTriangle,
+  CheckCircle,
+  Download,
+  Loader2,
+  Lock,
+  Mail,
+  LogOut,
+  PauseCircle,
+  PlayCircle,
+  Trash2,
+  User,
+} from 'lucide-react';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -36,6 +50,15 @@ export default function SettingsPage() {
   const [passwordMessage, setPasswordMessage] = useState('');
 
   const [error, setError] = useState('');
+
+  // ― Actions de compte ―
+  const [confirmLogout, setConfirmLogout] = useState(false);
+  const [confirmSuspend, setConfirmSuspend] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [dangerLoading, setDangerLoading] = useState(false);
+  const [dangerMessage, setDangerMessage] = useState('');
+
+  const suspended = isSuspended(user?.role);
 
   // Accès protégé
   useEffect(() => {
@@ -128,6 +151,86 @@ export default function SettingsPage() {
     }
   };
 
+  /** Réactive un compte suspendu (la session en cours suffit). */
+  const handleReactivate = async () => {
+    setError('');
+    setDangerMessage('');
+    setDangerLoading(true);
+
+    try {
+      const response = await fetch('/api/auth/reactivate', { method: 'POST' });
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(data?.message || 'Erreur lors de la réactivation');
+      }
+
+      setDangerMessage(data?.message || 'Compte réactivé.');
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+    } finally {
+      setDangerLoading(false);
+    }
+  };
+
+  /** Suspension temporaire (mot de passe demandé). */
+  const handleSuspend = async ({ password }: ConfirmDialogValues) => {
+    setError('');
+    setDangerMessage('');
+    setDangerLoading(true);
+
+    try {
+      const response = await fetch('/api/auth/suspend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(data?.message || 'Erreur lors de la suspension');
+      }
+
+      setConfirmSuspend(false);
+      setDangerMessage(data?.message || 'Compte suspendu.');
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+      setConfirmSuspend(false);
+    } finally {
+      setDangerLoading(false);
+    }
+  };
+
+  /** Suppression définitive (mot de passe + texte de confirmation). */
+  const handleDelete = async ({ password, text }: ConfirmDialogValues) => {
+    setError('');
+    setDangerLoading(true);
+
+    try {
+      const response = await fetch('/api/auth/account', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password, confirmation: text }),
+      });
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(data?.message || 'Erreur lors de la suppression');
+      }
+
+      setConfirmDelete(false);
+      // Compte supprimé : le cookie de session est déjà effacé côté serveur
+      window.location.href = '/';
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+      setConfirmDelete(false);
+    } finally {
+      setDangerLoading(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-20 flex justify-center">
@@ -155,6 +258,40 @@ export default function SettingsPage() {
         </div>
 
         <AuthError message={error} onClose={() => setError('')} />
+
+        {dangerMessage && (
+          <p className="flex items-center text-sm text-green-700">
+            <CheckCircle className="w-4 h-4 mr-2" />
+            {dangerMessage}
+          </p>
+        )}
+
+        {/* Bandeau « compte suspendu » + réactivation */}
+        {suspended && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 flex items-start space-x-3">
+            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-amber-800">
+              <p className="font-medium">Votre compte est suspendu</p>
+              <p className="mt-1">
+                La connexion est bloquée et vos données sont conservées. Vous pouvez réactiver
+                votre compte à tout moment.
+              </p>
+              <button
+                type="button"
+                onClick={handleReactivate}
+                disabled={dangerLoading}
+                className="mt-3 inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 disabled:opacity-50"
+              >
+                {dangerLoading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <PlayCircle className="w-4 h-4 mr-2" />
+                )}
+                Réactiver mon compte
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* ― Profil ― */}
         <form
@@ -329,6 +466,67 @@ export default function SettingsPage() {
           </button>
         </form>
 
+        {/* ― Vos données (RGPD) ― */}
+        <div className="rounded-lg border border-border p-6 space-y-4">
+          <h2 className="flex items-center text-lg font-semibold">
+            <Download className="w-5 h-5 mr-2 text-purple-600" />
+            Vos données
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Téléchargez une copie de vos données personnelles (profil, historique de conversions,
+            clés API sans leur secret). Les fichiers envoyés pour conversion ne sont jamais
+            stockés.
+          </p>
+          <a
+            href="/api/auth/export-data"
+            className="inline-flex items-center justify-center py-2.5 px-5 rounded-lg text-sm font-medium border border-border hover:bg-accent"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Télécharger mes données (JSON)
+          </a>
+        </div>
+
+        {/* ― Zone de danger ― */}
+        <div className="rounded-lg border border-red-200 p-6 space-y-5">
+          <h2 className="flex items-center text-lg font-semibold text-red-700">
+            <AlertTriangle className="w-5 h-5 mr-2" />
+            Zone de danger
+          </h2>
+
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Suspendre temporairement mon compte</p>
+            <p className="text-sm text-muted-foreground">
+              Bloque la connexion et met le compte en pause. Vos données sont conservées et vous
+              pouvez réactiver le compte à tout moment.
+            </p>
+            <button
+              type="button"
+              onClick={() => setConfirmSuspend(true)}
+              disabled={suspended}
+              className="inline-flex items-center justify-center py-2.5 px-5 rounded-lg text-sm font-medium text-amber-800 border border-amber-300 hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <PauseCircle className="w-4 h-4 mr-2" />
+              {suspended ? 'Compte déjà suspendu' : 'Suspendre mon compte'}
+            </button>
+          </div>
+
+          <div className="border-t border-red-100 pt-5 space-y-2">
+            <p className="text-sm font-medium">Supprimer définitivement mon compte</p>
+            <p className="text-sm text-muted-foreground">
+              Suppression immédiate et irréversible du compte et de ses données (conversions,
+              clés API). Cette action ne peut pas être annulée.
+            </p>
+            <button
+              type="button"
+              onClick={() => setConfirmDelete(true)}
+              className="inline-flex items-center justify-center py-2.5 px-5 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-700"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Supprimer mon compte
+            </button>
+          </div>
+        </div>
+
         {/* ― Session ― */}
         <div className="rounded-lg border border-border p-6 space-y-4">
           <h2 className="flex items-center text-lg font-semibold">
@@ -340,7 +538,7 @@ export default function SettingsPage() {
           </p>
           <button
             type="button"
-            onClick={logout}
+            onClick={() => setConfirmLogout(true)}
             className="inline-flex items-center justify-center py-2.5 px-5 rounded-lg text-sm font-medium text-red-700 border border-red-200 hover:bg-red-50"
           >
             <LogOut className="w-4 h-4 mr-2" />
@@ -348,6 +546,43 @@ export default function SettingsPage() {
           </button>
         </div>
       </div>
+
+      {/* ― Confirmations des actions sensibles ― */}
+      <ConfirmDialog
+        open={confirmLogout}
+        title="Se déconnecter ?"
+        description="Vous devrez saisir votre email et votre mot de passe pour vous reconnecter."
+        confirmLabel="Se déconnecter"
+        onCancel={() => setConfirmLogout(false)}
+        onConfirm={() => {
+          setConfirmLogout(false);
+          logout();
+        }}
+      />
+
+      <ConfirmDialog
+        open={confirmSuspend}
+        title="Suspendre mon compte ?"
+        description="La connexion sera bloquée (vos données restent conservées). Vous pourrez réactiver le compte depuis cette page."
+        confirmLabel="Suspendre"
+        requirePassword
+        loading={dangerLoading}
+        onCancel={() => setConfirmSuspend(false)}
+        onConfirm={handleSuspend}
+      />
+
+      <ConfirmDialog
+        open={confirmDelete}
+        title="Supprimer définitivement mon compte ?"
+        description="Cette action est irréversible : le compte et toutes ses données seront supprimés."
+        confirmLabel="Supprimer définitivement"
+        variant="danger"
+        requireText={DELETE_CONFIRMATION_TEXT}
+        requirePassword
+        loading={dangerLoading}
+        onCancel={() => setConfirmDelete(false)}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }
