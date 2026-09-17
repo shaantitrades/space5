@@ -114,7 +114,10 @@
     "stats": {
       "noInstall": "🖥️ Ingen installation",
       "languages": "🌍 Tillgängligt på 10 språk",
-      "https": "🔒 Krypterad anslutning (HTTPS)"
+      "https": "🔒 Krypterad anslutning (HTTPS)",
+      "filesDeleted": "🗑️ Filer raderas efter konvertering",
+      "noResaleNoAi": "🚫 Aldrig vidareförsålda, aldrig använda för att träna AI",
+      "gdprRights": "🛡️ GDPR: export och radering med ett klick"
     },
     "cta": "Klicka för att öppna",
     "badges": {

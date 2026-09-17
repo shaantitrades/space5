@@ -85,7 +85,10 @@
     "stats": {
       "noInstall": "🖥️ Keine Installation nötig",
       "languages": "🌍 In 10 Sprachen verfügbar",
-      "https": "🔒 Verschlüsselte Verbindung (HTTPS)"
+      "https": "🔒 Verschlüsselte Verbindung (HTTPS)",
+      "filesDeleted": "🗑️ Dateien nach der Konvertierung gelöscht",
+      "noResaleNoAi": "🚫 Nie weiterverkauft, nie zum Trainieren von KI genutzt",
+      "gdprRights": "🛡️ DSGVO: Export und Löschung mit einem Klick"
     },
     "cta": "Zum Öffnen klicken",
     "badges": {

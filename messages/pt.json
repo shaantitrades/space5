@@ -114,7 +114,10 @@
     "stats": {
       "noInstall": "🖥️ Sem instalação",
       "languages": "🌍 Disponível em 10 idiomas",
-      "https": "🔒 Ligação encriptada (HTTPS)"
+      "https": "🔒 Ligação encriptada (HTTPS)",
+      "filesDeleted": "🗑️ Arquivos excluídos após a conversão",
+      "noResaleNoAi": "🚫 Nunca revendidos, nunca usados para treinar IA",
+      "gdprRights": "🛡️ RGPD: exportação e exclusão em um clique"
     },
     "cta": "Clique para aceder",
     "badges": {

@@ -85,7 +85,10 @@
     "stats": {
       "noInstall": "🖥️ No installation required",
       "languages": "🌍 Available in 10 languages",
-      "https": "🔒 Encrypted connection (HTTPS)"
+      "https": "🔒 Encrypted connection (HTTPS)",
+      "filesDeleted": "🗑️ Files deleted after conversion",
+      "noResaleNoAi": "🚫 Never resold, never used to train AI",
+      "gdprRights": "🛡️ GDPR: export and delete in one click"
     },
     "cta": "Click to access",
     "badges": {

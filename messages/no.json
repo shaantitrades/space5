@@ -114,7 +114,10 @@
     "stats": {
       "noInstall": "🖥️ Ingen installasjon",
       "languages": "🌍 Tilgjengelig på 10 språk",
-      "https": "🔒 Kryptert tilkobling (HTTPS)"
+      "https": "🔒 Kryptert tilkobling (HTTPS)",
+      "filesDeleted": "🗑️ Filer slettes etter konvertering",
+      "noResaleNoAi": "🚫 Aldri videresolgt, aldri brukt til å trene KI",
+      "gdprRights": "🛡️ GDPR: eksport og sletting med ett klikk"
     },
     "cta": "Klikk for å åpne",
     "badges": {

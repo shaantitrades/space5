@@ -34,11 +34,26 @@ export function Hero() {
           </div>
 
           {/* Faits vérifiables uniquement : aucun chiffre d'usage ni
-              certification non démontrée ne doit apparaître ici. */}
-          <div className="flex flex-wrap justify-center gap-4 text-sm font-semibold">
-            <span>{th.has('home.stats.noInstall') ? th('home.stats.noInstall') : '🖥️ Aucune installation'}</span>
-            <span>{th.has('home.stats.languages') ? th('home.stats.languages') : '🌍 Disponible en 10 langues'}</span>
-            <span>{th.has('home.stats.https') ? th('home.stats.https') : '🔒 Connexion chiffrée (HTTPS)'}</span>
+              certification non démontrée ne doit apparaître ici.
+              Les 3 badges ci-dessous correspondent exactement à ce que fait le
+              service (voir /privacy) : fichiers traités à la demande puis
+              supprimés, aucune revente, aucun envoi à un service d'IA. */}
+          <div className="flex flex-wrap justify-center gap-3 text-sm font-semibold">
+            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3.5 py-1.5 shadow-sm">
+              {th.has('home.stats.filesDeleted')
+                ? th('home.stats.filesDeleted')
+                : '🗑️ Fichiers supprimés après la conversion'}
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3.5 py-1.5 shadow-sm">
+              {th.has('home.stats.noResaleNoAi')
+                ? th('home.stats.noResaleNoAi')
+                : '🚫 Jamais revendus, jamais utilisés pour entraîner une IA'}
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3.5 py-1.5 shadow-sm">
+              {th.has('home.stats.gdprRights')
+                ? th('home.stats.gdprRights')
+                : '🛡️ RGPD : export et suppression en 1 clic'}
+            </span>
           </div>
 
           {/* Barre de recherche : trouver un outil rapidement */}

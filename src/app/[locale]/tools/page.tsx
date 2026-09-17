@@ -56,7 +56,7 @@ export default function ToolsPage() {
             </h1>
             
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Conversion 100% locale, rapide et sécurisée. Vos fichiers ne quittent jamais votre ordinateur.
+              Conversion rapide et sécurisée. Vos fichiers sont traités à la demande, puis supprimés ; ils ne sont ni conservés ni revendus.
             </p>
 
             {/* Trust Badges */}
