@@ -6,14 +6,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import { DevAuth, isDevMode, createDevToken } from '@/lib/dev-auth';
 import { describeDatabaseError } from '@/lib/db-error';
+import {
+  applySessionCookie,
+  signSessionToken,
+  SESSION_TTL_REMEMBER_SECONDS,
+  SESSION_TTL_SECONDS,
+} from '@/lib/auth-session';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this';
 
 export async function POST(request: NextRequest) {
   try {
@@ -93,15 +96,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Créer le token JWT
-    const token = jwt.sign(
-      { 
-        userId: user.id, 
-        email: user.email,
-        role: user.role 
-      },
-      JWT_SECRET,
-      { expiresIn: rememberMe ? '30d' : '7d' }
+    // Créer le jeton de session (même format que la confirmation d'email)
+    const ttl = rememberMe ? SESSION_TTL_REMEMBER_SECONDS : SESSION_TTL_SECONDS;
+    const token = signSessionToken(
+      { userId: user.id, email: user.email, role: user.role },
+      ttl
     );
 
     // Mettre à jour la dernière connexion
@@ -124,14 +123,8 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
 
-    // Définir le cookie
-    response.cookies.set('auth-token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: rememberMe ? 30 * 24 * 60 * 60 : 7 * 24 * 60 * 60,
-      path: '/',
-    });
+    // Définir le cookie de session (httpOnly)
+    applySessionCookie(response, token, ttl);
 
     return response;
   } catch (error) {

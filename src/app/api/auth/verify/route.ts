@@ -9,9 +9,27 @@
  *   - lien invalide → /verify-email?error=invalid_token
  */
 
+/**
+ * 🔐 VÉRIFICATION DE L'EMAIL - Multi Convert
+ *
+ * GET /api/auth/verify?token=xxxxx
+ *
+ * Cette URL est le lien cliqué depuis l'email de confirmation : elle
+ *  - valide l'email en base,
+ *  - OUVRE UNE SESSION (cookie httpOnly) : l'utilisateur n'a pas à ressaisir son
+ *    mot de passe juste après avoir confirmé son adresse,
+ *  - redirige vers le tableau de bord.
+ * En cas de problème : redirection vers /verify-email?error=…
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyEmail } from '@/lib/email';
 import { relativeRedirect } from '@/lib/relative-redirect';
+import {
+  applySessionCookie,
+  signSessionToken,
+  SESSION_TTL_SECONDS,
+} from '@/lib/auth-session';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -31,8 +49,15 @@ export async function GET(request: NextRequest) {
       return relativeRedirect('/verify-email?error=invalid_token');
     }
 
-    // ✅ Email vérifié : l'utilisateur peut se connecter
-    return relativeRedirect('/login?verified=1');
+    // ✅ Email vérifié → session ouverte immédiatement (plus de re-connexion)
+    const sessionToken = signSessionToken(
+      { userId: user.id, email: user.email, role: user.role },
+      SESSION_TTL_SECONDS
+    );
+
+    const response = relativeRedirect('/dashboard?verified=1');
+    applySessionCookie(response, sessionToken, SESSION_TTL_SECONDS);
+    return response;
   } catch (error) {
     console.error('Erreur lors de la vérification de l\'email:', error);
     return relativeRedirect('/verify-email?error=server_error');
