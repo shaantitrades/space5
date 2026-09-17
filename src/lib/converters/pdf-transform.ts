@@ -239,4 +239,48 @@ export class PDFTransform {
   ): Promise<Buffer> {
     return this.cropPages(pdfBuffer, x, y, width, height, pageIndex);
   }
+
+  /**
+   * Recadre les pages en appliquant des marges en POURCENTAGE de la taille de
+   * chaque page (0-45 %).
+   *
+   * Pourquoi des pourcentages : le navigateur ne connaît pas la taille réelle
+   * des pages (le PDF y est rasterisé), il ne peut donc pas calculer des
+   * coordonnées en points. Les marges sont appliquées page par page, ce qui
+   * reste correct même avec des formats mixtes (A4, Letter...).
+   */
+  static async cropByMargins(
+    pdfBuffer: Buffer,
+    margins: { top: number; bottom: number; left: number; right: number },
+    pageIndex?: number
+  ): Promise<Buffer> {
+    const { PDFDocument } = await import('pdf-lib');
+    const pdfDoc = await PDFDocument.load(pdfBuffer, { ignoreEncryption: true });
+    const pages = pdfDoc.getPages();
+
+    const clampPercent = (value: number) =>
+      Number.isFinite(value) ? Math.min(Math.max(value, 0), 45) : 0;
+
+    pages.forEach((page, index) => {
+      if (pageIndex !== undefined && index !== pageIndex) return;
+
+      const { width, height } = page.getSize();
+
+      const left = (width * clampPercent(margins.left)) / 100;
+      const right = (width * clampPercent(margins.right)) / 100;
+      const bottom = (height * clampPercent(margins.bottom)) / 100;
+      const top = (height * clampPercent(margins.top)) / 100;
+
+      // Taille minimale de 10 points : une marge trop grande ne doit pas
+      // produire une page vide.
+      const cropWidth = Math.max(width - left - right, 10);
+      const cropHeight = Math.max(height - top - bottom, 10);
+
+      // pdf-lib : origine en bas à gauche → le « haut » correspond à y + hauteur
+      page.setCropBox(left, bottom, cropWidth, cropHeight);
+    });
+
+    const bytes = await pdfDoc.save();
+    return Buffer.from(bytes);
+  }
 }

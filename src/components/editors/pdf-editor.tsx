@@ -918,7 +918,7 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
         if (!ctx) return null;
         ctx.save();
         ctx.font = `${a.italic ? 'italic ' : ''}${a.bold ? 'bold ' : ''}${a.fontSize || 16}px Arial`;
-        const w = ctx.measureText(a.text || '').width;
+        const w = Math.max(ctx.measureText(a.text || '').width, 24);
         ctx.restore();
         const h = a.fontSize || 16;
         return { x: a.x, y: a.y - h, w, h };
@@ -943,11 +943,15 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
       case 'arrow':
       case 'double-arrow':
       case 'curve':
+        // Une flèche horizontale ou verticale a une boîte d'épaisseur nulle :
+        // on garantit une taille minimale pour que les poignées restent
+        // saisissables et que la mise à l'échelle soit fiable (sinon le
+        // redimensionnement envoyait la flèche en haut de la page).
         return {
           x: Math.min(a.x1, a.x2),
           y: Math.min(a.y1, a.y2),
-          w: Math.abs(a.x2 - a.x1),
-          h: Math.abs(a.y2 - a.y1),
+          w: Math.max(Math.abs(a.x2 - a.x1), 12),
+          h: Math.max(Math.abs(a.y2 - a.y1), 12),
         };
       case 'draw': {
         const points = a.points || [];
@@ -1035,6 +1039,35 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
     }
   };
 
+  /**
+   * Ouvre (ou rouvre) la saisie d'un texte existant.
+   *
+   * Avant, l'édition d'un texte déjà posé était impossible : cliquer dessus
+   * ne faisait qu'afficher les poignées (« deux points bleus ») sans jamais
+   * rendre le clavier. Appelé par le double-clic et par le bouton
+   * « Modifier le texte » de la barre d'actions.
+   */
+  const openTextEditor = (annotation: EditorAnnotation | null | undefined) => {
+    const a = annotation as any;
+    if (!a || a.type !== 'text') return;
+
+    const canvas = canvasRef.current;
+    const bounds = getAnnotationBounds(annotation as EditorAnnotation);
+    const rect = canvas?.getBoundingClientRect();
+    const canvasX = bounds ? bounds.x : a.x;
+    const canvasY = bounds ? bounds.y + bounds.h : a.y;
+
+    setSelectedAnnotationId(a.id);
+    setEditingTextId(a.id);
+    setTextDraft(a.text || '');
+    setContextMenu({
+      pageX: (rect?.left ?? 0) + canvasX,
+      pageY: (rect?.top ?? 0) + canvasY,
+      canvasX,
+      canvasY,
+    });
+  };
+
   /** Contour de sélection + poignées, dessinés sur le canvas */
   const drawSelectionOverlay = (ctx: CanvasRenderingContext2D, annotation: EditorAnnotation) => {
     const bounds = getAnnotationBounds(annotation);
@@ -1103,6 +1136,13 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
     const newY = isTopEdge ? Math.min(pointerY, bottom - MIN_ELEMENT_SIZE) : start.y;
     const newW = Math.max(MIN_ELEMENT_SIZE, isLeftEdge ? right - newX : pointerX - start.x);
     const newH = Math.max(MIN_ELEMENT_SIZE, isTopEdge ? bottom - newY : pointerY - start.y);
+
+    // Garde-fou : si une valeur n'est pas finie (poignées dégénérées, élément
+    // sans géométrie), on n'écrit rien. Sans cela, l'élément recevait des
+    // coordonnées NaN et « partait » en haut de la page, voire hors de la page.
+    if (![newX, newY, newW, newH].every((value) => Number.isFinite(value))) {
+      return;
+    }
 
     // Texte et symboles : pas de boîte, on agit sur la taille de la police
     if (TEXT_LIKE_TYPES.has(annotation.type)) {
@@ -2603,7 +2643,7 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
         </div>
 
         {/* Outils principaux */}
-        <div className="flex items-center space-x-1 flex-1 overflow-x-auto relative">
+        <div className="flex flex-wrap items-center gap-1 flex-1 relative">
           {mainTools.map((tool) => {
             const Icon = tool.icon;
             const isActive = currentTool === tool.id;
@@ -2618,7 +2658,10 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                 }`}
                 title={tool.label}
               >
-                <span className="text-sm font-medium">{tool.label}</span>
+                <span className="md:hidden" aria-hidden="true">
+                  <Icon className="w-4 h-4" />
+                </span>
+                <span className="hidden md:inline text-sm font-medium">{tool.label}</span>
               </button>
             );
           })}
@@ -3121,7 +3164,7 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
             title="Plus d'outils"
           >
             <Grid3x3 className="w-4 h-4 inline mr-1" />
-            <span className="inline">Plus d'outils</span>
+            <span className="hidden md:inline">Plus d'outils</span>
           </button>
         </div>
 
@@ -3768,6 +3811,15 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                     setContextMenu(null);
                   }
                 }}
+                onDoubleClick={(e) => {
+                  // Double-clic sur un texte : (re)ouvre la saisie. C'est le geste
+                  // naturel pour corriger un texte déjà posé.
+                  const canvas = canvasRef.current;
+                  if (!canvas) return;
+                  const rect = canvas.getBoundingClientRect();
+                  const hit = hitTestAnnotation(e.clientX - rect.left, e.clientY - rect.top);
+                  if (hit) openTextEditor(hit);
+                }}
                 onWheel={(e) => {
                   // Redimensionnement au scroll de l'élément sélectionné (texte/symbole)
                   if (!selectedAnnotationId) return;
@@ -3793,6 +3845,60 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                   touchAction: 'none', // important pour pointer events sur mobile/trackpad
                 }}
               />
+
+              {/* Barre d'actions de l'élément sélectionné : rend visible ce que
+                  l'on peut faire (éditer un texte, agrandir/réduire, supprimer),
+                  au lieu de ne montrer que les poignées. */}
+              {selectedAnnotationId && (() => {
+                const selected = annotations.find(
+                  (a) => a.id === selectedAnnotationId && (a as any).page === currentPage
+                ) as any;
+                if (!selected) return null;
+
+                return (
+                  <div
+                    data-pdf-canvas-area
+                    className="absolute top-3 left-1/2 -translate-x-1/2 z-30 bg-white border border-border rounded-xl shadow-lg px-2 py-1.5 flex items-center gap-1"
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {selected.type === 'text' && (
+                      <button
+                        type="button"
+                        onClick={() => openTextEditor(selected)}
+                        className="px-2.5 py-1.5 text-sm font-medium rounded-lg hover:bg-muted"
+                        title="Modifier le texte"
+                      >
+                        Modifier le texte
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => scaleSelectedAnnotation(0.85)}
+                      className="px-2.5 py-1.5 text-sm rounded-lg hover:bg-muted"
+                      title="Réduire"
+                    >
+                      Réduire
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => scaleSelectedAnnotation(1.15)}
+                      className="px-2.5 py-1.5 text-sm rounded-lg hover:bg-muted"
+                      title="Agrandir"
+                    >
+                      Agrandir
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => deleteAnnotation(selected.id)}
+                      className="px-2.5 py-1.5 text-sm font-medium rounded-lg text-red-600 hover:bg-red-50"
+                      title="Supprimer"
+                    >
+                      Supprimer
+                    </button>
+                  </div>
+                );
+              })()}
 
               {/* Guides d'alignement lors du d�placement */}
               {alignmentGuides && canvasRef.current && (

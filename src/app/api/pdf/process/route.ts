@@ -410,18 +410,41 @@ export async function POST(request: NextRequest) {
       }
 
       case 'crop': {
+        const pageIndexStr = formData.get('pageIndex') as string;
+        const pageIndex =
+          pageIndexStr !== null && pageIndexStr !== undefined ? parseInt(pageIndexStr) : undefined;
+
+        // Recadrage par MARGES EN POURCENTAGE (ce que l'interface peut calculer :
+        // le navigateur ne connaît pas la taille réelle des pages).
+        const toPercent = (key: string) => {
+          const raw = formData.get(key);
+          const value = raw === null ? NaN : parseFloat(raw as string);
+          return Number.isFinite(value) ? value : 0;
+        };
+
+        const margins = {
+          top: toPercent('marginTop'),
+          bottom: toPercent('marginBottom'),
+          left: toPercent('marginLeft'),
+          right: toPercent('marginRight'),
+        };
+
+        if (Object.values(margins).some((value) => value > 0)) {
+          resultBuffer = await PDFTransform.cropByMargins(buffers[0], margins, pageIndex);
+          fileName = 'cropped.pdf';
+          break;
+        }
+
         const x = parseFloat(formData.get('x') as string) || 0;
         const y = parseFloat(formData.get('y') as string) || 0;
         const width = parseFloat(formData.get('width') as string);
         const height = parseFloat(formData.get('height') as string);
-        const pageIndexStr = formData.get('pageIndex') as string;
 
         if (!width || !height || width <= 0 || height <= 0) {
           throwHttp(400, { error: 'La largeur et la hauteur doivent être spécifiées et positives' });
         }
 
-        if (pageIndexStr !== null && pageIndexStr !== undefined) {
-          const pageIndex = parseInt(pageIndexStr);
+        if (pageIndex !== undefined) {
           resultBuffer = await PDFTransform.cropPage(buffers[0], pageIndex, x, y, width, height);
         } else {
           resultBuffer = await PDFTransform.cropAllPages(buffers[0], x, y, width, height);

@@ -74,6 +74,10 @@ export default function PDFToolsPage() {
   } = useConversionProgress();
   
   const [selectedTool, setSelectedTool] = useState<PDFTool>('convert');
+  // Marges de recadrage, en pourcentage de la taille de chaque page.
+  // Le navigateur ne connaît pas la taille réelle des pages : des pourcentages
+  // sont la seule unité fiable, et ils restent justes en formats mixtes.
+  const [cropMargins, setCropMargins] = useState({ top: 0, bottom: 0, left: 0, right: 0 });
   const [files, setFiles] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedOutputFormat, setSelectedOutputFormat] = useState<string>('');
@@ -299,6 +303,15 @@ export default function PDFToolsPage() {
         formData.append('angle', '45');
       } else if (selectedTool === 'rotate') {
         formData.append('angle', '90');
+      } else if (selectedTool === 'crop') {
+        const hasMargin = Object.values(cropMargins).some((value) => value > 0);
+        if (!hasMargin) {
+          throw new Error('Indiquez au moins une marge de recadrage supérieure à 0 %.');
+        }
+        formData.append('marginTop', String(cropMargins.top));
+        formData.append('marginBottom', String(cropMargins.bottom));
+        formData.append('marginLeft', String(cropMargins.left));
+        formData.append('marginRight', String(cropMargins.right));
       } else if (selectedTool === 'protect' || selectedTool === 'unlock') {
         // En production, demander le mot de passe à l'utilisateur
         formData.append('password', 'default-password');
@@ -871,6 +884,43 @@ export default function PDFToolsPage() {
                     <option value="spa">Espagnol</option>
                     <option value="deu">Allemand</option>
                   </select>
+                </div>
+              )}
+
+              {selectedTool === 'crop' && files.length > 0 && (
+                <div className="mb-6 p-4 bg-muted rounded-lg">
+                  <h3 className="font-semibold mb-1">Marges de recadrage</h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Les marges sont retirées de chaque page, en % de sa taille. Indiquez au moins
+                    une marge supérieure à 0 %. Le contenu est conservé, seule la zone visible
+                    change.
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {([
+                      { key: 'top' as const, label: 'Marge du haut' },
+                      { key: 'bottom' as const, label: 'Marge du bas' },
+                      { key: 'left' as const, label: 'Marge gauche' },
+                      { key: 'right' as const, label: 'Marge droite' },
+                    ]).map(({ key, label }) => (
+                      <label key={key} className="flex flex-col gap-1 text-sm font-medium">
+                        {label} (%)
+                        <input
+                          type="number"
+                          min={0}
+                          max={45}
+                          step={1}
+                          value={cropMargins[key]}
+                          onChange={(e) =>
+                            setCropMargins((prev) => ({
+                              ...prev,
+                              [key]: Math.min(Math.max(parseFloat(e.target.value) || 0, 0), 45),
+                            }))
+                          }
+                          className="px-3 py-2 border-2 border-border rounded-lg focus:border-primary focus:outline-none bg-background"
+                        />
+                      </label>
+                    ))}
+                  </div>
                 </div>
               )}
 
