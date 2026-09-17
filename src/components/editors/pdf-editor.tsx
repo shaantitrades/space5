@@ -806,7 +806,11 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
-    const pageAnnotations = annotations.filter((a) => (a as any).page === currentPage);
+    // `annotationsRef` est tenu à jour de façon SYNCHRONE par commitAnnotations et
+    // setAnnotationsLive. L'état React, lui, accuse un rendu de retard : un élément
+    // qui vient d'être créé ou validé dans le même geste n'était alors pas
+    // « attrapable » au clic (impossible de le déplacer ou de le redimensionner).
+    const pageAnnotations = annotationsRef.current.filter((a) => (a as any).page === currentPage);
     for (let i = pageAnnotations.length - 1; i >= 0; i--) {
       const a = pageAnnotations[i];
       if (a.type === 'text') {
@@ -1134,6 +1138,11 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
   };
 
   const closeContextMenu = () => {
+    // Un texte en cours de saisie est validé avant fermeture : sans cela,
+    // l'élément restait vide (invisible et impossible à sélectionner).
+    if (editingTextId) {
+      commitTextDraft();
+    }
     setContextMenu(null);
     setSelectedAnnotationId(null);
     setEditingTextId(null);
@@ -1193,6 +1202,8 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
         underline: boolean;
       }>;
       openEditor?: boolean;
+      /** Position écran du panneau de saisie (ouvre l'édition immédiatement) */
+      menu?: { pageX: number; pageY: number };
     }
   ) => {
     const id = genId();
@@ -1225,12 +1236,20 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
       underline: style.underline ?? defaultStyle.underline,
     };
     commitAnnotations([...annotationsRef.current, ann]);
-    setSelectedAnnotationId(ann.id);
     setSelectedAnnotationId(id);
     if (opts?.openEditor !== false) {
       setEditingTextId(id);
       setTextDraft(text);
+      // Le panneau de saisie s'ouvre ICI (et non via un second événement) :
+      // l'outil repasse en « sélection » juste après, et l'ancien code refermait
+      // le panneau au clic suivant — l'élément restait donc vide, donc insaisissable.
+      if (opts?.menu) {
+        setContextMenu({ pageX: opts.menu.pageX, pageY: opts.menu.pageY, canvasX: x, canvasY: y });
+      }
     }
+    // Outil à usage unique : retour à la sélection pour ne plus créer d'élément
+    // à chaque clic sur la page.
+    setCurrentTool('select');
   };
 
   const insertSymbolAt = (x: number, y: number, symbol: string) => {
@@ -1246,8 +1265,9 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
       fontSize: Math.max(20, defaultStyle.fontSize + 2),
     };
     commitAnnotations([...annotationsRef.current, ann]);
-    setSelectedAnnotationId(ann.id);
     setSelectedAnnotationId(id);
+    // Outil à usage unique : sinon chaque clic ajoutait un nouveau symbole
+    setCurrentTool('select');
   };
 
   const insertImageAt = async (x: number, y: number) => {
@@ -1279,6 +1299,8 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
           };
           commitAnnotations([...annotationsRef.current, ann]);
           setSelectedAnnotationId(ann.id);
+          // Outil à usage unique
+          setCurrentTool('select');
         };
         img.src = src;
       };
@@ -1363,6 +1385,23 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
     if (!selectedAnnotationId) return;
     commitAnnotations(annotationsRef.current.filter((a) => a.id !== selectedAnnotationId));
     setSelectedAnnotationId(null);
+  };
+
+  /**
+   * Supprime une annotation par son identifiant.
+   *
+   * ⚠️ Cette fonction était appelée (validation d'un texte vide, bouton
+   * « Supprimer ») sans avoir jamais été définie : elle levait une
+   * ReferenceError, ce qui faisait échouer la suppression.
+   */
+  const deleteAnnotation = (id: string) => {
+    if (!id) return;
+    commitAnnotations(annotationsRef.current.filter((a) => a.id !== id));
+    if (selectedAnnotationId === id) setSelectedAnnotationId(null);
+    if (editingTextId === id) {
+      setEditingTextId(null);
+      setTextDraft('');
+    }
   };
 
   const updateSelected = (patch: Partial<EditorAnnotation>) => {
@@ -3141,6 +3180,12 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                 }}
                 onPointerDown={(e) => {
                   try {
+                  // Un texte en cours de saisie est validé avant tout autre geste :
+                  // sinon l'élément restait vide (invisible, insaisissable).
+                  if (editingTextId) {
+                    commitTextDraft();
+                  }
+
                   const canvas = canvasRef.current;
                   if (!canvas) return;
                   const rect = canvas.getBoundingClientRect();
@@ -3229,8 +3274,14 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
 
                   // Clic gauche sur zone vide = ajouter du texte (comportement par défaut)
                   // Si un outil spécifique est actif, on l'utilise
-                  if (currentTool === 'text' || currentTool === 'select' || currentTool === 'edit-pdf') {
-                    insertTextAt(x, y);
+                  // Outil « Texte » : insertion + ouverture IMMÉDIATE du panneau de saisie.
+                  // « select » ne crée plus rien : un clic sur une zone vide désélectionne
+                  // simplement (avant, chaque clic ajoutait un texte vide de plus).
+                  if (currentTool === 'text') {
+                    insertTextAt(x, y, { menu: { pageX: e.clientX, pageY: e.clientY } });
+                    return;
+                  }
+                  if (currentTool === 'select' || currentTool === 'edit-pdf') {
                     return;
                   }
                   if (currentTool === 'image') {
@@ -3278,6 +3329,8 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                     };
                     commitAnnotations([...annotationsRef.current, ann]);
                     setSelectedAnnotationId(ann.id);
+                    // Outil à usage unique
+                    setCurrentTool('select');
                     return;
                   }
                   if (currentTool === 'check') {
@@ -3396,6 +3449,28 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                 onPointerMove={(e) => {
                   const canvas = canvasRef.current;
                   if (!canvas) return;
+
+                  // Déplacement / redimensionnement de l'élément saisi : traité ici
+                  // AUSSI, car le canvas a capturé le pointeur (`setPointerCapture`)
+                  // et l'événement `mousemove` global peut ne plus remonter — le
+                  // glissement ne suivait alors plus la souris après le dépôt.
+                  const elementDrag = dragRef.current;
+                  if (elementDrag?.isDragging) {
+                    const rect = canvas.getBoundingClientRect();
+                    const cx = e.clientX - rect.left;
+                    const cy = e.clientY - rect.top;
+
+                    if (elementDrag.mode === 'resize') {
+                      applyResize(elementDrag, cx, cy);
+                    } else {
+                      updateAnnotationLive(elementDrag.id, {
+                        x: cx - elementDrag.offsetX,
+                        y: cy - elementDrag.offsetY,
+                      } as any);
+                    }
+                    return;
+                  }
+
                   const drag = toolDragRef.current;
                   if (!drag || drag.pointerId !== e.pointerId) return;
 
@@ -3455,6 +3530,9 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                   // La forme qui vient d'etre dessinee devient selectionnee :
                   // le contour, les poignees et les options apparaissent aussitot.
                   setSelectedAnnotationId(drag.id);
+                  // Outil à usage unique : après le dépôt, retour à la sélection
+                  // (sinon chaque nouveau clic dessinait une forme de plus).
+                  setCurrentTool('select');
                   // Commit final state (une seule entr�e historique)
                   commitAnnotations(annotationsRef.current);
                   // Apr�s une action "drag tool", on ferme la toolbar si elle �tait ouverte
@@ -3473,6 +3551,9 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                 }}
                 onClick={(e) => {
                   // Fallback: certains navigateurs/overlays peuvent bloquer onPointerDown
+                  // Ne jamais refermer le panneau de saisie en cours : ce clic suit
+                  // immédiatement le pointerdown qui vient de l'ouvrir.
+                  if (editingTextId) return;
                   const canvas = canvasRef.current;
                   if (!canvas) return;
                   const rect = canvas.getBoundingClientRect();
