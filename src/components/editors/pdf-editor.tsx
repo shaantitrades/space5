@@ -2661,7 +2661,7 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                 <span className="md:hidden" aria-hidden="true">
                   <Icon className="w-4 h-4" />
                 </span>
-                <span className="hidden md:inline text-sm font-medium">{tool.label}</span>
+                <span className="text-xs md:text-sm font-medium whitespace-nowrap">{tool.label}</span>
               </button>
             );
           })}
