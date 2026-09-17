@@ -2643,7 +2643,7 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
         </div>
 
         {/* Outils principaux */}
-        <div className="flex flex-wrap items-center gap-1 flex-1 relative">
+        <div className="flex items-center space-x-1 flex-1 overflow-x-auto relative">
           {mainTools.map((tool) => {
             const Icon = tool.icon;
             const isActive = currentTool === tool.id;
@@ -2661,7 +2661,7 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                 <span className="md:hidden" aria-hidden="true">
                   <Icon className="w-4 h-4" />
                 </span>
-                <span className="text-xs md:text-sm font-medium whitespace-nowrap">{tool.label}</span>
+                <span className="hidden md:inline text-sm font-medium whitespace-nowrap">{tool.label}</span>
               </button>
             );
           })}

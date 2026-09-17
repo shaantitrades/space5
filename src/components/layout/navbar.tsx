@@ -3,22 +3,31 @@
 import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
 import { Link, usePathname, useRouter } from '@/i18n/routing';
-import { Globe, Menu, X, PenLine, Check } from 'lucide-react';
+import { Globe, Menu, X, PenLine, Check, User, LayoutDashboard, Settings, LogOut } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { ToolsModal } from '@/components/modals/tools-modal';
 import { getAvailableLocales, LANGUAGES } from '@/config/i18n';
 import  UserMenu from '@/components/layout/user-menu';
 import { siteConfig } from '@/config/site';
+import { useAuth } from '@/hooks/useAuth';
+import ConfirmDialog from '@/components/ui/confirm-dialog';
 
 export function Navbar() {
   const t = useTranslations('nav');
+  const tUser = useTranslations('userMenu');
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [toolsModalOpen, setToolsModalOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
   const langMenuRef = useRef<HTMLDivElement>(null);
+
+  // Le menu utilisateur complet est masqué sous md (md:flex) : sans cette
+  // session partagée, le menu mobile affichait « Connexion / S'inscrire »
+  // même une fois connecté.
+  const { user, isAuthenticated, logout } = useAuth();
 
   // Ferme automatiquement le menu des langues au clic à l'extérieur ou avec Échap
   useEffect(() => {
@@ -150,6 +159,20 @@ export function Navbar() {
             {/* Auth Buttons */}
             <UserMenu />
 
+            {/* Rappel visuel de la session sur mobile (le UserMenu complet est
+                masqué par `hidden md:flex`) : sans lui, rien n'indiquait que
+                l'on était connecté. */}
+            {isAuthenticated && (
+              <Link
+                href="/dashboard"
+                className="md:hidden flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary"
+                title={user?.fullName || user?.email || undefined}
+                aria-label={tUser('dashboard')}
+              >
+                <User className="w-4 h-4" />
+              </Link>
+            )}
+
             {/* Mobile Menu Button */}
             <button
               className="md:hidden"
@@ -212,20 +235,58 @@ export function Navbar() {
                   ))}
                 </select>
               </div>
-              <Link
-                href="/login"
-                className="block py-2 text-sm font-medium"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {t('login')}
-              </Link>
-              <Link
-                href="/signup"
-                className="block py-2 text-sm font-medium text-primary"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {t('signup')}
-              </Link>
+              {isAuthenticated ? (
+                <div className="pt-1 border-t border-border mt-1">
+                  <div className="py-2">
+                    <p className="text-sm font-medium truncate">{user?.fullName}</p>
+                    <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                  </div>
+                  <Link
+                    href="/dashboard"
+                    className="flex items-center gap-2 py-2 text-sm font-medium"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <LayoutDashboard className="w-4 h-4" />
+                    {tUser('dashboard')}
+                  </Link>
+                  <Link
+                    href="/dashboard/settings"
+                    className="flex items-center gap-2 py-2 text-sm font-medium"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Settings className="w-4 h-4" />
+                    {tUser('settings')}
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      setConfirmLogout(true);
+                    }}
+                    className="flex w-full items-center gap-2 py-2 text-sm font-medium text-red-600"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    {tUser('logout')}
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="block py-2 text-sm font-medium"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {t('login')}
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="block py-2 text-sm font-medium text-primary"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {t('signup')}
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}
@@ -235,6 +296,19 @@ export function Navbar() {
       <ToolsModal 
         isOpen={toolsModalOpen} 
         onClose={() => setToolsModalOpen(false)} 
+      />
+
+      {/* Confirmation avant déconnexion (aussi accessible depuis le menu mobile) */}
+      <ConfirmDialog
+        open={confirmLogout}
+        title="Se déconnecter ?"
+        description="Vous devrez saisir votre email et votre mot de passe pour vous reconnecter."
+        confirmLabel="Se déconnecter"
+        onCancel={() => setConfirmLogout(false)}
+        onConfirm={() => {
+          setConfirmLogout(false);
+          logout();
+        }}
       />
     </nav>
   );
