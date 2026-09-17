@@ -214,6 +214,19 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
   } | null>(null);
   const [selectedAnnotationId, setSelectedAnnotationId] = useState<string | null>(null);
   const [editingTextId, setEditingTextId] = useState<string | null>(null);
+
+  /** Poignée de redimensionnement survolée (retour visuel avant le clic) */
+  const [hoveredHandle, setHoveredHandle] = useState<ResizeHandle | null>(null);
+  /** Dernière poignée survolée : évite un rendu à chaque mouvement de souris */
+  const hoveredHandleRef = useRef<ResizeHandle | null>(null);
+
+  /** Recherche dans le texte du PDF (document pdf.js conservé pour getTextContent) */
+  const pdfDocRef = useRef<any>(null);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchMessage, setSearchMessage] = useState<string | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchFromPage, setSearchFromPage] = useState(1);
   const [textDraft, setTextDraft] = useState<string>('');
   const [defaultStyle, setDefaultStyle] = useState<{
     color: string;
@@ -407,6 +420,9 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
         );
 
         const pdf = await Promise.race([loadingTask.promise, timeoutPromise]) as any;
+        // Motif conservé : recherche plein texte (getTextContent) et navigation
+        pdfDocRef.current = pdf;
+        setSearchFromPage(1);
         setLoadingProgress(50);
         
         if (!pdf || pdf.numPages === 0) {
@@ -540,7 +556,7 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pdfPages, currentPage, zoom, annotations, selectedAnnotationId, editingTextId]);
+  }, [pdfPages, currentPage, zoom, annotations, selectedAnnotationId, editingTextId, hoveredHandle]);
 
   // Fermer le menu d�roulant quand on clique en dehors
   useEffect(() => {
@@ -984,6 +1000,41 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
     return null;
   };
 
+  /**
+   * Retour visuel au survol : met en avant la poignée de redimensionnement
+   * (halo bleu, dessiné par drawSelectionOverlay) et adapte le curseur
+   * (`nwse-resize` / `nesw-resize` sur une poignée, `move` sur un élément).
+   * N'agit que hors glissement, et ne déclenche un rendu que si la poignée change.
+   */
+  const updateHoverFeedback = (x: number, y: number) => {
+    if (dragRef.current?.isDragging || toolDragRef.current) return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const handleHit = hitTestResizeHandle(x, y);
+    const nextHandle = handleHit?.handle ?? null;
+
+    if (nextHandle !== hoveredHandleRef.current) {
+      hoveredHandleRef.current = nextHandle;
+      setHoveredHandle(nextHandle);
+    }
+
+    const cursor = nextHandle
+      ? nextHandle === 'nw' || nextHandle === 'se'
+        ? 'nwse-resize'
+        : 'nesw-resize'
+      : hitTestAnnotation(x, y)
+        ? 'move'
+        : currentTool !== 'select'
+          ? 'crosshair'
+          : 'default';
+
+    if (canvas.style.cursor !== cursor) {
+      canvas.style.cursor = cursor;
+    }
+  };
+
   /** Contour de sélection + poignées, dessinés sur le canvas */
   const drawSelectionOverlay = (ctx: CanvasRenderingContext2D, annotation: EditorAnnotation) => {
     const bounds = getAnnotationBounds(annotation);
@@ -1001,13 +1052,24 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
     // Poignées : des carrés blancs bordés de bleu aux quatre coins
     const half = RESIZE_HANDLE_SIZE / 2;
     for (const corner of cornerHandles(bounds)) {
-      ctx.fillStyle = '#ffffff';
+      // Poignée survolée : remplie en bleu avec un halo (l'« ombre »), pour
+      // montrer AVANT le clic que la zone de redimensionnement est saisissable.
+      const isHovered = hoveredHandle === corner.handle;
+      if (isHovered) {
+        ctx.save();
+        ctx.shadowColor = 'rgba(37, 99, 235, 0.65)';
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = '#2563eb';
+      } else {
+        ctx.fillStyle = '#ffffff';
+      }
       ctx.strokeStyle = '#2563eb';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.rect(corner.x - half, corner.y - half, RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE);
       ctx.fill();
       ctx.stroke();
+      if (isHovered) ctx.restore();
     }
     ctx.restore();
   };
@@ -1962,6 +2024,61 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
     const blob = new Blob([outBytes], { type: 'application/pdf' });
     const outName = sourceFile.name.toLowerCase().endsWith('.pdf') ? sourceFile.name : `${sourceFile.name}.pdf`;
     return new File([blob], outName, { type: 'application/pdf' });
+  };
+
+  /**
+   * Recherche plein texte dans le PDF (texte extrait par pdf.js).
+   *
+   * Place la vue sur la première page qui contient la requête, en reprenant
+   * après la page trouvée pour pouvoir enchaîner les recherches (Entrée).
+   */
+  const handleSearch = async () => {
+    const pdf = pdfDocRef.current;
+    const query = searchQuery.trim();
+
+    if (!pdf) {
+      setSearchMessage('Document non chargé.');
+      return;
+    }
+
+    if (query.length < 2) {
+      setSearchMessage('Saisissez au moins 2 caractères.');
+      return;
+    }
+
+    setIsSearching(true);
+    setSearchMessage(null);
+
+    const needle = query.toLowerCase();
+    const total: number = pdf.numPages;
+    const start = Math.max(1, Math.min(searchFromPage, total));
+
+    try {
+      for (let offset = 0; offset < total; offset++) {
+        const pageNumber = ((start - 1 + offset) % total) + 1;
+
+        const page = await pdf.getPage(pageNumber);
+        const content = await page.getTextContent();
+        const text = (content.items as any[])
+          .map((item) => (typeof item?.str === 'string' ? item.str : ''))
+          .join(' ')
+          .toLowerCase();
+
+        if (text.includes(needle)) {
+          setCurrentPage(pageNumber);
+          setSearchFromPage((pageNumber % total) + 1);
+          setSearchMessage(`Trouvé à la page ${pageNumber} (sur ${total}).`);
+          return;
+        }
+      }
+
+      setSearchMessage(`Aucun résultat pour « ${query} » dans le texte du PDF.`);
+      setSearchFromPage(1);
+    } catch {
+      setSearchMessage('Recherche impossible sur ce document.');
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const handleApplyChanges = async () => {
@@ -2943,7 +3060,7 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                           setShowMoreMenu(false);
                         }}
                         className="p-3 border border-border rounded-lg hover:bg-muted transition-colors flex items-center justify-center text-purple-600"
-                        title="�tincelles"
+                        title="Étincelles"
                       >
                         <Sparkles className="w-5 h-5" />
                       </button>
@@ -2959,18 +3076,47 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
         {/* Outils utilitaires */}
         <div className="flex items-center space-x-1 border-l border-border pl-2">
           <button
+            onClick={() => {
+              // « Pense-bête » : insère une note texte sur la page et ouvre la saisie.
+              const canvas = canvasRef.current;
+              if (!canvas) return;
+              const x = Math.round(canvas.width * 0.12);
+              const y = Math.round(canvas.height * 0.15);
+              const rect = canvas.getBoundingClientRect();
+              insertTextAt(x, y, {
+                text: 'Note : ',
+                style: { color: '#B45309', fontSize: Math.max(18, defaultStyle.fontSize) },
+                menu: { pageX: rect.left + x, pageY: rect.top + y },
+              });
+              setStatusMessage('Note ajoutée : saisissez votre texte puis validez (Ctrl+Entrée).');
+              window.setTimeout(() => setStatusMessage(null), 4000);
+            }}
             className="p-2 rounded-lg hover:bg-muted transition-colors"
-            title="Pense-b�te"
+            title="Pense-bête"
           >
             <StickyNote className="w-4 h-4" />
           </button>
           <button
+            onClick={() => {
+              setShowSearch(true);
+              setSearchMessage(null);
+            }}
             className="p-2 rounded-lg hover:bg-muted transition-colors"
             title="Rechercher"
           >
             <Search className="w-4 h-4" />
           </button>
           <button
+            onClick={(e) => {
+              // Ouvre le même menu que le bouton « Plus » (formes, tampons, icônes)
+              const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+              const menuWidth = Math.min(500, window.innerWidth - 24);
+              setMenuPosition({
+                top: rect.bottom + 8,
+                left: Math.max(12, Math.min(rect.left, window.innerWidth - menuWidth - 12)),
+              });
+              setShowMoreMenu(true);
+            }}
             className="px-3 py-2 rounded-lg hover:bg-muted transition-colors text-sm"
             title="Plus d'outils"
           >
@@ -2978,6 +3124,56 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
             <span className="inline">Plus d'outils</span>
           </button>
         </div>
+
+        {/* Recherche plein texte dans le PDF */}
+        {showSearch && (
+          <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[60] w-[22rem] bg-white border border-border rounded-lg shadow-xl p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-semibold">Rechercher dans le PDF</span>
+              <button
+                onClick={() => {
+                  setShowSearch(false);
+                  setSearchMessage(null);
+                }}
+                className="text-sm text-muted-foreground hover:text-foreground"
+                title="Fermer"
+              >
+                Fermer
+              </button>
+            </div>
+            <div className="flex space-x-2">
+              <input
+                autoFocus
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setSearchMessage(null);
+                  setSearchFromPage(1);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    void handleSearch();
+                  }
+                }}
+                placeholder="Texte à rechercher..."
+                className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+              />
+              <button
+                onClick={() => void handleSearch()}
+                disabled={isSearching || searchQuery.trim().length < 2}
+                className="px-3 py-2 rounded-lg text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-blue-600 disabled:opacity-50"
+              >
+                {isSearching ? 'Recherche...' : 'Chercher'}
+              </button>
+            </div>
+            {searchMessage && <p className="mt-2 text-sm text-muted-foreground">{searchMessage}</p>}
+            <p className="mt-2 text-xs text-gray-500">
+              Le document est analysé page par page et la vue se place sur la première page
+              contenant le texte. Appuyez de nouveau sur Entrée pour chercher la suite.
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-1 overflow-hidden relative">
@@ -3363,23 +3559,23 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                     ].includes(currentTool)
                   ) {
                     const map: Record<string, string> = {
-                      'check-icon': '?',
-                      'cross-icon': '?',
-                      'star-icon': '?',
-                      'heart-icon': '?',
-                      'alert-icon': '?',
-                      'info-icon': '?',
+                      'check-icon': '✓',
+                      'cross-icon': '✗',
+                      'star-icon': '★',
+                      'heart-icon': '♥',
+                      'alert-icon': '⚠',
+                      'info-icon': 'ℹ',
                       'dollar-icon': '$',
-                      'euro-icon': '�',
+                      'euro-icon': '€',
                       'percent-icon': '%',
                       'hash-icon': '#',
-                      'arrow-up': '?',
-                      'arrow-down': '?',
-                      'zap-icon': '?',
-                      'sparkles-icon': '?',
+                      'arrow-up': '↑',
+                      'arrow-down': '↓',
+                      'zap-icon': '⚡',
+                      'sparkles-icon': '✨',
                     };
                     setContextMenu(null);
-                    insertSymbolAt(x, y, map[currentTool] || '�');
+                    insertSymbolAt(x, y, map[currentTool] || '★');
                     return;
                   }
                   if (currentTool === 'highlight' || currentTool === 'erase' || currentTool === 'redact') {
@@ -3472,7 +3668,13 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                   }
 
                   const drag = toolDragRef.current;
-                  if (!drag || drag.pointerId !== e.pointerId) return;
+                  if (!drag || drag.pointerId !== e.pointerId) {
+                    // Aucun geste en cours : retour visuel au survol (halo sur la
+                    // poignée + curseur de redimensionnement ou de déplacement).
+                    const hoverRect = canvas.getBoundingClientRect();
+                    updateHoverFeedback(e.clientX - hoverRect.left, e.clientY - hoverRect.top);
+                    return;
+                  }
 
                   const rect = canvas.getBoundingClientRect();
                   const x = e.clientX - rect.left;
