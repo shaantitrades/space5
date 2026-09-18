@@ -1,6 +1,13 @@
 # ============================================================
 # docker-compose.coolify.yml — Configuration Coolify / VPS
 # ============================================================
+# ⚠️ CE FICHIER N'EST PAS CELUI UTILISÉ PAR COOLIFY.
+#    Coolify (et le guide DEPLOIEMENT-COOLIFY.md) utilisent
+#    `docker-compose.prod.yml`, qui contient les correctifs anti-504
+#    (plafonds mémoire, sonde de vivacité, rotation des logs,
+#    démarrage même si Postgres n'est pas prêt).
+#    Ne basculez sur ce fichier qu'en connaissance de cause.
+#
 # Usage:
 #   Pointer Coolify vers ce fichier dans "Docker Compose > Compose File"
 #   ou le renommer en docker-compose.yml

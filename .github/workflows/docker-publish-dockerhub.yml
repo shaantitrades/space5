@@ -8,6 +8,15 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    env:
+      # ── Déploiement automatique (facultatif) ──────────────────────────────
+      # Ajoutez ces deux secrets GitHub pour que l'image publiée soit déployée
+      # sans aucune action manuelle :
+      #   COOLIFY_WEBHOOK = https://<votre-coolify>/api/v1/deploy?uuid=<uuid-app>&force=false
+      #   COOLIFY_TOKEN   = jeton API Coolify (Keys & Tokens → API tokens)
+      # Sans eux, le workflow publie simplement l'image (aucun échec).
+      COOLIFY_WEBHOOK: ${{ secrets.COOLIFY_WEBHOOK }}
+      COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -44,3 +53,19 @@ jobs:
 
       - name: Output image
         run: echo "IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/space5:latest"
+
+      # ────────────────────────────────────────────────────────────────────────
+      # Déclenche le déploiement Coolify UNE FOIS l'image publiée.
+      # C'est ce qui évite les « 504 Gateway Timeout » : Coolify télécharge
+      # l'image déjà construite au lieu de recompiler le projet sur le VPS
+      # (2-4 Go de RAM, ce qui faisait tomber le site pendant le déploiement).
+      # Se saute automatiquement si les secrets ne sont pas définis.
+      # ────────────────────────────────────────────────────────────────────────
+      - name: Trigger Coolify deployment
+        if: env.COOLIFY_WEBHOOK != ''
+        run: |
+          echo "Déclenchement du déploiement Coolify..."
+          curl -fsS --retry 3 --retry-delay 5 --max-time 60 \
+            --request GET "$COOLIFY_WEBHOOK" \
+            --header "Authorization: Bearer $COOLIFY_TOKEN" \
+            || echo "⚠️ Webhook Coolify indisponible — déclenchez le déploiement depuis Coolify."

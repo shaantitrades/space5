@@ -236,9 +236,83 @@ présent dans l'historique Git**. Ces identifiants doivent être considérés co
 
 ---
 
-## 8. GitHub Actions
+## 8. GitHub Actions — où l'image est construite
 
-`.github/workflows/docker-publish.yml` construit et publie une image sur **GHCR** à chaque push sur
-`main` (`ghcr.io/<owner>/space5:latest`). **Ce workflow n'est pas nécessaire à Coolify**, qui construit
-lui-même l'image depuis le `Dockerfile`. Il peut être conservé (build de secours) ou désactivé pour
-accélérer les pushs.
+**Règle : l'image est construite sur les runners GitHub, jamais sur le VPS.**
+
+| Workflow | Registre | Rôle |
+| --- | --- | --- |
+| `.github/workflows/docker-publish-dockerhub.yml` | Docker Hub (`space5:latest` + `space5:<sha>`) | **Celui utilisé en production** |
+| `.github/workflows/docker-publish.yml` | GHCR | Secours (peut être désactivé : deux builds par push = minutes CI doublées) |
+
+Pourquoi : le build Next.js consomme 2 à 4 Go de RAM. Sur un VPS qui fait déjà tourner
+l'application, Postgres et Redis, ce pic déclenche l'OOM killer pendant le remplacement du
+conteneur → le proxy n'a plus de backend → **504 Gateway Timeout** pour les visiteurs.
+
+Mise en route (une seule fois) :
+
+1. Coolify → application → **Configuration** → type **Docker Image** (et non « Build from Git »),
+   image = `<utilisateur Docker Hub>/space5:latest`.
+2. Coolify → **Environment Variables** du service `app` :
+   - `IMAGE=<utilisateur Docker Hub>/space5:latest`
+   - `PULL_POLICY=always` → Coolify télécharge l'image à chaque déploiement
+3. GitHub → **Settings → Secrets and variables → Actions** (facultatif : déploiement automatique
+   à la fin du build) :
+   - `COOLIFY_WEBHOOK` = `https://<votre-coolify>/api/v1/deploy?uuid=<uuid-app>&force=false`
+   - `COOLIFY_TOKEN` = jeton API Coolify
+
+Avec `IMAGE` + `PULL_POLICY=always`, Coolify ne recompile plus jamais le projet : un déploiement
+se résume à un `docker pull` (quelques secondes) puis au redémarrage du conteneur.
+
+---
+
+## 9. Zéro « 504 Gateway Timeout » au déploiement
+
+### Les 5 causes, et ce qui les supprime
+
+| Cause | Symptôme | Correctif (présent dans le dépôt) |
+| --- | --- | --- |
+| Build Next.js sur le VPS (2-4 Go) | OOM killer → proxy sans backend | Image construite par GitHub Actions + `IMAGE`/`PULL_POLICY=always` (§8) |
+| Le serveur attendait la base avant d'écouter | 504 pendant 1-2 min à chaque démarrage | `docker-entrypoint.sh` lance `server.js` **en premier**, la base est préparée en arrière-plan |
+| `depends_on: service_healthy` sur Postgres | l'app ne démarre pas tant que PG n'est pas prêt | `condition: service_started` (le code tolère une base momentanément absente) |
+| Aucun plafond mémoire | un pic du process Node tue le VPS entier | `NODE_OPTIONS=--max-old-space-size=768` + `mem_limit` |
+| Logs Docker illimités (disque plein) | site injoignable, redémarrage impossible | rotation des logs (`max-size: 10m`, `max-file: 3`) |
+
+### À vérifier dans l'interface Coolify
+
+- **Zero-downtime deployment** activé : le trafic n'est basculé qu'une fois le nouveau conteneur
+  *healthy*.
+- **Health check path** = `/api/health` : route de **vivacité**, qui n'interroge pas la base (une
+  base lente ne peut donc pas faire échouer la sonde). Diagnostic base : `/api/health?db=1`.
+- **Resource limits** du service `app` ≈ 1,5 Go (au-dessus du plafond Node de 768 Mo).
+
+### Réglages ajustables sans modifier les fichiers
+
+| Variable (Coolify → Environment) | Défaut | Rôle |
+| --- | --- | --- |
+| `APP_MAX_OLD_SPACE` | `768` | plafond du tas Node (Mo) |
+| `APP_MEM_LIMIT` | `1536m` | plafond mémoire du conteneur app |
+| `PG_MEM_LIMIT` / `REDIS_MEM_LIMIT` | `768m` / `384m` | plafonds Postgres / Redis |
+
+### Si le site ne répond quand même pas
+
+```bash
+docker ps -a                  # le conteneur app tourne-t-il ? redémarre-t-il en boucle ?
+docker logs --tail 100 <app>  # chercher « Killed », « OOM », « server.js introuvable »
+free -h                       # mémoire disponible sur le VPS
+docker stats --no-stream      # consommation par conteneur
+df -h                         # disque : plein = site injoignable
+```
+
+Puis, depuis l'extérieur, la séquence qui distingue un problème de proxy d'un problème
+d'application :
+
+```bash
+curl -s -o /dev/null -w 'http  : %{http_code}\n' http://multi-convert.com/            # 302 = proxy vivant
+curl -s -o /dev/null -w 'https : %{http_code} tls=%{time_appconnect}s octet=%{time_starttransfer}s\n' https://multi-convert.com/api/health
+```
+
+- **TLS rapide + aucun octet de réponse** → l'application ne répond pas (processus figé ou OOM) :
+  redémarrer le conteneur puis contrôler la mémoire.
+- **502 / 503 immédiat** → conteneur non démarré ou non *healthy* : lire les logs.
+- **`/api/health` en 200 mais pages lentes** → chercher côté base de données (`/api/health?db=1`).

@@ -7,6 +7,19 @@ services:
     # recompilait jamais le depot et relancait une image locale ancienne,
     # ce qui servait une vieille version du site (d'ou /api/health fige au
     # 7 septembre et l'ancien docker-entrypoint.sh dans les logs).
+    # ── Source de l'image ──────────────────────────────────────
+    # Par défaut on garde la compilation locale (le fichier reste autonome),
+    # MAIS la façon de supprimer définitivement les « 504 Gateway Timeout »
+    # pendant les déploiements est de NE PLUS compiler sur le VPS :
+    #   IMAGE=<utilisateur Docker Hub>/space5:latest
+    #   PULL_POLICY=always
+    # L'image est construite par GitHub Actions (workflow
+    # docker-publish-dockerhub.yml) sur les runners GitHub, puis simplement
+    # téléchargée ici. Le VPS ne consomme plus 2-4 Go de RAM pour un build, il
+    # ne peut donc plus se retrouver à court de mémoire pendant le
+    # remplacement du conteneur (OOM → le proxy n'a plus de backend → 504).
+    image: ${IMAGE:-multi-convert:latest}
+    pull_policy: ${PULL_POLICY:-missing}
     build:
       context: .
       dockerfile: Dockerfile
@@ -15,10 +28,17 @@ services:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
         NEXT_PUBLIC_VERSION: ${NEXT_PUBLIC_VERSION:-1.0.0}
     # Tag local par defaut : plus aucune dependance a une image GHCR.
-    image: ${IMAGE:-multi-convert:latest}
     restart: unless-stopped
+    # Temps laissé au process pour fermer ses connexions avant SIGKILL
+    # (évite les requêtes coupées pendant un redéploiement).
+    stop_grace_period: 20s
     environment:
       NODE_ENV: production
+      # Plafond du tas Node.js : sans plafond, un pic mémoire du process faisait
+      # tomber tout le VPS (OOM killer) et le site restait injoignable.
+      # Surchargeable sans toucher au fichier : APP_MAX_OLD_SPACE=1024
+      NODE_OPTIONS: --max-old-space-size=${APP_MAX_OLD_SPACE:-768}
+      PORT: 3000
       NEXTAUTH_URL: ${NEXTAUTH_URL}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
       JWT_SECRET: ${JWT_SECRET}
@@ -50,19 +70,38 @@ services:
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
       ADMIN_EMAILS: ${ADMIN_EMAILS}
     depends_on:
+      # `service_started` (et non `service_healthy`) : l'application démarre et
+      # répond immédiatement, même si Postgres/Redis finissent de démarrer.
+      # Le schéma est appliqué en arrière-plan par docker-entrypoint.sh et le
+      # code est tolérant à une base momentanément indisponible : mieux vaut un
+      # site qui répond que des minutes de « 504 Gateway Timeout ».
       mc_postgres:
-        condition: service_healthy
+        condition: service_started
       mc_redis:
-        condition: service_healthy
+        condition: service_started
     # Expose container port so Coolify (or other orchestrators) can detect the app port
     expose:
       - "3000"
+    # Plafonds de ressources : un conteneur ne doit jamais pouvoir affamer
+    # l'hôte (c'était la cause du site injoignable après un déploiement).
+    # Ajustables dans Coolify sans modifier ce fichier.
+    mem_limit: ${APP_MEM_LIMIT:-1536m}
+    memswap_limit: ${APP_MEM_LIMIT:-1536m}
     healthcheck:
+      # Sonde de VIVACITÉ : /api/health ne touche PAS la base de données, la
+      # sonde ne peut donc pas échouer à cause d'une base lente.
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
-      interval: 30s
-      timeout: 10s
-      start_period: 120s
+      interval: 15s
+      timeout: 5s
+      start_period: 45s
       retries: 5
+    # Rotation des logs : un disque plein rendait le site injoignable (et le
+    # redémarrage impossible) sur les VPS à petit disque.
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - internal
       - proxy
@@ -83,6 +122,12 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
+    mem_limit: ${PG_MEM_LIMIT:-768m}
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - internal
 
@@ -97,6 +142,12 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    mem_limit: ${REDIS_MEM_LIMIT:-384m}
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - internal
 
