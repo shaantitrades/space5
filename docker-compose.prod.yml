@@ -2,15 +2,15 @@ version: '3.8'
 
 services:
   app:
-    # Le code deploye est compile ICI, depuis ce depot.
-    # AVANT : il n'y avait que `image:` (sans `build:`) -> Coolify ne
-    # recompilait jamais le depot et relancait une image locale ancienne,
-    # ce qui servait une vieille version du site (d'ou /api/health fige au
-    # 7 septembre et l'ancien docker-entrypoint.sh dans les logs).
     # ── Source de l'image ──────────────────────────────────────
-    # Par défaut on garde la compilation locale (le fichier reste autonome),
-    # MAIS la façon de supprimer définitivement les « 504 Gateway Timeout »
-    # pendant les déploiements est de NE PLUS compiler sur le VPS :
+    # Historique : il n'y avait d'abord que `image:` (sans `build:`) → Coolify
+    # ne recompilait jamais le dépôt et relançait une image locale ancienne
+    # (d'où /api/health figé au 7 septembre). D'où la présence de `build:`.
+    #
+    # MAIS compiler sur le VPS est ce qui provoquait les « 504 Gateway Timeout » :
+    # le build Next.js demande 2-4 Go de RAM alors que l'ancien conteneur,
+    # Postgres et Redis tournent déjà → OOM killer → le proxy n'a plus de
+    # backend. La solution définitive est donc de NE PLUS compiler ici :
     #   IMAGE=<utilisateur Docker Hub>/space5:latest
     #   PULL_POLICY=always
     # L'image est construite par GitHub Actions (workflow
