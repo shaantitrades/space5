@@ -283,6 +283,36 @@ export function buildPageMetadata(
   });
 }
 
+/**
+ * Métadonnées d’une page PRIVÉE (authentification, tableau de bord, erreurs…).
+ *
+ * Ces pages ne doivent jamais apparaître dans les résultats de recherche :
+ * `noindex, nofollow` systématique. Elles sont également exclues du `robots.txt`
+ * (voir `app/robots.ts`) — les deux mécanismes sont complémentaires :
+ * le `robots.txt` empêche l’EXPLORATION (et donc la lecture de la balise), la
+ * balise empêche l’INDEXATION si l’URL est découverte par un lien direct.
+ *
+ * Le titre n’est volontairement pas traduit : ces pages n’ont aucune valeur
+ * éditoriale et ne peuvent pas être affichées dans les résultats.
+ */
+export function buildPrivatePageMetadata(
+  locale: string,
+  path: string,
+  title: string,
+  description: string
+): Metadata {
+  return buildMetadata({
+    locale,
+    path,
+    title: `${title} — ${siteConfig.name}`,
+    description,
+    keywords: [],
+    noIndex: true,
+  });
+}
+
+
+
 /** Métadonnées de la page d’accueil (10 langues) */
 export function buildHomeMetadata(locale: string): Metadata {
   const seo = getSeo(locale);

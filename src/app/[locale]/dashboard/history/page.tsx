@@ -4,6 +4,8 @@ import { Link } from '@/i18n/routing';
 export const metadata: Metadata = {
   title: 'Historique - OMNIVERSA',
   description: 'Historique de vos conversions',
+  /** Espace privé : jamais indexé (voir `lib/seo.ts` → `buildPrivatePageMetadata`). */
+  robots: { index: false, follow: false },
 };
 
 export default function HistoryPage() {

@@ -157,6 +157,16 @@ async function logSecurityEvent(
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const ip = request.ip || request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+  const userAgent = request.headers.get('user-agent') || '';
+
+  /**
+   * Robots d'indexation : ils ne doivent recevoir NI 403 (blocage
+   * géographique) NI 307 anti-bot. Un 403/307 renvoyé à Googlebot fait échouer
+   * l'exploration des pages et la validation du sitemap dans Search Console.
+   * (Le sitemap XML lui-même contourne déjà ce middleware : voir
+   * TECHNICAL_ROUTES + `matcher`.)
+   */
+  const isCrawler = isLegitimateCrawler(userAgent);
 
   // Routes techniques (sitemap.xml, robots.txt…) : servies telles quelles,
   // sans réécriture i18n ni redirection possible.
@@ -178,8 +188,8 @@ export async function middleware(request: NextRequest) {
     // 1. Récupération des données géographiques
     const geo = await getGeoData(request);
 
-    // 2. Blocage pays niveau 1 (BLOCKED)
-    if (BLOCKED_COUNTRIES.LEVEL_1.includes(geo.country as unknown as any)) {
+    // 2. Blocage pays niveau 1 (BLOCKED) — jamais appliqué aux moteurs de recherche
+    if (!isCrawler && BLOCKED_COUNTRIES.LEVEL_1.includes(geo.country as unknown as any)) {
       await logSecurityEvent('COUNTRY_BLOCKED', {
         ip,
         country: geo.country,
@@ -210,8 +220,9 @@ export async function middleware(request: NextRequest) {
       return response;
     }
 
-    // 4. Vérification Threat Score Cloudflare
-    if (geo.threatScore && geo.threatScore > 20) {
+    // 4. Vérification Threat Score Cloudflare (jamais de redirection vers
+    // /verify pour un robot d'indexation : la page serait indexée à sa place)
+    if (!isCrawler && geo.threatScore && geo.threatScore > 20) {
       await logSecurityEvent('HIGH_THREAT_SCORE', {
         ip,
         threatScore: geo.threatScore,
@@ -219,11 +230,14 @@ export async function middleware(request: NextRequest) {
         path,
       });
 
-      // Rediriger vers une page de vérification.
-      // Redirection RELATIVE : `new URL(path, request.url)` exposait l'adresse
-      // interne du conteneur (http://0.0.0.0:3000) → ERR_ADDRESS_INVALID.
+      // Redirection vers la page de vérification.
+      // `relativeRedirect` construit une URL ABSOLUE à partir de l'hôte PUBLIC
+      // (`x-forwarded-host` / `x-forwarded-proto`) : un `Location` relatif
+      // provoque un 500 « Invalid URL » côté Next.js, et `request.nextUrl.origin`
+      // exposerait l'adresse interne du conteneur (http://0.0.0.0:3000)
+      // → ERR_ADDRESS_INVALID.
       if (!path.startsWith('/verify')) {
-        return relativeRedirect('/verify?reason=threat_score');
+        return relativeRedirect('/verify?reason=threat_score', 302, request);
       }
     }
 
@@ -237,7 +251,7 @@ export async function middleware(request: NextRequest) {
       });
 
       if (!path.startsWith('/verify')) {
-        return relativeRedirect('/verify?reason=suspicious_behavior');
+        return relativeRedirect('/verify?reason=suspicious_behavior', 302, request);
       }
     }
 

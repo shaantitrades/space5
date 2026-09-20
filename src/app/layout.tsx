@@ -79,7 +79,21 @@ export const metadata: Metadata = {
     languages: Object.fromEntries(locales.map((l) => [l, `${siteConfig.url}/${l}`])),
   },
   verification: {
-    google: 'E3zpWu3IJ57W2iYGxsvNiN-CSjJGYftVcpYpGq6y85o',
+    /**
+     * Jetons Search Console — Next.js génère UNE balise
+     * `<meta name="google-site-verification" content="…">` par jeton.
+     *
+     * - `E3zp…` : propriété `multi-convert.com`. Le même jeton est présent dans
+     *   l'enregistrement TXT DNS du domaine : la vérification reste valide même
+     *   si cette balise disparaît un jour.
+     * - `svdh6…` : propriété `imaparami.com`. La balise doit être servie par le
+     *   domaine à vérifier, donc `imaparami.com` doit pointer vers ce
+     *   déploiement (Coolify/Traefik) pour que Search Console la trouve.
+     */
+    google: [
+      'E3zpWu3IJ57W2iYGxsvNiN-CSjJGYftVcpYpGq6y85o',
+      'svdh6WOrdjKjKZwVz9yXgnYbQOGsmjnebvDoHxTUVbQ',
+    ],
   },
   other: {
     'google-adsense-account': 'ca-pub-5343389597650456',

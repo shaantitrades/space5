@@ -67,6 +67,30 @@ const nextConfig = {
     
     return config;
   },
+  /**
+   * 🔎 ALIAS DE SITEMAP → /sitemap.xml
+   *
+   * Google (et Bing) acceptent une redirection 308 devant un sitemap. Sans ces
+   * règles, les URL ci-dessous renvoyaient une page 404 en HTML : Search Console
+   * répondait alors « Impossible de lire le sitemap » (le fichier reçu n'est pas
+   * un XML). Les noms `sitemap_index.xml` / `sitemap-index.xml` sont ceux générés
+   * par la plupart des CMS et donc ceux saisis par défaut dans Search Console.
+   *
+   * `redirects()` est évalué AVANT le middleware (voir
+   * node_modules/next/dist/server/lib/router-utils/resolve-routes.js) : la règle
+   * `/sitemap` fonctionne donc malgré le middleware i18n.
+   */
+  async redirects() {
+    return [
+      { source: '/sitemap', destination: '/sitemap.xml', permanent: true },
+      { source: '/sitemap/', destination: '/sitemap.xml', permanent: true },
+      { source: '/sitemap_index', destination: '/sitemap.xml', permanent: true },
+      { source: '/sitemap-index', destination: '/sitemap.xml', permanent: true },
+      { source: '/sitemap_index.xml', destination: '/sitemap.xml', permanent: true },
+      { source: '/sitemap-index.xml', destination: '/sitemap.xml', permanent: true },
+      { source: '/sitemap.xml.gz', destination: '/sitemap.xml', permanent: true },
+    ];
+  },
   // Security headers
   async headers() {
     return [
