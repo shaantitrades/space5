@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { Toaster } from 'sonner';
+import { getLocale } from 'next-intl/server';
 import './globals.css';
 import { siteConfig } from '@/config/site';
 import { PwaRegister } from '@/components/pwa/pwa-register';
@@ -110,13 +111,38 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  /**
+   * 🌍 Langue du document (`<html lang>`).
+   *
+   * Google détermine la langue d'une page en priorité via cet attribut, PAS
+   * via l'URL. Servir `/fr` avec `lang="en"` fait donc classer la page
+   * française comme anglaise : Google affiche la version `/en` aux
+   * francophones et signale un conflit dans le rapport hreflang de Search
+   * Console.
+   *
+   * La locale est fournie par l'en-tête `X-NEXT-INTL-LOCALE`, posé par le
+   * middleware i18n (`src/middleware.ts`) et lisible côté serveur via
+   * `getLocale()` de `next-intl/server`. `HtmlLang` (côté client) reste
+   * nécessaire pour mettre l'attribut à jour lors des navigations internes
+   * sans rechargement.
+   */
+  let locale = 'en';
+  try {
+    const currentLocale = await getLocale();
+    if (locales.includes(currentLocale)) {
+      locale = currentLocale;
+    }
+  } catch {
+    // Requête hors middleware i18n (en-tête absent) : repli sur l'anglais.
+  }
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body className={inter.className}>
         {children}
         <PwaRegister />
