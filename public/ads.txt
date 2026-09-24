@@ -1,0 +1,4 @@
+# ads.txt — déclaration des vendeurs autorisés à commercialiser l'inventaire.
+# Référence : https://support.google.com/adsense/answer/12171612
+# Un seul vendeur : Google AdSense (DIRECT).
+google.com, pub-5343389597650456, DIRECT, f08c47fec0942fa0
