@@ -101,12 +101,22 @@ ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL \
 #
 # 2) Nombre de workers du build (génération statique) : Next en crée 4 par
 #    défaut ET retire ce plafond de tas de leur environnement (chaque worker
-#    n'est donc plus borné en mémoire). Voir buildWorkers() dans
-#    next.config.js : vide = dimensionné sur la mémoire libre du serveur
-#    (~1 Go par worker), surchargeable :
-#      --build-arg NEXT_BUILD_WORKERS=1
+#    n'est donc plus borné en mémoire). Voir buildWorkers() dans next.config.js.
+#
+#    DÉFAUT = 1, et non plus « automatique ». Pourquoi : le dimensionnement
+#    automatique s'appuie sur os.freemem(), c'est-à-dire la mémoire libre de
+#    l'HÔTE au moment où next.config.js est évalué. Or Coolify ARRÊTE l'ancien
+#    conteneur juste avant de compiler (docker stop) : la mémoire libre paraît
+#    alors confortable et le calcul autorise 2 à 4 workers, alors que le build
+#    pèse déjà ~1,5 à 2 Go à lui seul (mesuré à froid sur ce dépôt : 1 495 Mo
+#    avec 1 worker, 2 059 Mo avec 4). Sur un VPS 2-4 Go où tournent déjà
+#    Coolify, Postgres, Redis et BuildKit, ce budget n'existe pas → OOM killer →
+#    déploiement en échec sur « Collecting page data ... » (ou « Collecting build
+#    traces ... »), exit 255 SANS aucun message (voir DEPLOIEMENT-COOLIFY.md §6).
+#    Sur un hôte ≥ 8 Go (runners GitHub Actions), forcer la vitesse :
+#      --build-arg NEXT_BUILD_WORKERS=4
 ARG NODE_MAX_OLD_SPACE_SIZE=1536
-ARG NEXT_BUILD_WORKERS=
+ARG NEXT_BUILD_WORKERS=1
 ENV NODE_OPTIONS="--max-old-space-size=${NODE_MAX_OLD_SPACE_SIZE}" \
     NEXT_BUILD_WORKERS=${NEXT_BUILD_WORKERS}
 

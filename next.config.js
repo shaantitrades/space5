@@ -23,14 +23,26 @@ const withNextIntl = require('next-intl/plugin')('./i18n.ts');
  * « Collecting build traces ... » avec `exit code 255` et **aucun message
  * d'erreur** (voir DEPLOIEMENT-COOLIFY.md §6 et §9).
  *
- * On dimensionne donc le nombre de workers sur la mémoire réellement libre :
- * ~1 Go de RAM libre par worker, après avoir réservé 1,5 Go au process
- * principal (webpack + collecte des traces).
+ * Mesures faites sur ce dépôt (build à FROID, cache `.next` vide comme sur le
+ * VPS, `NODE_OPTIONS=--max-old-space-size=1536`) :
  *
- *   VPS 4 Go, ~2,5 Go libres  -> 1 worker
- *   VPS 8 Go, ~5,5 Go libres  -> 4 workers (maximum de Next)
- *   Runner GitHub Actions     -> 4 workers (build CI rapide, inchangé)
+ *   1 worker  -> pic 1 495 Mo pour tout l'arbre (principal + workers),  69 s
+ *   4 workers -> pic 2 059 Mo,                                          49 s
  *
+ * L'essentiel du pic vient du process principal (webpack puis collecte des
+ * données et des traces) ; chaque worker ne coûte ici qu'environ 200 Mo de plus,
+ * MAIS ce coût n'est pas borné (leur plafond de tas est retiré). On garde donc
+ * une marge prudente : 2 Go pour le principal, 2 Go par worker.
+ *
+ *   VPS 4 Go, ~2,5 Go libres -> 1 worker
+ *   VPS 8 Go, ~5,5 Go libres -> 1 worker
+ *   Machine ≥ 12 Go libres   -> 4 workers (maximum de Next)
+ *
+ * ⚠️ Ce calcul reste une ESTIMATION, basée sur la mémoire libre de l'HÔTE à
+ * l'instant où ce fichier est évalué. En production la valeur n'est donc jamais
+ * laissée à l'automatique :
+ *   - Dockerfile : ARG NEXT_BUILD_WORKERS=1 (défaut, sûr sur un VPS 2-4 Go) ;
+ *   - CI GitHub Actions : NEXT_BUILD_WORKERS=4 (runners ≥ 8 Go).
  * Surchargeable sans modifier ce fichier (build-arg / variable de build
  * Coolify) : NEXT_BUILD_WORKERS=1 (ou 2, 4...). Une valeur vide ou invalide
  * laisse le dimensionnement automatique.
@@ -41,7 +53,7 @@ function buildWorkers() {
     return Math.floor(forced);
   }
   const GB = 1024 ** 3;
-  const freeAfterMainProcess = (os.freemem() - 1.5 * GB) / GB;
+  const freeAfterMainProcess = (os.freemem() - 2 * GB) / (2 * GB);
   return Math.max(1, Math.min(4, Math.floor(freeAfterMainProcess)));
 }
 

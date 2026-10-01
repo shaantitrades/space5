@@ -45,16 +45,21 @@ services:
         NEXT_PUBLIC_ADSENSE_SLOT_IN_CONTENT: ${NEXT_PUBLIC_ADSENSE_SLOT_IN_CONTENT:-}
         NEXT_PUBLIC_ADSENSE_SLOT_FOOTER: ${NEXT_PUBLIC_ADSENSE_SLOT_FOOTER:-}
         # ── Mémoire du build (VPS) ─────────────────────────────
-        # Le build échouait à « Collecting build traces ... » (exit 255, sans
-        # aucun message) : mémoire insuffisante sur le VPS. Ces deux valeurs
-        # sont transmises au Dockerfile (voir les commentaires détaillés
-        # dedans) et ajustables dans Coolify → Environment Variables
-        # (build time), sans modifier ce fichier :
+        # Le build échouait à « Collecting page data ... » / « Collecting build
+        # traces ... » (exit 255, sans aucun message) : mémoire insuffisante sur
+        # le VPS. Ces deux valeurs sont transmises au Dockerfile (voir les
+        # commentaires détaillés dedans) et ajustables dans Coolify →
+        # Environment Variables (build time), sans modifier ce fichier :
         #   NODE_MAX_OLD_SPACE_SIZE=2048   (VPS ≥ 6 Go)
-        #   NEXT_BUILD_WORKERS=1           (imposer 1 worker de build)
-        # Vide = dimensionnement automatique sur la mémoire libre du serveur.
+        #   NEXT_BUILD_WORKERS=4           (uniquement hôte ≥ 8 Go)
+        # Défaut = 1 worker (et non plus « vide ») : le mode automatique
+        # dimensionnait sur os.freemem() de l'HÔTE, mesuré juste après l'arrêt
+        # de l'ancien conteneur — donc trop optimiste. Mesuré à froid sur ce
+        # dépôt : 1 495 Mo de pic avec 1 worker contre 2 059 Mo avec 4, sur un
+        # VPS 2-4 Go qui héberge en plus Coolify, Postgres, Redis et BuildKit.
+        # 1 worker = valeur déterministe et sûre (coût : build un peu plus long).
         NODE_MAX_OLD_SPACE_SIZE: ${NODE_MAX_OLD_SPACE_SIZE:-1536}
-        NEXT_BUILD_WORKERS: ${NEXT_BUILD_WORKERS:-}
+        NEXT_BUILD_WORKERS: ${NEXT_BUILD_WORKERS:-1}
     # Tag local par defaut : plus aucune dependance a une image GHCR.
     restart: unless-stopped
     # Temps laissé au process pour fermer ses connexions avant SIGKILL

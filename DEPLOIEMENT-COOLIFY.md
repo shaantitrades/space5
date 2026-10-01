@@ -188,12 +188,21 @@ Puis : **Google Search Console** → ajouter la propriété et soumettre `sitema
 
 ## 6. Dépannage
 
-### Le déploiement échoue sur « Collecting build traces » (`exit code 255`, aucun message)
+### Le déploiement échoue sur « Collecting page data » / « Collecting build traces » (`exit code 255`, aucun message)
 
-Symptôme exact dans les logs Coolify : le build va jusqu'à
-`✓ Generating static pages (339/339)`, puis affiche `Collecting build traces ...`
-et s'arrête là — `Deployment failed: Command execution failed (exit code 255)`,
-sans le moindre message d'erreur.
+Symptôme exact dans les logs Coolify : le build s'arrête **net**, sans le moindre
+message d'erreur, juste après l'une de ces deux étapes (la phase où le noyau tue
+le process varie selon la mémoire disponible à cet instant) :
+
+- `✓ Compiled successfully` → `Collecting page data ...` — observé le
+  2026-10-01 : les workers de génération statique démarrent et ne tiennent pas ;
+- `✓ Generating static pages (339/339)` → `Collecting build traces ...`.
+
+Dans les deux cas la commande `docker compose ... build` échoue avec
+`Deployment failed: Command execution failed (exit code 255)` et **aucune ligne
+`#17 ERROR` n'apparaît** dans le log BuildKit : le process a été tué, il n'a rien
+pu écrire (un vrai échec de build, lui, affiche toujours `#17 ERROR: process ...
+did not complete successfully`).
 
 Cause : **la mémoire du VPS a manqué pendant la compilation**. `Collecting build
 traces` est l'étape la plus gourmande de Next.js ; quand le noyau tue le process
@@ -203,10 +212,20 @@ juste un code de sortie 255. Deux amplificateurs :
 1. **Coolify recompile sur le VPS** à chaque déploiement, car le service `app`
    du `docker-compose.prod.yml` contient un bloc `build:` — alors que l'image est
    déjà construite par GitHub Actions (§8).
-2. **4 workers de génération statique par défaut** : Next en crée 4 et **retire
-   leur plafond de mémoire** (chaque worker est un process Node complet, non
-   borné par `NODE_OPTIONS`). `buildWorkers()` dans `next.config.js` n'en crée
-   plus qu'un seul quand la mémoire libre est faible.
+2. **Workers de génération statique non plafonnés** : Next en crée jusqu'à 4 et
+   **retire leur plafond de mémoire** (chaque worker est un process Node complet,
+   non borné par `NODE_OPTIONS`). Le dimensionnement « automatique »
+   (`buildWorkers()` dans `next.config.js`) est trompeur ici : il lit
+   `os.freemem()`, c'est-à-dire la mémoire libre de **l'hôte**, au moment où
+   Coolify a **déjà arrêté l'ancien conteneur** (`docker stop`) — la mémoire
+   paraît donc confortable et le calcul autorise plusieurs workers.
+   **Correctif** : la valeur est désormais imposée, jamais laissée à
+   l'automatique — `ARG NEXT_BUILD_WORKERS=1` dans le `Dockerfile` et
+   `NEXT_BUILD_WORKERS: ${NEXT_BUILD_WORKERS:-1}` dans `docker-compose.prod.yml`
+   (les runners GitHub, eux, passent explicitement `NEXT_BUILD_WORKERS=4`).
+   Gain mesuré (build à froid de ce dépôt, cache `.next` vide) : **pic de
+   2 059 Mo avec 4 workers contre 1 495 Mo avec 1** — ~560 Mo libérés, au prix
+   d'un build plus long (69 s contre 49 s ici).
 
 À faire dans l'ordre (sur le VPS) :
 
@@ -345,7 +364,7 @@ se résume à un `docker pull` (quelques secondes) puis au redémarrage du conte
 | Cause | Symptôme | Correctif (présent dans le dépôt) |
 | --- | --- | --- |
 | Build Next.js sur le VPS (2-4 Go) | OOM killer → proxy sans backend | Image construite par GitHub Actions + `IMAGE`/`PULL_POLICY=always` (§8) |
-| Build tué sur « Collecting build traces » (exit 255, aucun message) | déploiement en échec, sans log d'erreur | 1 worker de build sur VPS (`NEXT_BUILD_WORKERS=1`, auto via `next.config.js`) + swap si possible (§6) |
+| Build tué sur « Collecting page data » / « Collecting build traces » (exit 255, aucun message) | déploiement en échec, sans log d'erreur | **1 worker de build imposé** (`ARG NEXT_BUILD_WORKERS=1` du `Dockerfile`, `NEXT_BUILD_WORKERS:-1` du compose) + swap si possible (§6) |
 | Le serveur attendait la base avant d'écouter | 504 pendant 1-2 min à chaque démarrage | `docker-entrypoint.sh` lance `server.js` **en premier**, la base est préparée en arrière-plan |
 | `depends_on: service_healthy` sur Postgres | l'app ne démarre pas tant que PG n'est pas prêt | `condition: service_started` (le code tolère une base momentanément absente) |
 | Aucun plafond mémoire | un pic du process Node tue le VPS entier | `NODE_OPTIONS=--max-old-space-size=768` + `mem_limit` |
@@ -366,7 +385,7 @@ se résume à un `docker pull` (quelques secondes) puis au redémarrage du conte
 | `APP_MAX_OLD_SPACE` | `768` | plafond du tas Node (Mo) |
 | `APP_MEM_LIMIT` | `1536m` | plafond mémoire du conteneur app |
 | `PG_MEM_LIMIT` / `REDIS_MEM_LIMIT` | `768m` / `384m` | plafonds Postgres / Redis |
-| `NEXT_BUILD_WORKERS` *(build time)* | auto (≈1 par Go libre, max 4) | workers du build Next.js — `1` sur un VPS |
+| `NEXT_BUILD_WORKERS` *(build time)* | `1` (imposé par le `Dockerfile` et `docker-compose.prod.yml`) | workers du build Next.js — ne PAS laisser l'automatique sur un VPS (il lit la mémoire libre de l'hôte) |
 | `NODE_MAX_OLD_SPACE_SIZE` *(build time)* | `1536` | plafond du tas Node pendant le build (Mo) |
 
 ### Si le site ne répond quand même pas
