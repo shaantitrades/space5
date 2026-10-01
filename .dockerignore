@@ -54,6 +54,11 @@ __tests__/
 *.test.ts
 *.spec.ts
 
+# Sorties des verifications locales (builds de mesure memoire, sorties tsc des
+# tests, scripts de diagnostic) : rien de tout cela ne sert a construire l'image,
+# et `COPY . .` les embarquerait sinon dans l'etape builder.
+.test-build/
+
 # ── Divers ────────────────────────────────────────────────────
 uploads/
 temp/
