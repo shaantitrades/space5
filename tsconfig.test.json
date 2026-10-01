@@ -17,6 +17,6 @@
     "jsx": "preserve",
     "types": ["node"]
   },
-  "include": ["tests/**/*.ts", "src/lib/converters/image-to-pdf.ts"],
+  "include": ["tests/**/*.ts", "src/lib/qr.ts", "src/lib/qr-poster.ts", "src/lib/converters/image-to-pdf.ts"],
   "exclude": ["node_modules", ".next", ".test-build"]
 }

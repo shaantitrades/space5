@@ -452,5 +452,113 @@
     "learnMore": "Scopri di più",
     "currentChoice": "La tua scelta attuale:",
     "notChosen": "Non definita"
+  },
+  "qr": {
+    "title": "Generatore di codici QR",
+    "subtitle": "Crea gratuitamente codici QR scansionabili, senza registrazione né pubblicità.",
+    "types": {
+      "url": "URL",
+      "wifi": "WiFi",
+      "vcard": "vCard",
+      "email": "Email",
+      "phone": "Telefono",
+      "sms": "SMS",
+      "geo": "GPS"
+    },
+    "fields": {
+      "url": "Link (URL)",
+      "ssid": "Nome della rete (SSID)",
+      "password": "Password",
+      "encryption": "Crittografia",
+      "firstName": "Nome",
+      "lastName": "Cognome",
+      "organization": "Azienda",
+      "jobTitle": "Ruolo / Titolo",
+      "phone": "Telefono",
+      "email": "Email",
+      "website": "Sito web",
+      "address": "Indirizzo",
+      "emailAddress": "Indirizzo email",
+      "subject": "Oggetto",
+      "body": "Messaggio",
+      "phoneNumber": "Numero di telefono",
+      "message": "Messaggio",
+      "latitude": "Latitudine",
+      "longitude": "Longitudine"
+    },
+    "encryption": {
+      "wpa": "WPA / WPA2",
+      "wep": "WEP",
+      "nopass": "Nessuna (rete aperta)"
+    },
+    "placeholders": {
+      "url": "https://esempio.it",
+      "ssid": "MioWiFi",
+      "password": "••••••",
+      "emailAddress": "contatti@esempio.it",
+      "phoneNumber": "+39 333 123 4567",
+      "latitude": "41.9028",
+      "longitude": "12.4964"
+    },
+    "appearance": {
+      "color": "Colore",
+      "sizePx": "Dimensione: {size} px"
+    },
+    "download": {
+      "qrPng": "PNG",
+      "qrSvg": "SVG",
+      "posterPng": "Poster PNG",
+      "posterSvg": "Poster SVG"
+    },
+    "reset": "Reimposta",
+    "hint": "Inquadra il codice con la fotocamera del telefono per provarlo.",
+    "empty": "Compila il modulo per generare il tuo codice QR.",
+    "stats": {
+      "types": "Tipi di codice QR",
+      "free": "Gratuito e senza registrazione",
+      "export": "Esportazione in alta risoluzione"
+    },
+    "caption": {
+      "alt": "Codice QR: {title}",
+      "kinds": {
+        "link": "Link a",
+        "wifi": "Rete WiFi",
+        "contact": "Biglietto da visita",
+        "email": "Email",
+        "call": "Chiamata",
+        "sms": "SMS",
+        "map": "Posizione sulla mappa"
+      },
+      "actions": {
+        "link": "Inquadra con la fotocamera",
+        "wifi": "Inquadra per unirti al WiFi",
+        "contact": "Inquadra per aggiungere il contatto",
+        "email": "Inquadra per scrivere un'email",
+        "call": "Inquadra per chiamare",
+        "sms": "Inquadra per inviare un SMS",
+        "map": "Inquadra per aprire la mappa"
+      },
+      "security": "Sicurezza",
+      "fallbackLabel": "Nessuno scanner? Digita questo:",
+      "copy": "Copia",
+      "copied": "Copiato",
+      "reveal": "Mostra la password",
+      "hide": "Nascondi la password",
+      "secretNote": "Visibile a chiunque veda il QR stampato.",
+      "warnings": {
+        "shortlink": "Link abbreviato: la destinazione reale non è visibile.",
+        "open-network": "Rete aperta: i dati non sono crittografati.",
+        "invalid": "Destinazione non valida: controlla il campo."
+      }
+    },
+    "poster": {
+      "title": "Poster con didascalia",
+      "subtitle": "Mostra i dettagli",
+      "action": "Mostra l'istruzione di scansione",
+      "fallback": "Mostra il testo di riserva",
+      "secret": "Mostra la password",
+      "footer": "Piè di pagina (facoltativo)",
+      "footerPlaceholder": "Es. La mia azienda — miaazienda.it"
+    }
   }
 }

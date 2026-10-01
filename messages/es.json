@@ -452,5 +452,113 @@
     "learnMore": "Más información",
     "currentChoice": "Su elección actual:",
     "notChosen": "Sin definir"
+  },
+  "qr": {
+    "title": "Generador de códigos QR",
+    "subtitle": "Crea códigos QR escaneables gratis, sin registro y sin publicidad.",
+    "types": {
+      "url": "URL",
+      "wifi": "WiFi",
+      "vcard": "vCard",
+      "email": "Email",
+      "phone": "Teléfono",
+      "sms": "SMS",
+      "geo": "GPS"
+    },
+    "fields": {
+      "url": "Enlace (URL)",
+      "ssid": "Nombre de la red (SSID)",
+      "password": "Contraseña",
+      "encryption": "Cifrado",
+      "firstName": "Nombre",
+      "lastName": "Apellidos",
+      "organization": "Empresa",
+      "jobTitle": "Puesto / Cargo",
+      "phone": "Teléfono",
+      "email": "Correo",
+      "website": "Sitio web",
+      "address": "Dirección",
+      "emailAddress": "Dirección de correo",
+      "subject": "Asunto",
+      "body": "Mensaje",
+      "phoneNumber": "Número de teléfono",
+      "message": "Mensaje",
+      "latitude": "Latitud",
+      "longitude": "Longitud"
+    },
+    "encryption": {
+      "wpa": "WPA / WPA2",
+      "wep": "WEP",
+      "nopass": "Ninguno (red abierta)"
+    },
+    "placeholders": {
+      "url": "https://ejemplo.es",
+      "ssid": "MiWiFi",
+      "password": "••••••",
+      "emailAddress": "contacto@ejemplo.es",
+      "phoneNumber": "+34 600 123 456",
+      "latitude": "48.8566",
+      "longitude": "2.3522"
+    },
+    "appearance": {
+      "color": "Color",
+      "sizePx": "Tamaño: {size} px"
+    },
+    "download": {
+      "qrPng": "PNG",
+      "qrSvg": "SVG",
+      "posterPng": "Cartel PNG",
+      "posterSvg": "Cartel SVG"
+    },
+    "reset": "Restablecer",
+    "hint": "Escanea el código con la cámara de tu teléfono para probarlo.",
+    "empty": "Rellena el formulario para generar tu código QR.",
+    "stats": {
+      "types": "Tipos de código QR",
+      "free": "Gratis y sin registro",
+      "export": "Exportación de alta resolución"
+    },
+    "caption": {
+      "alt": "Código QR: {title}",
+      "kinds": {
+        "link": "Enlace a",
+        "wifi": "Red WiFi",
+        "contact": "Tarjeta de contacto",
+        "email": "Correo",
+        "call": "Llamada telefónica",
+        "sms": "SMS",
+        "map": "Ubicación en el mapa"
+      },
+      "actions": {
+        "link": "Escanea con la cámara",
+        "wifi": "Escanea para unirte al WiFi",
+        "contact": "Escanea para añadir el contacto",
+        "email": "Escanea para escribir un correo",
+        "call": "Escanea para llamar",
+        "sms": "Escanea para enviar un SMS",
+        "map": "Escanea para abrir el mapa"
+      },
+      "security": "Seguridad",
+      "fallbackLabel": "¿Sin escáner? Escribe esto:",
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "reveal": "Mostrar la contraseña",
+      "hide": "Ocultar la contraseña",
+      "secretNote": "Visible para cualquiera que vea el QR impreso.",
+      "warnings": {
+        "shortlink": "Enlace acortado: el destino real no es visible.",
+        "open-network": "Red abierta: los datos no están cifrados.",
+        "invalid": "Destino no válido: revisa el campo."
+      }
+    },
+    "poster": {
+      "title": "Cartel con leyenda",
+      "subtitle": "Mostrar el detalle",
+      "action": "Mostrar la instrucción de escaneo",
+      "fallback": "Mostrar el texto de respaldo",
+      "secret": "Mostrar la contraseña",
+      "footer": "Pie de página (opcional)",
+      "footerPlaceholder": "Ej. Mi empresa — miempresa.es"
+    }
   }
 }

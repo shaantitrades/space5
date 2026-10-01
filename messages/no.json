@@ -452,5 +452,113 @@
     "learnMore": "Les mer",
     "currentChoice": "Ditt nåværende valg:",
     "notChosen": "Ikke valgt"
+  },
+  "qr": {
+    "title": "QR-kodegenerator",
+    "subtitle": "Lag skannbare QR-koder gratis – uten registrering og uten annonser.",
+    "types": {
+      "url": "URL",
+      "wifi": "WiFi",
+      "vcard": "vCard",
+      "email": "E-post",
+      "phone": "Telefon",
+      "sms": "SMS",
+      "geo": "GPS"
+    },
+    "fields": {
+      "url": "Lenke (URL)",
+      "ssid": "Nettverksnavn (SSID)",
+      "password": "Passord",
+      "encryption": "Kryptering",
+      "firstName": "Fornavn",
+      "lastName": "Etternavn",
+      "organization": "Bedrift",
+      "jobTitle": "Stilling / tittel",
+      "phone": "Telefon",
+      "email": "E-post",
+      "website": "Nettsted",
+      "address": "Adresse",
+      "emailAddress": "E-postadresse",
+      "subject": "Emne",
+      "body": "Melding",
+      "phoneNumber": "Telefonnummer",
+      "message": "Melding",
+      "latitude": "Breddegrad",
+      "longitude": "Lengdegrad"
+    },
+    "encryption": {
+      "wpa": "WPA / WPA2",
+      "wep": "WEP",
+      "nopass": "Ingen (åpent nettverk)"
+    },
+    "placeholders": {
+      "url": "https://eksempel.no",
+      "ssid": "MittWiFi",
+      "password": "••••••",
+      "emailAddress": "kontakt@eksempel.no",
+      "phoneNumber": "+47 400 12 345",
+      "latitude": "59.9139",
+      "longitude": "10.7522"
+    },
+    "appearance": {
+      "color": "Farge",
+      "sizePx": "Størrelse: {size} px"
+    },
+    "download": {
+      "qrPng": "PNG",
+      "qrSvg": "SVG",
+      "posterPng": "Plakat PNG",
+      "posterSvg": "Plakat SVG"
+    },
+    "reset": "Nullstill",
+    "hint": "Skann koden med kameraet på telefonen for å teste den.",
+    "empty": "Fyll ut skjemaet for å lage QR-koden din.",
+    "stats": {
+      "types": "Typer QR-koder",
+      "free": "Gratis og uten registrering",
+      "export": "Eksport i høy oppløsning"
+    },
+    "caption": {
+      "alt": "QR-kode: {title}",
+      "kinds": {
+        "link": "Lenke til",
+        "wifi": "WiFi-nettverk",
+        "contact": "Kontaktkort",
+        "email": "E-post",
+        "call": "Telefonsamtale",
+        "sms": "SMS",
+        "map": "Posisjon på kartet"
+      },
+      "actions": {
+        "link": "Skann med kameraet",
+        "wifi": "Skann for å bli med i WiFi",
+        "contact": "Skann for å legge til kontakten",
+        "email": "Skann for å skrive e-post",
+        "call": "Skann for å ringe",
+        "sms": "Skann for å sende SMS",
+        "map": "Skann for å åpne kartet"
+      },
+      "security": "Sikkerhet",
+      "fallbackLabel": "Ingen skanner? Skriv inn dette:",
+      "copy": "Kopier",
+      "copied": "Kopiert",
+      "reveal": "Vis passordet",
+      "hide": "Skjul passordet",
+      "secretNote": "Synlig for alle som ser den trykte QR-koden.",
+      "warnings": {
+        "shortlink": "Kortet lenke: den virkelige destinasjonen er skjult.",
+        "open-network": "Åpent nettverk: dataene er ikke kryptert.",
+        "invalid": "Ugyldig destinasjon: sjekk feltet."
+      }
+    },
+    "poster": {
+      "title": "Plakat med bildetekst",
+      "subtitle": "Vis detaljer",
+      "action": "Vis skanneveiledningen",
+      "fallback": "Vis reserverteksten",
+      "secret": "Vis passordet",
+      "footer": "Bunntekst (valgfritt)",
+      "footerPlaceholder": "F.eks. Min bedrift — minbedrift.no"
+    }
   }
 }

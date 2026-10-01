@@ -452,5 +452,113 @@
     "learnMore": "Saiba mais",
     "currentChoice": "A sua escolha atual:",
     "notChosen": "Não definida"
+  },
+  "qr": {
+    "title": "Gerador de códigos QR",
+    "subtitle": "Crie códigos QR digitalizáveis gratuitamente, sem registo e sem publicidade.",
+    "types": {
+      "url": "URL",
+      "wifi": "WiFi",
+      "vcard": "vCard",
+      "email": "Email",
+      "phone": "Telefone",
+      "sms": "SMS",
+      "geo": "GPS"
+    },
+    "fields": {
+      "url": "Ligação (URL)",
+      "ssid": "Nome da rede (SSID)",
+      "password": "Palavra-passe",
+      "encryption": "Encriptação",
+      "firstName": "Nome",
+      "lastName": "Apelido",
+      "organization": "Empresa",
+      "jobTitle": "Cargo / Título",
+      "phone": "Telefone",
+      "email": "Email",
+      "website": "Website",
+      "address": "Endereço",
+      "emailAddress": "Endereço de email",
+      "subject": "Assunto",
+      "body": "Mensagem",
+      "phoneNumber": "Número de telefone",
+      "message": "Mensagem",
+      "latitude": "Latitude",
+      "longitude": "Longitude"
+    },
+    "encryption": {
+      "wpa": "WPA / WPA2",
+      "wep": "WEP",
+      "nopass": "Nenhuma (rede aberta)"
+    },
+    "placeholders": {
+      "url": "https://exemplo.pt",
+      "ssid": "MeuWiFi",
+      "password": "••••••",
+      "emailAddress": "contacto@exemplo.pt",
+      "phoneNumber": "+351 912 345 678",
+      "latitude": "38.7223",
+      "longitude": "-9.1393"
+    },
+    "appearance": {
+      "color": "Cor",
+      "sizePx": "Tamanho: {size} px"
+    },
+    "download": {
+      "qrPng": "PNG",
+      "qrSvg": "SVG",
+      "posterPng": "Cartaz PNG",
+      "posterSvg": "Cartaz SVG"
+    },
+    "reset": "Reiniciar",
+    "hint": "Digitalize o código com a câmara do telemóvel para testar.",
+    "empty": "Preencha o formulário para gerar o seu código QR.",
+    "stats": {
+      "types": "Tipos de código QR",
+      "free": "Gratuito e sem registo",
+      "export": "Exportação de alta resolução"
+    },
+    "caption": {
+      "alt": "Código QR: {title}",
+      "kinds": {
+        "link": "Ligação para",
+        "wifi": "Rede WiFi",
+        "contact": "Cartão de contacto",
+        "email": "Email",
+        "call": "Chamada telefónica",
+        "sms": "SMS",
+        "map": "Localização no mapa"
+      },
+      "actions": {
+        "link": "Digitalize com a câmara",
+        "wifi": "Digitalize para entrar no WiFi",
+        "contact": "Digitalize para adicionar o contacto",
+        "email": "Digitalize para escrever um email",
+        "call": "Digitalize para telefonar",
+        "sms": "Digitalize para enviar um SMS",
+        "map": "Digitalize para abrir o mapa"
+      },
+      "security": "Segurança",
+      "fallbackLabel": "Sem leitor? Escreva isto:",
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "reveal": "Mostrar a palavra-passe",
+      "hide": "Ocultar a palavra-passe",
+      "secretNote": "Visível para quem vir o QR impresso.",
+      "warnings": {
+        "shortlink": "Ligação encurtada: o destino real não é visível.",
+        "open-network": "Rede aberta: os dados não estão encriptados.",
+        "invalid": "Destino inválido: verifique o campo."
+      }
+    },
+    "poster": {
+      "title": "Cartaz com legenda",
+      "subtitle": "Mostrar o detalhe",
+      "action": "Mostrar a instrução de leitura",
+      "fallback": "Mostrar o texto alternativo",
+      "secret": "Mostrar a palavra-passe",
+      "footer": "Rodapé (opcional)",
+      "footerPlaceholder": "Ex. A minha empresa — aminhaempresa.pt"
+    }
   }
 }

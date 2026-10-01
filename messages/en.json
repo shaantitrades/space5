@@ -452,5 +452,113 @@
     "learnMore": "Learn more",
     "currentChoice": "Your current choice:",
     "notChosen": "Not chosen"
+  },
+  "qr": {
+    "title": "QR Code Generator",
+    "subtitle": "Create scannable QR codes for free — no sign-up, no ads.",
+    "types": {
+      "url": "URL",
+      "wifi": "WiFi",
+      "vcard": "vCard",
+      "email": "Email",
+      "phone": "Phone",
+      "sms": "SMS",
+      "geo": "GPS"
+    },
+    "fields": {
+      "url": "Link (URL)",
+      "ssid": "Network name (SSID)",
+      "password": "Password",
+      "encryption": "Encryption",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "organization": "Company",
+      "jobTitle": "Job title",
+      "phone": "Phone",
+      "email": "Email",
+      "website": "Website",
+      "address": "Address",
+      "emailAddress": "Email address",
+      "subject": "Subject",
+      "body": "Message",
+      "phoneNumber": "Phone number",
+      "message": "Message",
+      "latitude": "Latitude",
+      "longitude": "Longitude"
+    },
+    "encryption": {
+      "wpa": "WPA / WPA2",
+      "wep": "WEP",
+      "nopass": "None (open network)"
+    },
+    "placeholders": {
+      "url": "https://example.com",
+      "ssid": "MyWiFi",
+      "password": "••••••",
+      "emailAddress": "contact@example.com",
+      "phoneNumber": "+1 555 123 4567",
+      "latitude": "48.8566",
+      "longitude": "2.3522"
+    },
+    "appearance": {
+      "color": "Color",
+      "sizePx": "Size: {size} px"
+    },
+    "download": {
+      "qrPng": "PNG",
+      "qrSvg": "SVG",
+      "posterPng": "Poster PNG",
+      "posterSvg": "Poster SVG"
+    },
+    "reset": "Reset",
+    "hint": "Scan the code with your phone camera to test it.",
+    "empty": "Fill in the form to generate your QR code.",
+    "stats": {
+      "types": "QR code types",
+      "free": "Free, no sign-up",
+      "export": "High-resolution export"
+    },
+    "caption": {
+      "alt": "QR code: {title}",
+      "kinds": {
+        "link": "Link to",
+        "wifi": "WiFi network",
+        "contact": "Contact card",
+        "email": "Email",
+        "call": "Phone call",
+        "sms": "Text message",
+        "map": "Map location"
+      },
+      "actions": {
+        "link": "Scan with your camera",
+        "wifi": "Scan to join the WiFi",
+        "contact": "Scan to add the contact",
+        "email": "Scan to write an email",
+        "call": "Scan to call",
+        "sms": "Scan to send a text",
+        "map": "Scan to open the map"
+      },
+      "security": "Security",
+      "fallbackLabel": "No scanner? Type this instead:",
+      "copy": "Copy",
+      "copied": "Copied",
+      "reveal": "Show password",
+      "hide": "Hide password",
+      "secretNote": "Visible to anyone who sees the printed QR code.",
+      "warnings": {
+        "shortlink": "Shortened link: the real destination is hidden.",
+        "open-network": "Open network: data is not encrypted.",
+        "invalid": "Invalid destination: check the field."
+      }
+    },
+    "poster": {
+      "title": "Poster with caption",
+      "subtitle": "Show details",
+      "action": "Show the scan instruction",
+      "fallback": "Show the fallback text",
+      "secret": "Show the password",
+      "footer": "Footer (optional)",
+      "footerPlaceholder": "e.g. My company — mycompany.com"
+    }
   }
 }

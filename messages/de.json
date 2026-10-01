@@ -452,5 +452,113 @@
     "learnMore": "Mehr erfahren",
     "currentChoice": "Ihre aktuelle Auswahl:",
     "notChosen": "Nicht festgelegt"
+  },
+  "qr": {
+    "title": "QR-Code-Generator",
+    "subtitle": "Erstellen Sie kostenlos scanbare QR-Codes – ohne Anmeldung, ohne Werbung.",
+    "types": {
+      "url": "URL",
+      "wifi": "WiFi",
+      "vcard": "vCard",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "sms": "SMS",
+      "geo": "GPS"
+    },
+    "fields": {
+      "url": "Link (URL)",
+      "ssid": "Netzwerkname (SSID)",
+      "password": "Passwort",
+      "encryption": "Verschlüsselung",
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "organization": "Unternehmen",
+      "jobTitle": "Position / Titel",
+      "phone": "Telefon",
+      "email": "E-Mail",
+      "website": "Website",
+      "address": "Adresse",
+      "emailAddress": "E-Mail-Adresse",
+      "subject": "Betreff",
+      "body": "Nachricht",
+      "phoneNumber": "Telefonnummer",
+      "message": "Nachricht",
+      "latitude": "Breitengrad",
+      "longitude": "Längengrad"
+    },
+    "encryption": {
+      "wpa": "WPA / WPA2",
+      "wep": "WEP",
+      "nopass": "Keine (offenes Netzwerk)"
+    },
+    "placeholders": {
+      "url": "https://beispiel.de",
+      "ssid": "MeinWLAN",
+      "password": "••••••",
+      "emailAddress": "kontakt@beispiel.de",
+      "phoneNumber": "+49 151 2345678",
+      "latitude": "48.8566",
+      "longitude": "2.3522"
+    },
+    "appearance": {
+      "color": "Farbe",
+      "sizePx": "Größe: {size} px"
+    },
+    "download": {
+      "qrPng": "PNG",
+      "qrSvg": "SVG",
+      "posterPng": "Poster PNG",
+      "posterSvg": "Poster SVG"
+    },
+    "reset": "Zurücksetzen",
+    "hint": "Scannen Sie den Code mit der Kamera Ihres Telefons, um ihn zu testen.",
+    "empty": "Füllen Sie das Formular aus, um Ihren QR-Code zu erzeugen.",
+    "stats": {
+      "types": "QR-Code-Typen",
+      "free": "Kostenlos und ohne Anmeldung",
+      "export": "Export in hoher Auflösung"
+    },
+    "caption": {
+      "alt": "QR-Code: {title}",
+      "kinds": {
+        "link": "Link zu",
+        "wifi": "WLAN-Netzwerk",
+        "contact": "Kontaktkarte",
+        "email": "E-Mail",
+        "call": "Telefonanruf",
+        "sms": "SMS",
+        "map": "Standort auf der Karte"
+      },
+      "actions": {
+        "link": "Mit der Kamera scannen",
+        "wifi": "Scannen, um dem WLAN beizutreten",
+        "contact": "Scannen, um den Kontakt hinzuzufügen",
+        "email": "Scannen, um eine E-Mail zu schreiben",
+        "call": "Scannen, um anzurufen",
+        "sms": "Scannen, um eine SMS zu senden",
+        "map": "Scannen, um die Karte zu öffnen"
+      },
+      "security": "Sicherheit",
+      "fallbackLabel": "Kein Scanner? Tippen Sie dies ein:",
+      "copy": "Kopieren",
+      "copied": "Kopiert",
+      "reveal": "Passwort anzeigen",
+      "hide": "Passwort verbergen",
+      "secretNote": "Für alle sichtbar, die den gedruckten QR-Code sehen.",
+      "warnings": {
+        "shortlink": "Gekürzter Link: Das echte Ziel ist nicht sichtbar.",
+        "open-network": "Offenes Netzwerk: Die Daten sind nicht verschlüsselt.",
+        "invalid": "Ungültiges Ziel: Prüfen Sie das Feld."
+      }
+    },
+    "poster": {
+      "title": "Poster mit Beschriftung",
+      "subtitle": "Details anzeigen",
+      "action": "Scan-Hinweis anzeigen",
+      "fallback": "Ersatztext anzeigen",
+      "secret": "Passwort anzeigen",
+      "footer": "Fußzeile (optional)",
+      "footerPlaceholder": "z. B. Meine Firma — meinefirma.de"
+    }
   }
 }

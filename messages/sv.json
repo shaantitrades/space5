@@ -452,5 +452,113 @@
     "learnMore": "Läs mer",
     "currentChoice": "Ditt nuvarande val:",
     "notChosen": "Inte valt"
+  },
+  "qr": {
+    "title": "QR-kodgenerator",
+    "subtitle": "Skapa skannbara QR-koder gratis – utan registrering och utan annonser.",
+    "types": {
+      "url": "URL",
+      "wifi": "WiFi",
+      "vcard": "vCard",
+      "email": "E-post",
+      "phone": "Telefon",
+      "sms": "SMS",
+      "geo": "GPS"
+    },
+    "fields": {
+      "url": "Länk (URL)",
+      "ssid": "Nätverksnamn (SSID)",
+      "password": "Lösenord",
+      "encryption": "Kryptering",
+      "firstName": "Förnamn",
+      "lastName": "Efternamn",
+      "organization": "Företag",
+      "jobTitle": "Titel / Befattning",
+      "phone": "Telefon",
+      "email": "E-post",
+      "website": "Webbplats",
+      "address": "Adress",
+      "emailAddress": "E-postadress",
+      "subject": "Ämne",
+      "body": "Meddelande",
+      "phoneNumber": "Telefonnummer",
+      "message": "Meddelande",
+      "latitude": "Latitud",
+      "longitude": "Longitud"
+    },
+    "encryption": {
+      "wpa": "WPA / WPA2",
+      "wep": "WEP",
+      "nopass": "Ingen (öppet nätverk)"
+    },
+    "placeholders": {
+      "url": "https://exempel.se",
+      "ssid": "MittWiFi",
+      "password": "••••••",
+      "emailAddress": "kontakt@exempel.se",
+      "phoneNumber": "+46 70 123 45 67",
+      "latitude": "59.3293",
+      "longitude": "18.0686"
+    },
+    "appearance": {
+      "color": "Färg",
+      "sizePx": "Storlek: {size} px"
+    },
+    "download": {
+      "qrPng": "PNG",
+      "qrSvg": "SVG",
+      "posterPng": "Affisch PNG",
+      "posterSvg": "Affisch SVG"
+    },
+    "reset": "Återställ",
+    "hint": "Skanna koden med telefonens kamera för att testa den.",
+    "empty": "Fyll i formuläret för att skapa din QR-kod.",
+    "stats": {
+      "types": "Typer av QR-koder",
+      "free": "Gratis och utan registrering",
+      "export": "Export i hög upplösning"
+    },
+    "caption": {
+      "alt": "QR-kod: {title}",
+      "kinds": {
+        "link": "Länk till",
+        "wifi": "WiFi-nätverk",
+        "contact": "Kontaktkort",
+        "email": "E-post",
+        "call": "Telefonsamtal",
+        "sms": "SMS",
+        "map": "Plats på kartan"
+      },
+      "actions": {
+        "link": "Skanna med kameran",
+        "wifi": "Skanna för att ansluta till WiFi",
+        "contact": "Skanna för att lägga till kontakten",
+        "email": "Skanna för att skriva e-post",
+        "call": "Skanna för att ringa",
+        "sms": "Skanna för att skicka SMS",
+        "map": "Skanna för att öppna kartan"
+      },
+      "security": "Säkerhet",
+      "fallbackLabel": "Ingen skanner? Skriv detta:",
+      "copy": "Kopiera",
+      "copied": "Kopierat",
+      "reveal": "Visa lösenordet",
+      "hide": "Dölj lösenordet",
+      "secretNote": "Synligt för alla som ser den tryckta QR-koden.",
+      "warnings": {
+        "shortlink": "Förkortad länk: den verkliga destinationen är dold.",
+        "open-network": "Öppet nätverk: data är inte krypterad.",
+        "invalid": "Ogiltig destination: kontrollera fältet."
+      }
+    },
+    "poster": {
+      "title": "Affisch med bildtext",
+      "subtitle": "Visa detaljer",
+      "action": "Visa skanningsinstruktionen",
+      "fallback": "Visa reservtexten",
+      "secret": "Visa lösenordet",
+      "footer": "Sidfot (valfritt)",
+      "footerPlaceholder": "T.ex. Mitt företag — mittforetag.se"
+    }
   }
 }
