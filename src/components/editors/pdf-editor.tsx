@@ -57,6 +57,19 @@ import {
   ClipboardPaste,
 } from 'lucide-react';
 
+import {
+  RESIZE_HANDLE_SIZE,
+  centeredAnchor,
+  defaultShapeSize,
+  hitResizeHandle,
+  isClickedShape,
+  resizeHandlePoint,
+  textBlockHeight,
+  textLineHeight,
+  type Bounds,
+  type BoxShapeKind,
+} from '@/lib/pdf-editor-geometry';
+
 interface PDFEditorProps {
   file: File;
   onSave: (editedFile: File) => void;
@@ -228,13 +241,20 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
   const [isSearching, setIsSearching] = useState(false);
   const [searchFromPage, setSearchFromPage] = useState(1);
   const [textDraft, setTextDraft] = useState<string>('');
-  const [defaultStyle, setDefaultStyle] = useState<{
+  /**
+   * Style par défaut des nouveaux éléments (texte, symbole, forme).
+   *
+   * C'était un `useState` dont le setter n'était appelé que par la barre
+   * d'outils contextuelle désactivée (`false && …`), supprimée depuis : un
+   * simple réglage constant suffit, et il ne peut plus devenir obsolète.
+   */
+  const defaultStyle: {
     color: string;
     fontSize: number;
     bold: boolean;
     italic: boolean;
     underline: boolean;
-  }>({ color: '#111827', fontSize: 18, bold: false, italic: false, underline: false });
+  } = { color: '#111827', fontSize: 18, bold: false, italic: false, underline: false };
 
   const [activeStamp, setActiveStamp] = useState<{
     text: string;
@@ -537,11 +557,15 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
         // Dessiner la page PDF
         ctx.drawImage(pageCanvas, 0, 0, canvas.width, canvas.height);
 
-        // Dessiner les annotations
+        // Dessiner les annotations. Pendant la saisie d'un texte, on dessine le
+        // BROUILLON en cours : sans cela on tapait sans rien voir apparaître
+        // sur la page (le texte n'apparaissait qu'après validation), ce qui
+        // donnait l'impression que « ça n'écrit rien ».
         annotations
           .filter((a) => (a as any).page === currentPage)
           .forEach((annotation) => {
-            drawAnnotation(ctx, annotation);
+            const isDraft = editingTextId !== null && annotation.id === editingTextId;
+            drawAnnotation(ctx, isDraft ? ({ ...annotation, text: textDraft } as any) : annotation);
           });
 
         // Element selectionne : contour + poignees de redimensionnement.
@@ -550,13 +574,14 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
         if (selectedAnnotationId) {
           const selected = annotations.find((a) => a.id === selectedAnnotationId);
           if (selected && (selected as any).page === currentPage) {
-            drawSelectionOverlay(ctx, selected);
+            const isDraft = editingTextId !== null && selected.id === editingTextId;
+            drawSelectionOverlay(ctx, isDraft ? ({ ...selected, text: textDraft } as any) : selected);
           }
         }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pdfPages, currentPage, zoom, annotations, selectedAnnotationId, editingTextId, hoveredHandle]);
+  }, [pdfPages, currentPage, zoom, annotations, selectedAnnotationId, editingTextId, textDraft, hoveredHandle]);
 
   // Fermer le menu d�roulant quand on clique en dehors
   useEffect(() => {
@@ -583,7 +608,8 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
 
   const drawAnnotation = (ctx: CanvasRenderingContext2D, annotation: EditorAnnotation) => {
     ctx.save();
-    // @ts-expect-error (union)
+    // `opacity` n'existe que sur certaines formes de l'union des annotations :
+    // accès toléré (les autres formes retombent sur 1).
     ctx.globalAlpha = (annotation as any).opacity || 1;
 
     switch (annotation.type) {
@@ -691,21 +717,31 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
         ctx.globalAlpha = 1;
         ctx.fillRect(annotation.x, annotation.y, annotation.width || 160, annotation.height || 40);
         break;
-      case 'text':
+      case 'text': {
         ctx.fillStyle = annotation.color || '#000000';
-        ctx.font = `${annotation.italic ? 'italic ' : ''}${annotation.bold ? 'bold ' : ''}${annotation.fontSize || 16}px Arial`;
-        ctx.fillText(annotation.text || '', annotation.x, annotation.y);
-        if (annotation.underline && annotation.text) {
-          const metrics = ctx.measureText(annotation.text);
-          const underlineY = annotation.y + 3;
-          ctx.beginPath();
-          ctx.strokeStyle = annotation.color || '#000000';
-          ctx.lineWidth = 2;
-          ctx.moveTo(annotation.x, underlineY);
-          ctx.lineTo(annotation.x + metrics.width, underlineY);
-          ctx.stroke();
+        const fontOfText = annotation.fontSize || 16;
+        ctx.font = `${annotation.italic ? 'italic ' : ''}${annotation.bold ? 'bold ' : ''}${fontOfText}px Arial`;
+        // Un texte peut comporter plusieurs lignes (retours à la ligne saisis
+        // dans le panneau, ou repli automatique des textes longs) : chaque
+        // ligne est tracée sur sa propre ligne de base. Avant, le texte replié
+        // ressortait concaténé sur une seule ligne, donc illisible.
+        const lines = String(annotation.text || '').split('\n');
+        for (let index = 0; index < lines.length; index++) {
+          const line = lines[index];
+          const baseline = annotation.y + index * textLineHeight(fontOfText);
+          ctx.fillText(line, annotation.x, baseline);
+          if (annotation.underline && line) {
+            const metrics = ctx.measureText(line);
+            ctx.beginPath();
+            ctx.strokeStyle = annotation.color || '#000000';
+            ctx.lineWidth = 2;
+            ctx.moveTo(annotation.x, baseline + 3);
+            ctx.lineTo(annotation.x + metrics.width, baseline + 3);
+            ctx.stroke();
+          }
         }
         break;
+      }
       case 'symbol': {
         ctx.fillStyle = annotation.color || '#000000';
         ctx.font = `${annotation.fontSize || 22}px Arial`;
@@ -816,6 +852,30 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
     ctx.restore();
   };
 
+  /**
+   * Boîte réelle d'un texte, mesurée avec la police effective : la largeur est
+   * celle de la ligne la plus longue, la hauteur tient compte des retours à la
+   * ligne. Sert au centrage au clic, au contour de sélection et à la saisie au
+   * clic (les trois doivent s'accorder, sinon les poignées « flottent »).
+   */
+  const measureTextBlock = (
+    text: string,
+    fontSize: number,
+    italic?: boolean,
+    bold?: boolean
+  ): { w: number; h: number } => {
+    const lines = String(text || '').split('\n');
+    const ctx = canvasRef.current?.getContext('2d');
+    let w = 24;
+    if (ctx) {
+      ctx.save();
+      ctx.font = `${italic ? 'italic ' : ''}${bold ? 'bold ' : ''}${fontSize}px Arial`;
+      w = Math.max(24, ...lines.map((line) => ctx.measureText(line).width));
+      ctx.restore();
+    }
+    return { w, h: textBlockHeight(text, fontSize) };
+  };
+
   const hitTestAnnotation = (x: number, y: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return null;
@@ -830,12 +890,11 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
     for (let i = pageAnnotations.length - 1; i >= 0; i--) {
       const a = pageAnnotations[i];
       if (a.type === 'text') {
-        ctx.font = `${a.italic ? 'italic ' : ''}${a.bold ? 'bold ' : ''}${a.fontSize || 16}px Arial`;
-        const w = ctx.measureText(a.text || '').width;
-        const h = a.fontSize || 16;
+        const fontSize = a.fontSize || 16;
+        const box = measureTextBlock(a.text || '', fontSize, a.italic, a.bold);
         const left = a.x;
-        const top = a.y - h;
-        if (x >= left && x <= left + w && y >= top && y <= top + h) return a;
+        const top = a.y - fontSize;
+        if (x >= left && x <= left + box.w && y >= top && y <= top + box.h) return a;
       } else if (a.type === 'symbol') {
         ctx.font = `${a.fontSize || 22}px Arial`;
         const w = ctx.measureText(a.symbol || '').width;
@@ -891,10 +950,16 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
   // REDIMENSIONNEMENT DES ÉLÉMENTS
   // ==========================================================================
 
-  /** Taille des poignées dessinées aux coins de l'élément sélectionné (px) */
-  const RESIZE_HANDLE_SIZE = 9;
-  /** Marge de saisie autour d'une poignée, pour la rendre facile à attraper */
-  const RESIZE_HANDLE_TOLERANCE = 12;
+  /**
+   * Poignée unique de redimensionnement (coin bas-droite), définie et testée
+   * dans `@/lib/pdf-editor-geometry`.
+   *
+   * Avant : quatre poignées de coin. Elles étaient toutes équivalentes (sur un
+   * texte ou un symbole, tirer un coin revient à changer la taille de la
+   * police) et, sur un petit objet comme la croix ✗ (20×20 px), leurs zones de
+   * saisie recouvraient la boîte entière : l'objet ne pouvait plus être
+   * déplacé, seulement redimensionné.
+   */
   /** Taille minimale d'un élément redimensionné */
   const MIN_ELEMENT_SIZE = 8;
   /** Types sans boîte : leur taille se règle via la police */
@@ -915,13 +980,9 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
 
     switch (a.type) {
       case 'text': {
-        if (!ctx) return null;
-        ctx.save();
-        ctx.font = `${a.italic ? 'italic ' : ''}${a.bold ? 'bold ' : ''}${a.fontSize || 16}px Arial`;
-        const w = Math.max(ctx.measureText(a.text || '').width, 24);
-        ctx.restore();
-        const h = a.fontSize || 16;
-        return { x: a.x, y: a.y - h, w, h };
+        const fontSize = a.fontSize || 16;
+        const box = measureTextBlock(a.text || '', fontSize, a.italic, a.bold);
+        return { x: a.x, y: a.y - fontSize, w: box.w, h: box.h };
       }
       case 'symbol': {
         if (!ctx) return null;
@@ -975,13 +1036,8 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
     }
   };
 
-  /** Les 4 coins d'une boîte, avec le nom de la poignée correspondante */
-  const cornerHandles = (bounds: { x: number; y: number; w: number; h: number }) => [
-    { handle: 'nw' as ResizeHandle, x: bounds.x, y: bounds.y },
-    { handle: 'ne' as ResizeHandle, x: bounds.x + bounds.w, y: bounds.y },
-    { handle: 'sw' as ResizeHandle, x: bounds.x, y: bounds.y + bounds.h },
-    { handle: 'se' as ResizeHandle, x: bounds.x + bounds.w, y: bounds.y + bounds.h },
-  ];
+  /** La poignée unique (coin bas-droite) d'une boîte, avec sa marge de saisie. */
+  const visibleHandles = (bounds: Bounds) => [resizeHandlePoint(bounds)];
 
   /** Le pointeur est-il sur une poignée de l'élément sélectionné ? */
   const hitTestResizeHandle = (x: number, y: number): { id: string; handle: ResizeHandle } | null => {
@@ -993,15 +1049,11 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
     const bounds = getAnnotationBounds(selected);
     if (!bounds) return null;
 
-    for (const corner of cornerHandles(bounds)) {
-      if (
-        Math.abs(x - corner.x) <= RESIZE_HANDLE_TOLERANCE &&
-        Math.abs(y - corner.y) <= RESIZE_HANDLE_TOLERANCE
-      ) {
-        return { id: selectedAnnotationId, handle: corner.handle };
-      }
-    }
-    return null;
+    // Une seule poignée, dont la marge de saisie se réduit sur les petits
+    // objets : le centre de l'objet reste toujours attrapable pour le
+    // déplacer (avant, les 4 coins se recouvraient sur une croix ✗).
+    const handle = hitResizeHandle(bounds, x, y);
+    return handle ? { id: selectedAnnotationId, handle } : null;
   };
 
   /**
@@ -1082,9 +1134,9 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
     ctx.strokeRect(x - 1, y - 1, w + 2, h + 2);
     ctx.setLineDash([]);
 
-    // Poignées : des carrés blancs bordés de bleu aux quatre coins
+    // Poignée unique : un carré blanc bordé de bleu au coin bas-droite.
     const half = RESIZE_HANDLE_SIZE / 2;
-    for (const corner of cornerHandles(bounds)) {
+    for (const corner of visibleHandles(bounds)) {
       // Poignée survolée : remplie en bleu avec un halo (l'« ombre »), pour
       // montrer AVANT le clic que la zone de redimensionnement est saisissable.
       const isHovered = hoveredHandle === corner.handle;
@@ -1204,39 +1256,46 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
     const a = (annotationsRef.current as any[]).find((x) => x.id === selectedAnnotationId);
     if (!a) return;
 
+    let patch: Record<string, unknown>;
+
     if (TEXT_LIKE_TYPES.has(a.type)) {
-      const next = Math.round(Math.min(Math.max((a.fontSize || 16) * factor, 6), 240));
-      updateAnnotationLive(a.id, { fontSize: next } as any);
+      patch = { fontSize: Math.round(Math.min(Math.max((a.fontSize || 16) * factor, 6), 240)) };
     } else if (a.type === 'draw') {
       // Le trace libre est une suite de points : on ajuste l'epaisseur du trait
-      updateAnnotationLive(a.id, { width: Math.min(Math.max((a.width || 3) * factor, 0.5), 40) } as any);
+      patch = { width: Math.min(Math.max((a.width || 3) * factor, 0.5), 40) };
     } else if (a.type === 'arrow' || a.type === 'double-arrow' || a.type === 'curve') {
       // Mise a l'echelle des deux extremites autour du milieu
       const cx = (a.x1 + a.x2) / 2;
       const cy = (a.y1 + a.y2) / 2;
-      updateAnnotationLive(a.id, {
+      patch = {
         x1: cx + (a.x1 - cx) * factor,
         y1: cy + (a.y1 - cy) * factor,
         x2: cx + (a.x2 - cx) * factor,
         y2: cy + (a.y2 - cy) * factor,
-      } as any);
+      };
     } else if (a.type === 'image' || a.type === 'stamp') {
-      updateAnnotationLive(a.id, {
+      patch = {
         w: Math.max(MIN_ELEMENT_SIZE, (a.w || 0) * factor),
         h: Math.max(MIN_ELEMENT_SIZE, (a.h || 0) * factor),
-      } as any);
+      };
     } else if (a.type === 'circle') {
       const size = Math.max(MIN_ELEMENT_SIZE, (a.width || (a.radius ? a.radius * 2 : 0) || 60) * factor);
-      updateAnnotationLive(a.id, { width: size, height: size, radius: size / 2 } as any);
+      patch = { width: size, height: size, radius: size / 2 };
     } else {
-      updateAnnotationLive(a.id, {
+      patch = {
         width: Math.max(MIN_ELEMENT_SIZE, (a.width || 60) * factor),
         height: Math.max(MIN_ELEMENT_SIZE, (a.height || 40) * factor),
-      } as any);
+      };
     }
 
-    // Une entree d'historique par clic, pour que l'annulation reste previsible
-    commitAnnotations(annotationsRef.current);
+    // Une entree d'historique par clic, pour que l'annulation reste previsible.
+    // Le tableau est reconstruit ICI (plutot que via `updateAnnotationLive`) :
+    // React peut appliquer la mise a jour live APRES ce gestionnaire, et le
+    // commit immediat de `annotationsRef` aurait alors ecrase le changement —
+    // les boutons « + / − » paraissaient sans effet.
+    commitAnnotations(
+      annotationsRef.current.map((item) => (item.id === a.id ? ({ ...item, ...patch } as any) : item))
+    );
   };
 
   const closeContextMenu = () => {
@@ -1324,12 +1383,22 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
       }
     }
     
+    // L'objet se pose CENTRÉ sur le clic : l'ancre d'un texte est sa ligne de
+    // base, donc son coin se retrouvait à droite et au-dessus du curseur.
+    const metrics = measureTextBlock(
+      text,
+      fontSize,
+      style.italic ?? defaultStyle.italic,
+      style.bold ?? defaultStyle.bold
+    );
+    const anchor = centeredAnchor({ x, y: y - fontSize, w: metrics.w, h: metrics.h }, x, y);
+
     const ann: EditorAnnotation = {
       id,
       page: currentPage,
       type: 'text',
-      x,
-      y,
+      x: anchor.x,
+      y: anchor.y,
       text,
       color: style.color ?? defaultStyle.color,
       fontSize,
@@ -1356,15 +1425,28 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
 
   const insertSymbolAt = (x: number, y: number, symbol: string) => {
     const id = genId();
+    const fontSize = Math.max(20, defaultStyle.fontSize + 2);
+    // Mesure du glyphe pour pouvoir le centrer sur le clic.
+    const ctx = canvasRef.current?.getContext('2d');
+    let width = fontSize * 0.8;
+    if (ctx) {
+      ctx.save();
+      ctx.font = `${fontSize}px Arial`;
+      width = Math.max(ctx.measureText(symbol).width, 8);
+      ctx.restore();
+    }
+    // Centré sur le clic (et non plus « coin posé sur le curseur ») : c'est ce
+    // qui donnait l'impression que l'objet partait en haut/à droite.
+    const anchor = centeredAnchor({ x, y: y - fontSize, w: width, h: fontSize }, x, y);
     const ann: EditorAnnotation = {
       id,
       page: currentPage,
       type: 'symbol',
-      x,
-      y,
+      x: anchor.x,
+      y: anchor.y,
       symbol,
       color: defaultStyle.color,
-      fontSize: Math.max(20, defaultStyle.fontSize + 2),
+      fontSize,
     };
     commitAnnotations([...annotationsRef.current, ann]);
     setSelectedAnnotationId(id);
@@ -1389,12 +1471,14 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
           const scale = img.width > maxW ? maxW / img.width : 1;
           const w = Math.max(40, img.width * scale);
           const h = Math.max(40, img.height * scale);
+          // Centrée sur le clic (ancre = coin haut-gauche pour une image).
+          const anchor = centeredAnchor({ x, y, w, h }, x, y);
           const ann: EditorAnnotation = {
             id: genId(),
             page: currentPage,
             type: 'image',
-            x,
-            y,
+            x: anchor.x,
+            y: anchor.y,
             w,
             h,
             src,
@@ -1544,6 +1628,23 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
     setTextDraft('');
   };
 
+  /**
+   * Annule la saisie en cours.
+   *
+   * Un élément tout juste créé est vide : le laisser derrière soi produirait un
+   * objet invisible et insaisissable (la boîte d'un texte vide est nulle). On le
+   * supprime donc, tandis qu'un texte déjà posé retrouve son contenu enregistré.
+   */
+  const cancelTextEdit = () => {
+    if (!editingTextId) return;
+    const stored = String((annotationsRef.current.find((a) => a.id === editingTextId) as any)?.text || '').trim();
+    if (!stored) {
+      deleteAnnotation(editingTextId);
+    }
+    setEditingTextId(null);
+    setTextDraft('');
+  };
+
   // Fermer la mini-toolbar si clic ailleurs
   useEffect(() => {
     const onDocDown = (e: MouseEvent) => {
@@ -1587,15 +1688,20 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
       // Comparer avec les autres éléments pour l'alignement
       annotations.forEach((ann) => {
         if (ann.id === d.id) return;
-        
+
+        // Seuls les éléments positionnés par `x`/`y` peuvent servir de repère
+        // (une flèche ou un tracé libre n'en a pas : la comparaison est alors
+        // NaN, donc toujours fausse, et aucun guide n'est affiché).
+        const other = ann as any;
+
         // Alignement vertical (même X)
-        if (Math.abs(ann.x - newX) < tolerance) {
-          guideX = ann.x;
+        if (Math.abs(other.x - newX) < tolerance) {
+          guideX = other.x;
         }
-        
+
         // Alignement horizontal (même Y)
-        if (Math.abs(ann.y - newY) < tolerance) {
-          guideY = ann.y;
+        if (Math.abs(other.y - newY) < tolerance) {
+          guideY = other.y;
         }
       });
 
@@ -2061,7 +2167,10 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
     }
 
     const outBytes = await pdfDoc.save();
-    const blob = new Blob([outBytes], { type: 'application/pdf' });
+    // Typage : `pdfDoc.save()` renvoie un `Uint8Array` que Blob accepte au
+    // runtime, mais dont le paramètre de type (`ArrayBufferLike`) est plus
+    // strict que `BlobPart` depuis TypeScript 5.7.
+    const blob = new Blob([outBytes as unknown as BlobPart], { type: 'application/pdf' });
     const outName = sourceFile.name.toLowerCase().endsWith('.pdf') ? sourceFile.name : `${sourceFile.name}.pdf`;
     return new File([blob], outName, { type: 'application/pdf' });
   };
@@ -2139,7 +2248,13 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
     }
   };
 
-  const renderPdfCanvasesFromArrayBuffer = async (arrayBuffer: ArrayBuffer) => {
+  /**
+   * Re-rend les pages du PDF à partir de ses octets.
+   *
+   * Accepte indifféremment un `ArrayBuffer` ou un `Uint8Array` : `pdf-lib`
+   * renvoie le second (`pdfDoc.save()`), pdf.js accepte les deux.
+   */
+  const renderPdfCanvasesFromArrayBuffer = async (arrayBuffer: ArrayBuffer | Uint8Array) => {
     const pdfjsLib = pdfjsRef.current;
     if (!pdfjsLib?.getDocument) {
       throw new Error('Le moteur PDF n�est pas pr�t.');
@@ -2170,9 +2285,11 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
     return canvases;
   };
 
-  const applyNewSourcePdf = async (arrayBuffer: ArrayBuffer, nextName?: string) => {
+  const applyNewSourcePdf = async (arrayBuffer: ArrayBuffer | Uint8Array, nextName?: string) => {
     const name = nextName || sourceFile.name || 'document.pdf';
-    const next = new File([arrayBuffer], name.toLowerCase().endsWith('.pdf') ? name : `${name}.pdf`, {
+    // Même remarque que dans `buildEditedPdf` : `BlobPart` est plus restrictif
+    // que le type de retour de `pdf-lib`.
+    const next = new File([arrayBuffer as unknown as BlobPart], name.toLowerCase().endsWith('.pdf') ? name : `${name}.pdf`, {
       type: 'application/pdf',
     });
 
@@ -3310,6 +3427,16 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                 if (target.tagName === 'TEXTAREA' || target.closest('[data-text-editor]')) {
                   return;
                 }
+
+                // Le canvas gère lui-même son menu contextuel ET l'ouverture du
+                // panneau de saisie d'un texte. Sans ce garde-fou, le
+                // `setContextMenu(null)` plus bas s'exécutait APRÈS le canvas
+                // dans le MÊME clic (l'événement remonte de l'enfant vers ce
+                // parent) et refermait aussitôt le panneau : l'outil « Texte »
+                // semblait donc ne rien écrire.
+                if (editingTextId || target.closest('[data-pdf-canvas]')) {
+                  return;
+                }
                 
                 // Fallback robuste: si le clic ne touche pas exactement le canvas,
                 // on ouvre quand même la mini-toolbar et on calcule les coordonnées relatives au canvas.
@@ -3384,7 +3511,7 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                       <Trash2 className="w-4 h-4" />
                     </button>
                     <span className="hidden md:inline text-xs text-muted-foreground pl-1 pr-1.5 whitespace-nowrap">
-                      Glissez pour deplacer, ou un coin bleu pour redimensionner
+                      Glissez pour deplacer, poignee bleue (bas-droite) pour redimensionner
                     </span>
                   </div>
                 );
@@ -3553,12 +3680,14 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                       return;
                     }
                     setContextMenu(null);
+                    // Centré sur le clic.
+                    const anchor = centeredAnchor({ x, y, w: 240, h: 64 }, x, y);
                     const ann: EditorAnnotation = {
                       id: genId(),
                       page: currentPage,
                       type: 'stamp',
-                      x,
-                      y,
+                      x: anchor.x,
+                      y: anchor.y,
                       w: 240,
                       h: 64,
                       text: activeStamp.text,
@@ -3772,6 +3901,42 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                   const drag = toolDragRef.current;
                   if (!drag || drag.pointerId !== e.pointerId) return;
                   toolDragRef.current = null;
+
+                  // Forme simplement CLIQUÉE (sans glisser) : elle restait en 1×1 px,
+                  // donc invisible et impossible à rattraper. On lui donne une
+                  // taille par défaut, centrée sur le clic.
+                  const boxShapeTools: string[] = [
+                    'highlight',
+                    'erase',
+                    'redact',
+                    'rectangle',
+                    'circle',
+                    'triangle',
+                    'hexagon',
+                    'pentagon',
+                    'star',
+                    'cloud',
+                  ];
+                  if (boxShapeTools.includes(drag.tool)) {
+                    const current = annotationsRef.current.find((a) => a.id === drag.id) as any;
+                    if (current && isClickedShape(current.width || 0, current.height || 0)) {
+                      const size = defaultShapeSize(drag.tool as BoxShapeKind);
+                      const anchor = centeredAnchor(
+                        { x: drag.startX, y: drag.startY, w: size.width, h: size.height },
+                        drag.startX,
+                        drag.startY
+                      );
+                      // Tableau reconstruit explicitement (au lieu de setAnnotationsLive) :
+                      // le commit final de ce geste produira ainsi une SEULE entrée
+                      // d'historique, et `annotationsRef` est déjà à jour.
+                      annotationsRef.current = annotationsRef.current.map((a) =>
+                        a.id === drag.id
+                          ? ({ ...a, x: anchor.x, y: anchor.y, width: size.width, height: size.height } as any)
+                          : a
+                      );
+                    }
+                  }
+
                   // La forme qui vient d'etre dessinee devient selectionnee :
                   // le contour, les poignees et les options apparaissent aussitot.
                   setSelectedAnnotationId(drag.id);
@@ -3871,6 +4036,34 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                       >
                         Modifier le texte
                       </button>
+                    )}
+                    {selected.type === 'text' && (
+                      <div className="flex items-center gap-0.5 border-l border-border pl-1">
+                        <button
+                          type="button"
+                          onClick={() => updateSelected({ bold: !selected.bold } as any)}
+                          className={`p-1.5 rounded-lg hover:bg-muted transition-colors ${selected.bold ? 'bg-primary/10 text-primary' : ''}`}
+                          title="Gras"
+                        >
+                          <Bold className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => updateSelected({ italic: !selected.italic } as any)}
+                          className={`p-1.5 rounded-lg hover:bg-muted transition-colors ${selected.italic ? 'bg-primary/10 text-primary' : ''}`}
+                          title="Italique"
+                        >
+                          <Italic className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => updateSelected({ underline: !selected.underline } as any)}
+                          className={`p-1.5 rounded-lg hover:bg-muted transition-colors ${selected.underline ? 'bg-primary/10 text-primary' : ''}`}
+                          title="Souligner"
+                        >
+                          <Underline className="w-4 h-4" />
+                        </button>
+                      </div>
                     )}
                     <button
                       type="button"
@@ -4003,196 +4196,50 @@ export function PDFEditor({ file, onSave, onClose }: PDFEditorProps) {
                       // Enter simple = retour à la ligne (comportement par défaut)
                       if (ev.key === 'Escape') {
                         ev.preventDefault();
-                        setEditingTextId(null);
+                        cancelTextEdit();
                       }
                     }}
                     placeholder="Tapez votre texte..."
                     rows={6}
                     className="w-full px-3 py-2 border border-border rounded-md text-base outline-none focus:ring-2 focus:ring-primary/30 resize-y min-h-[120px]"
                   />
+                  <div className="mt-2 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => commitTextDraft()}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90"
+                      title="Valider le texte (Ctrl+Entrée)"
+                    >
+                      <Check className="w-4 h-4" />
+                      Valider
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => cancelTextEdit()}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-sm font-medium hover:bg-muted"
+                      title="Annuler la saisie (Échap)"
+                    >
+                      <X className="w-4 h-4" />
+                      Annuler
+                    </button>
+                    <span className="hidden md:inline text-xs text-muted-foreground ml-auto">
+                      Le texte s&apos;affiche au fur et à mesure sur la page
+                    </span>
+                  </div>
                   <div className="text-xs text-muted-foreground mt-2">
                     Enter pour nouvelle ligne • Ctrl+Enter pour valider • Échap pour annuler
                   </div>
                 </div>
               )}
 
-              {/* Barre d'outils contextuelle désactivée - remplacée par barre fixe à gauche */}
-              {false && contextMenu && contextMenu.showToolbar !== false && (
-                <div
-                  data-pdf-context-toolbar
-                  className="absolute z-40 bg-white border border-border rounded-xl shadow-xl px-3 py-2 flex items-center gap-2"
-                  onPointerDown={(e) => {
-                    // IMPORTANT: �viter que le clic sur la barre d�clenche le handler du canvas
-                    e.stopPropagation();
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                  style={{
-                    // Position relative au canvas - toujours en dessous du clic
-                    left: Math.max(12, Math.min(contextMenu.canvasX - 170, (canvasRef.current?.width || 800) - 352)),
-                    top: contextMenu.canvasY + 60,
-                    width: 340,
-                  }}
-                >
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        insertTextAt(contextMenu.canvasX, contextMenu.canvasY);
-                      }}
-                      className="px-2 py-2 rounded-lg hover:bg-muted transition-colors"
-                      title="Ajouter du texte"
-                    >
-                      <Type className="w-4 h-4" />
-                    </button>
-                    
-                    <button
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        try {
-                          const text = await navigator.clipboard.readText();
-                          if (text) {
-                            insertTextAt(contextMenu.canvasX, contextMenu.canvasY, { text, openEditor: true });
-                          }
-                        } catch (err) {
-                          console.error('Impossible de lire le presse-papier:', err);
-                        }
-                      }}
-                      className="px-2 py-2 rounded-lg hover:bg-muted transition-colors"
-                      title="Coller"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                      </svg>
-                    </button>
 
-                    <div className="flex items-center gap-1">
-                      {['✓', '✗', '★', '♥', '⚠', 'ℹ', '→', '$', '€', '%', '#'].map((sym) => (
-                        <button
-                          key={sym}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            insertSymbolAt(contextMenu.canvasX, contextMenu.canvasY, sym);
-                          }}
-                          className="px-2 py-2 rounded-lg hover:bg-muted transition-colors text-sm font-semibold"
-                          title={`Ins�rer ${sym}`}
-                        >
-                          {sym}
-                        </button>
-                      ))}
-                    </div>
-
-                    <div className="h-6 w-px bg-border mx-1" />
-
-                    <input
-                      type="color"
-                      value={
-                        (selectedAnnotationId
-                          ? (annotations.find((a) => a.id === selectedAnnotationId) as any)?.color
-                          : defaultStyle.color) || '#111827'
-                      }
-                      onChange={(ev) => {
-                        const c = ev.target.value;
-                        if (selectedAnnotationId) updateSelected({ color: c } as any);
-                        else setDefaultStyle((s) => ({ ...s, color: c }));
-                      }}
-                      className="w-10 h-10 p-1 rounded-lg border border-border"
-                      title="Couleur"
-                    />
-
-                    <select
-                      className="h-10 px-2 rounded-lg border border-border text-sm"
-                      value={
-                        selectedAnnotationId
-                          ? ((annotations.find((a) => a.id === selectedAnnotationId) as any)?.fontSize ?? defaultStyle.fontSize)
-                          : defaultStyle.fontSize
-                      }
-                      onChange={(ev) => {
-                        const v = parseInt(ev.target.value, 10);
-                        if (selectedAnnotationId) updateSelected({ fontSize: v } as any);
-                        else setDefaultStyle((s) => ({ ...s, fontSize: v }));
-                      }}
-                      title="Taille"
-                    >
-                      {[12, 14, 16, 18, 20, 24, 28, 32].map((n) => (
-                        <option key={n} value={n}>
-                          {n}px
-                        </option>
-                      ))}
-                    </select>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (selectedAnnotationId) {
-                          const cur = annotations.find((a) => a.id === selectedAnnotationId) as any;
-                          updateSelected({ bold: !cur?.bold } as any);
-                        } else {
-                          setDefaultStyle((s) => ({ ...s, bold: !s.bold }));
-                        }
-                      }}
-                      className="px-2 py-2 rounded-lg hover:bg-muted transition-colors"
-                      title="Gras"
-                    >
-                      <Bold className="w-4 h-4" />
-                    </button>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (selectedAnnotationId) {
-                          const cur = annotations.find((a) => a.id === selectedAnnotationId) as any;
-                          updateSelected({ italic: !cur?.italic } as any);
-                        } else {
-                          setDefaultStyle((s) => ({ ...s, italic: !s.italic }));
-                        }
-                      }}
-                      className="px-2 py-2 rounded-lg hover:bg-muted transition-colors"
-                      title="Italique"
-                    >
-                      <Italic className="w-4 h-4" />
-                    </button>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (selectedAnnotationId) {
-                          const cur = annotations.find((a) => a.id === selectedAnnotationId) as any;
-                          updateSelected({ underline: !cur?.underline } as any);
-                        } else {
-                          setDefaultStyle((s) => ({ ...s, underline: !s.underline }));
-                        }
-                      }}
-                      className="px-2 py-2 rounded-lg hover:bg-muted transition-colors"
-                      title="Souligner"
-                    >
-                      <Underline className="w-4 h-4" />
-                    </button>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (selectedAnnotationId) deleteSelected();
-                      }}
-                      disabled={!selectedAnnotationId}
-                      className="px-2 py-2 rounded-lg hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      title="Supprimer l��l�ment"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        closeContextMenu();
-                      }}
-                      className="px-2 py-2 rounded-lg hover:bg-muted transition-colors"
-                      title="Fermer"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                </div>
-              )}
+              {/**
+               * Barre d'outils contextuelle supprimée : elle était désactivée
+               * (`false && …`), faisait doublon avec la barre latérale fixe et
+               * portait des accès non gardés à `contextMenu` (erreurs de type).
+               * Les actions utiles sont dans la barre latérale et dans la barre
+               * de l'élément sélectionné, juste au-dessus du document.
+               */}
 
               {/* Option insertion en bas de page */}
               {/* -bottom-25 : suffisamment d'écart avec la barre de navigation
