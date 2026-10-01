@@ -2,12 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-
-const CONSENT_KEY = 'cookie-consent';
+import {
+  COOKIE_CONSENT_OPEN_EVENT,
+  readCookieConsent,
+  writeCookieConsent,
+  type CookieConsentValue,
+} from '@/hooks/use-cookie-consent';
 
 /**
  * Bannière de consentement aux cookies (RGPD).
- * S'affiche tant que l'utilisateur n'a pas fait de choix.
+ * S'affiche tant que l'utilisateur n'a pas fait de choix, et peut être
+ * rouverte à tout moment (droit de retrait) via `openCookieConsent()`,
+ * par exemple depuis la page /cookies.
  * Textes issus du namespace i18n `cookie` (10 langues).
  */
 export function CookieConsent() {
@@ -15,12 +21,21 @@ export function CookieConsent() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (!localStorage.getItem(CONSENT_KEY)) setVisible(true);
+    if (!readCookieConsent()) setVisible(true);
+
+    const onOpen = () => setVisible(true);
+    window.addEventListener(COOKIE_CONSENT_OPEN_EVENT, onOpen);
+    return () => window.removeEventListener(COOKIE_CONSENT_OPEN_EVENT, onOpen);
   }, []);
 
-  function choose(value: 'accepted' | 'refused') {
-    localStorage.setItem(CONSENT_KEY, value);
+  function choose(value: CookieConsentValue) {
+    writeCookieConsent(value);
     setVisible(false);
+    // Aucun rechargement ici : le composant AdScript retire les scripts
+    // publicitaires dès que le refus est enregistré, et un utilisateur peut
+    // être en pleine conversion de fichier (le rechargement ferait perdre
+    // son travail). Le retrait explicite depuis /cookies, lui, recharge la
+    // page pour purger entièrement les balises déjà évaluées par Google.
   }
 
   if (!visible) return null;
@@ -58,3 +73,4 @@ export function CookieConsent() {
     </div>
   );
 }
+
