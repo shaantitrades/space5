@@ -91,6 +91,28 @@ Le conteneur **ne lit aucun fichier `.env`** : tout est injecté par Coolify à 
 `STRIPE_PUBLISHABLE_KEY` (paiement — **non branché dans le code**), `AWS_*` (stockage S3),
 `SENTRY_DSN` (monitoring).
 
+### Google AdSense (monétisation — désactivée par défaut)
+
+Le site **ne contacte jamais Google** tant que `NEXT_PUBLIC_ADSENSE_ENABLED` n'est pas à `true`.
+Activation détaillée : [`docs/ADSENSE.md`](docs/ADSENSE.md). Variables :
+
+| Variable | Valeur | Rôle |
+|---|---|---|
+| `NEXT_PUBLIC_ADSENSE_ENABLED` | `true` \| `false` | interrupteur maître |
+| `NEXT_PUBLIC_ADSENSE_CLIENT` | `ca-pub-5343389597650456` | identifiant éditeur (défaut déjà embarqué) |
+| `NEXT_PUBLIC_ADSENSE_SLOT_HEADER` | ID numérique | bloc haut de page |
+| `NEXT_PUBLIC_ADSENSE_SLOT_IN_CONTENT` | ID numérique | bloc dans les articles de blog |
+| `NEXT_PUBLIC_ADSENSE_SLOT_FOOTER` | ID numérique | bloc bas de page |
+| `NEXT_PUBLIC_ADSENSE_CMP_ID` | `pub-5343389597650456` | CMP Google, **obligatoire pour servir l'EEE/UK/CH** |
+| `NEXT_PUBLIC_ADSENSE_REQUIRE_CONSENT` | `true` (défaut) \| `false` | `false` seulement si la CMP Google gère le consentement |
+
+⚠️ **`NEXT_PUBLIC_*` est inlinée AU BUILD** : la définir uniquement à l'exécution n'a aucun
+effet. Renseignez-la dans l'onglet *build time* de Coolify (ou via `--build-arg`, les `ARG`
+existent dans le `Dockerfile` et les workflows `.github/workflows/docker-publish*.yml`),
+puis **redéployez**. Le fichier `public/ads.txt` doit rester accessible sur
+`https://multi-convert.com/ads.txt` (AdSense → *Sites* → *ads.txt* = « Autorisé »).
+
+
 ### Générer les secrets
 
 ```bash
@@ -165,6 +187,56 @@ Puis : **Google Search Console** → ajouter la propriété et soumettre `sitema
 ---
 
 ## 6. Dépannage
+
+### Le déploiement échoue sur « Collecting build traces » (`exit code 255`, aucun message)
+
+Symptôme exact dans les logs Coolify : le build va jusqu'à
+`✓ Generating static pages (339/339)`, puis affiche `Collecting build traces ...`
+et s'arrête là — `Deployment failed: Command execution failed (exit code 255)`,
+sans le moindre message d'erreur.
+
+Cause : **la mémoire du VPS a manqué pendant la compilation**. `Collecting build
+traces` est l'étape la plus gourmande de Next.js ; quand le noyau tue le process
+(*OOM killer*), il n'y a **aucune exception JavaScript** — donc aucun message,
+juste un code de sortie 255. Deux amplificateurs :
+
+1. **Coolify recompile sur le VPS** à chaque déploiement, car le service `app`
+   du `docker-compose.prod.yml` contient un bloc `build:` — alors que l'image est
+   déjà construite par GitHub Actions (§8).
+2. **4 workers de génération statique par défaut** : Next en crée 4 et **retire
+   leur plafond de mémoire** (chaque worker est un process Node complet, non
+   borné par `NODE_OPTIONS`). `buildWorkers()` dans `next.config.js` n'en crée
+   plus qu'un seul quand la mémoire libre est faible.
+
+À faire dans l'ordre (sur le VPS) :
+
+```bash
+# 1. Le noyau a-t-il tué le build ? (chercher « Killed process ... node »)
+dmesg -T | grep -i -E 'oom|killed process'
+free -h          # mémoire disponible
+df -h            # disque : un disque plein casse aussi le build
+
+# 2. Récupérer l'espace laissé par le build échoué
+docker builder prune -af
+
+# 3. Si le VPS n'a pas de swap : en ajouter 2 Go (absorbe le pic du build)
+sudo fallocate -l 2G /swapfile && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+```
+
+Puis relancer le déploiement — **sans** « Force rebuild » (`--no-cache` allonge et
+alourdit le build inutilement). Si le build est encore tué :
+
+| Levier | Où | Valeur |
+| --- | --- | --- |
+| Ne plus compiler sur le VPS | Coolify → Configuration → type **Docker Image** + `IMAGE` / `PULL_POLICY=always` (§8) | — |
+| Nombre de workers du build | Coolify → Environment Variables (**build time**) | `NEXT_BUILD_WORKERS=1` |
+| Plafond du tas Node du build | idem | `NODE_MAX_OLD_SPACE_SIZE=2048` (VPS ≥ 6 Go) |
+| Mémoire de la machine | hébergeur VPS | ≥ 8 Go pour compiler confortablement |
+
+ℹ️ Un `exit code 137` au lieu de 255 désigne le même problème : process tué par
+le noyau. Et rappel de la règle §8 : **l'image est construite sur les runners
+GitHub, jamais sur le VPS.**
 
 ### Le conteneur redémarre en boucle
 → Une variable obligatoire manque. Les logs indiquent laquelle : `docker logs <conteneur_app>`.
@@ -268,11 +340,12 @@ se résume à un `docker pull` (quelques secondes) puis au redémarrage du conte
 
 ## 9. Zéro « 504 Gateway Timeout » au déploiement
 
-### Les 5 causes, et ce qui les supprime
+### Les 6 causes, et ce qui les supprime
 
 | Cause | Symptôme | Correctif (présent dans le dépôt) |
 | --- | --- | --- |
 | Build Next.js sur le VPS (2-4 Go) | OOM killer → proxy sans backend | Image construite par GitHub Actions + `IMAGE`/`PULL_POLICY=always` (§8) |
+| Build tué sur « Collecting build traces » (exit 255, aucun message) | déploiement en échec, sans log d'erreur | 1 worker de build sur VPS (`NEXT_BUILD_WORKERS=1`, auto via `next.config.js`) + swap si possible (§6) |
 | Le serveur attendait la base avant d'écouter | 504 pendant 1-2 min à chaque démarrage | `docker-entrypoint.sh` lance `server.js` **en premier**, la base est préparée en arrière-plan |
 | `depends_on: service_healthy` sur Postgres | l'app ne démarre pas tant que PG n'est pas prêt | `condition: service_started` (le code tolère une base momentanément absente) |
 | Aucun plafond mémoire | un pic du process Node tue le VPS entier | `NODE_OPTIONS=--max-old-space-size=768` + `mem_limit` |
@@ -293,6 +366,8 @@ se résume à un `docker pull` (quelques secondes) puis au redémarrage du conte
 | `APP_MAX_OLD_SPACE` | `768` | plafond du tas Node (Mo) |
 | `APP_MEM_LIMIT` | `1536m` | plafond mémoire du conteneur app |
 | `PG_MEM_LIMIT` / `REDIS_MEM_LIMIT` | `768m` / `384m` | plafonds Postgres / Redis |
+| `NEXT_BUILD_WORKERS` *(build time)* | auto (≈1 par Go libre, max 4) | workers du build Next.js — `1` sur un VPS |
+| `NODE_MAX_OLD_SPACE_SIZE` *(build time)* | `1536` | plafond du tas Node pendant le build (Mo) |
 
 ### Si le site ne répond quand même pas
 
@@ -316,3 +391,33 @@ curl -s -o /dev/null -w 'https : %{http_code} tls=%{time_appconnect}s octet=%{ti
   redémarrer le conteneur puis contrôler la mémoire.
 - **502 / 503 immédiat** → conteneur non démarré ou non *healthy* : lire les logs.
 - **`/api/health` en 200 mais pages lentes** → chercher côté base de données (`/api/health?db=1`).
+
+### Cas réel (20/09/2026) — 504 alors que le TLS est instantané
+
+Mesures prises depuis l'extérieur pendant l'incident :
+
+| Test | Résultat | Lecture |
+| --- | --- | --- |
+| `curl -s -o /dev/null -w '%{http_code}' http://multi-convert.com/` | **302 en 0,10 s** | Traefik (proxy) est vivant et rapide |
+| Handshake TLS sur `:443` | **TLS 1.3 en 0,14 s**, certificat valide | ni DNS, ni certificat, ni pare-feu en cause |
+| `curl -w 'ttfb=%{time_starttransfer}' https://multi-convert.com/api/health` | **0 octet pendant 25 s** (puis 504) | le conteneur `app` accepte la connexion mais ne répond jamais |
+| `https://multi-convert.com/robots.txt` | même symptôme | ce n'est pas la base : aucune requête SQL sur cette route |
+
+Conclusion : Traefik va bien, **le conteneur `app` (Node) ne rend plus la main** — les requêtes
+sont acceptées par le proxy puis restent sans réponse jusqu'au 504. Ordre d'intervention :
+
+1. Coolify → **Deployments** : si un déploiement est en cours (build), **l'arrêter** — c'est lui
+   qui sature la mémoire/le CPU (cause n°1 du §9).
+2. Coolify → l'application → **Restart** (équivalent : `docker restart <conteneur app>`).
+3. Depuis le VPS, vérifier que l'application répond en interne :
+   `docker exec <app> wget -qO- http://127.0.0.1:3000/api/health`
+   → **200** = le conteneur va bien (chercher alors côté proxy/Traefik) ;
+   → **pas de réponse** = conteneur figé ou en boucle de redémarrage : lire les logs (étape 4).
+4. `docker logs --tail 100 <app>` (`Killed`, `OOM`, `server.js introuvable`, « Base indisponible »),
+   `docker stats --no-stream`, `free -h`, `df -h`, `dmesg | grep -i -E 'oom|killed process'`.
+5. Si `docker stats` montre le conteneur collé à son plafond : augmenter **ensemble**
+   `APP_MAX_OLD_SPACE` (plafond du tas Node) et `APP_MEM_LIMIT` — un tas de 768 Mo avec un
+   `mem_limit` de 1,5 Go provoque du *swapping* et des réponses qui n'arrivent plus.
+6. Vérifier enfin que Coolify **ne recompile pas sur le VPS** (type **Docker Image** +
+   `IMAGE` + `PULL_POLICY=always`, §8). Sans ce réglage, le déploiement suivant reproduira
+   exactement la même panne.

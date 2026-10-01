@@ -58,27 +58,57 @@ COPY . .
 ARG NEXT_PUBLIC_APP_URL=http://localhost:3000
 ARG NEXT_PUBLIC_API_URL=http://localhost:3000
 ARG NEXT_PUBLIC_VERSION=1.0.0
+# Google AdSense (monétisation) — inliné au build, donc figé dans l'image.
+# Passer NEXT_PUBLIC_ADSENSE_ENABLED=true + renseigner les IDs de blocs pour
+# activer les annonces (voir docs/ADSENSE.md). Valeurs par défaut = désactivé.
+ARG NEXT_PUBLIC_ADSENSE_ENABLED=false
+ARG NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-5343389597650456
+ARG NEXT_PUBLIC_ADSENSE_CMP_ID=
+ARG NEXT_PUBLIC_ADSENSE_REQUIRE_CONSENT=true
+ARG NEXT_PUBLIC_ADSENSE_SLOT_HEADER=
+ARG NEXT_PUBLIC_ADSENSE_SLOT_IN_CONTENT=
+ARG NEXT_PUBLIC_ADSENSE_SLOT_FOOTER=
 
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL \
     NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
     NEXT_PUBLIC_VERSION=$NEXT_PUBLIC_VERSION \
+    NEXT_PUBLIC_ADSENSE_ENABLED=$NEXT_PUBLIC_ADSENSE_ENABLED \
+    NEXT_PUBLIC_ADSENSE_CLIENT=$NEXT_PUBLIC_ADSENSE_CLIENT \
+    NEXT_PUBLIC_ADSENSE_CMP_ID=$NEXT_PUBLIC_ADSENSE_CMP_ID \
+    NEXT_PUBLIC_ADSENSE_REQUIRE_CONSENT=$NEXT_PUBLIC_ADSENSE_REQUIRE_CONSENT \
+    NEXT_PUBLIC_ADSENSE_SLOT_HEADER=$NEXT_PUBLIC_ADSENSE_SLOT_HEADER \
+    NEXT_PUBLIC_ADSENSE_SLOT_IN_CONTENT=$NEXT_PUBLIC_ADSENSE_SLOT_IN_CONTENT \
+    NEXT_PUBLIC_ADSENSE_SLOT_FOOTER=$NEXT_PUBLIC_ADSENSE_SLOT_FOOTER \
     NEXT_TELEMETRY_DISABLED=1 \
     CI=true \
     NEXT_BUILD_PHASE=1
 
-# Limite le heap Node pour éviter l'OOM sur un petit VPS.
+# ── Mémoire du build (VPS) ─────────────────────────────────────
 #
 # Constaté en production : le build échouait à l'étape
-# « Collecting build traces » (exit code 255, sans message d'erreur),
+# « Collecting build traces ... » (exit code 255, SANS aucun message),
 # c'est-à-dire l'étape la plus gourmande en mémoire de Next.js.
-# Cause probable : mémoire insuffisante sur le VPS pendant le build
-# (Coolify + l'ancien conteneur app + postgres + redis tournent en parallèle).
+# Cause : mémoire insuffisante sur le VPS pendant le build (Coolify +
+# l'ancien conteneur app + postgres + redis tournent en parallèle) → le noyau
+# tue le process (OOM killer) : pas d'exception JavaScript, donc pas de
+# message, juste un code de sortie 255.
 #
-# 2048 = OK pour 4 Go ; 1024–1536 sur un VPS 2 Go.
-# La valeur est surchargeable au build sans modifier le fichier :
-#   --build-arg NODE_MAX_OLD_SPACE_SIZE=2048
+# 1) Plafond du tas du process principal (où webpack compile et où Next
+#    collecte les « build traces ») :
+#    2048 = OK pour 4 Go ; 1024–1536 sur un VPS 2 Go.
+#    Surchargeable au build sans modifier le fichier :
+#      --build-arg NODE_MAX_OLD_SPACE_SIZE=2048
+#
+# 2) Nombre de workers du build (génération statique) : Next en crée 4 par
+#    défaut ET retire ce plafond de tas de leur environnement (chaque worker
+#    n'est donc plus borné en mémoire). Voir buildWorkers() dans
+#    next.config.js : vide = dimensionné sur la mémoire libre du serveur
+#    (~1 Go par worker), surchargeable :
+#      --build-arg NEXT_BUILD_WORKERS=1
 ARG NODE_MAX_OLD_SPACE_SIZE=1536
-ENV NODE_OPTIONS="--max-old-space-size=${NODE_MAX_OLD_SPACE_SIZE}"
+ARG NEXT_BUILD_WORKERS=
+ENV NODE_OPTIONS="--max-old-space-size=${NODE_MAX_OLD_SPACE_SIZE}" \
+    NEXT_BUILD_WORKERS=${NEXT_BUILD_WORKERS}
 
 RUN npm run build
 

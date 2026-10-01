@@ -18,6 +18,14 @@ services:
     # téléchargée ici. Le VPS ne consomme plus 2-4 Go de RAM pour un build, il
     # ne peut donc plus se retrouver à court de mémoire pendant le
     # remplacement du conteneur (OOM → le proxy n'a plus de backend → 504).
+    #
+    # ⚠️ Tant que ce bloc `build:` existe, Coolify recompile le projet sur le VPS
+    # à CHAQUE déploiement (`docker compose ... build --pull --no-cache`) : c'est
+    # ce build qui est tué faute de mémoire (« Collecting build traces ... »,
+    # exit 255, aucun message — voir DEPLOIEMENT-COOLIFY.md §6). Pour ne plus
+    # compiler ici : retirer ce bloc `build:` (et ses `args:`), puis laisser
+    # Coolify télécharger l'image publiée par GitHub Actions (§8).
+
     image: ${IMAGE:-multi-convert:latest}
     pull_policy: ${PULL_POLICY:-missing}
     build:
@@ -27,6 +35,26 @@ services:
         NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
         NEXT_PUBLIC_VERSION: ${NEXT_PUBLIC_VERSION:-1.0.0}
+        # Google AdSense — inliné au build : définir ENABLED=true + les IDs de
+        # blocs dans .env pour activer les annonces (docs/ADSENSE.md).
+        NEXT_PUBLIC_ADSENSE_ENABLED: ${NEXT_PUBLIC_ADSENSE_ENABLED:-false}
+        NEXT_PUBLIC_ADSENSE_CLIENT: ${NEXT_PUBLIC_ADSENSE_CLIENT:-ca-pub-5343389597650456}
+        NEXT_PUBLIC_ADSENSE_CMP_ID: ${NEXT_PUBLIC_ADSENSE_CMP_ID:-}
+        NEXT_PUBLIC_ADSENSE_REQUIRE_CONSENT: ${NEXT_PUBLIC_ADSENSE_REQUIRE_CONSENT:-true}
+        NEXT_PUBLIC_ADSENSE_SLOT_HEADER: ${NEXT_PUBLIC_ADSENSE_SLOT_HEADER:-}
+        NEXT_PUBLIC_ADSENSE_SLOT_IN_CONTENT: ${NEXT_PUBLIC_ADSENSE_SLOT_IN_CONTENT:-}
+        NEXT_PUBLIC_ADSENSE_SLOT_FOOTER: ${NEXT_PUBLIC_ADSENSE_SLOT_FOOTER:-}
+        # ── Mémoire du build (VPS) ─────────────────────────────
+        # Le build échouait à « Collecting build traces ... » (exit 255, sans
+        # aucun message) : mémoire insuffisante sur le VPS. Ces deux valeurs
+        # sont transmises au Dockerfile (voir les commentaires détaillés
+        # dedans) et ajustables dans Coolify → Environment Variables
+        # (build time), sans modifier ce fichier :
+        #   NODE_MAX_OLD_SPACE_SIZE=2048   (VPS ≥ 6 Go)
+        #   NEXT_BUILD_WORKERS=1           (imposer 1 worker de build)
+        # Vide = dimensionnement automatique sur la mémoire libre du serveur.
+        NODE_MAX_OLD_SPACE_SIZE: ${NODE_MAX_OLD_SPACE_SIZE:-1536}
+        NEXT_BUILD_WORKERS: ${NEXT_BUILD_WORKERS:-}
     # Tag local par defaut : plus aucune dependance a une image GHCR.
     restart: unless-stopped
     # Temps laissé au process pour fermer ses connexions avant SIGKILL

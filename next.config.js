@@ -1,6 +1,49 @@
 /** @type {import('next').NextConfig} */
 const path = require('path');
+const os = require('os');
 const withNextIntl = require('next-intl/plugin')('./i18n.ts');
+
+/**
+ * Nombre de « workers » utilisés par le build (option `experimental.cpus`).
+ *
+ * POURQUOI CETTE FONCTION
+ * -----------------------
+ * Next.js crée **4 workers par défaut** (voir
+ * node_modules/next/dist/build/index.js → getNumberOfWorkers : « Fall back to 4
+ * workers if a count is not specified »). Or, à la création de ces workers,
+ * Next **retire le plafond de tas** (`--max-old-space-size`) de leur
+ * environnement (même fichier : « we don't pass down NODE_OPTIONS as it can
+ * extra memory usage ») : chaque worker est donc un process Node complet dont
+ * la mémoire n'est plus bornée par NODE_OPTIONS.
+ *
+ * Sur un VPS qui fait déjà tourner Coolify + l'application + Postgres + Redis,
+ * ces 4 process en plus du process principal (qui compile, puis collecte les
+ * « build traces ») dépassent la RAM : le noyau tue le build (OOM killer)
+ * pendant l'étape la plus gourmande, d'où un échec à
+ * « Collecting build traces ... » avec `exit code 255` et **aucun message
+ * d'erreur** (voir DEPLOIEMENT-COOLIFY.md §6 et §9).
+ *
+ * On dimensionne donc le nombre de workers sur la mémoire réellement libre :
+ * ~1 Go de RAM libre par worker, après avoir réservé 1,5 Go au process
+ * principal (webpack + collecte des traces).
+ *
+ *   VPS 4 Go, ~2,5 Go libres  -> 1 worker
+ *   VPS 8 Go, ~5,5 Go libres  -> 4 workers (maximum de Next)
+ *   Runner GitHub Actions     -> 4 workers (build CI rapide, inchangé)
+ *
+ * Surchargeable sans modifier ce fichier (build-arg / variable de build
+ * Coolify) : NEXT_BUILD_WORKERS=1 (ou 2, 4...). Une valeur vide ou invalide
+ * laisse le dimensionnement automatique.
+ */
+function buildWorkers() {
+  const forced = Number(process.env.NEXT_BUILD_WORKERS);
+  if (Number.isFinite(forced) && forced > 0) {
+    return Math.floor(forced);
+  }
+  const GB = 1024 ** 3;
+  const freeAfterMainProcess = (os.freemem() - 1.5 * GB) / GB;
+  return Math.max(1, Math.min(4, Math.floor(freeAfterMainProcess)));
+}
 
 const nextConfig = {
   output: 'standalone',
@@ -28,6 +71,10 @@ const nextConfig = {
     formats: ['image/avif', 'image/webp'],
   },
   experimental: {
+    // Mémoire de build : voir buildWorkers() en haut de ce fichier.
+    // 4 workers (défaut Next) tuent le build sur un VPS (OOM killer pendant
+    // « Collecting build traces » → exit 255 sans message).
+    cpus: buildWorkers(),
     serverActions: {
       bodySizeLimit: '50mb',
     },
@@ -127,14 +174,29 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
+            /**
+             * CSP compatible AdSense.
+             *
+             * AdSense (et la CMP Google Funding Choices) chargent leurs
+             * ressources depuis les domaines Google : sans ces autorisations,
+             * les annonces sont bloquées silencieusement par le navigateur
+             * (« Refused to load the script… » dans la console).
+             *
+             * - script-src : pagead2.googlesyndication.com, adservice.google.com,
+             *                tpc.googlesyndication.com (via *.googlesyndication.com),
+             *                fundingchoicesmessages.google.com (CMP).
+             * - connect-src : doubleclick.net / googlesyndication.com (beacons).
+             * - frame-src : googleads.g.doubleclick.net et
+             *               *.googlesyndication.com (iframes d'annonces).
+             */
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com",
-              "style-src 'self' 'unsafe-inline'",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com https://fundingchoicesmessages.google.com https://*.gstatic.com",
+              "style-src 'self' 'unsafe-inline' https://*.googlesyndication.com",
               "img-src 'self' data: https: blob:",
-              "font-src 'self' data:",
-              "connect-src 'self' https://api.stripe.com https://*.uploadthing.com",
-              "frame-src 'self' https://js.stripe.com",
+              "font-src 'self' data: https://*.gstatic.com",
+              "connect-src 'self' https://api.stripe.com https://*.uploadthing.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://fundingchoicesmessages.google.com",
+              "frame-src 'self' https://js.stripe.com https://googleads.g.doubleclick.net https://*.doubleclick.net https://*.googlesyndication.com https://*.google.com",
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",
