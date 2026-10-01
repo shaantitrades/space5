@@ -142,6 +142,13 @@ export function QuickAccess() {
       description: 'Insérer des pages supplémentaires dans votre document PDF',
       link: '/pdf?tool=merge',
     },
+    {
+      icon: ImageIcon,
+      title: 'Images en PDF',
+      description: 'Assembler plusieurs images (JPG, PNG, WebP) en un seul PDF',
+      link: '/images?tool=img-to-pdf',
+      badge: 'nouveau',
+    },
   ];
 
   // Groupe 3 : Authentification & Protection (4 outils)

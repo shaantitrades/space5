@@ -47,7 +47,8 @@ export function FormatSelector({ inputFile, onFormatSelect, disabled }: FormatSe
     const formats: string[] = [];
 
     if (mimeType.startsWith('image/') || ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'bmp', 'tiff'].includes(extension || '')) {
-      formats.push(...FORMAT_GROUPS.image.formats);
+      // Une image peut aussi être assemblée en PDF (une image par page)
+      formats.push(...FORMAT_GROUPS.image.formats, ...FORMAT_GROUPS.pdf.formats);
     }
 
     if (mimeType === 'application/pdf' || extension === 'pdf') {

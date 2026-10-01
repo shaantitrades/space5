@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { X, ArrowLeft,
   FileText, Combine, Scissors, Minimize2, FileSearch,
   Edit, PenTool, PenLine, ShieldX, Lock, Unlock, Droplet,
-  Layers, RotateCw, Crop, Trash } from 'lucide-react';
+  Layers, RotateCw, Crop, Trash, ImagePlus } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
 
@@ -107,6 +107,11 @@ export function ToolsModal({ isOpen, onClose }: ToolsModalProps) {
       id: 'pdf-crop',
       icon: Crop,
       href: '/pdf?tool=crop',
+    },
+    {
+      id: 'img-to-pdf',
+      icon: ImagePlus,
+      href: '/images?tool=img-to-pdf',
     },
   ];
 

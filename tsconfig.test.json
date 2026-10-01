@@ -1,0 +1,22 @@
+/**
+ * Configuration TypeScript dédiée à la compilation des tests unitaires.
+ *
+ * Les tests sont écrits en TypeScript et exécutés via le lanceur natif de Node
+ * (`node --test`) : aucune dépendance de test supplémentaire n'est requise.
+ * Voir le script `npm test`.
+ */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": ".test-build",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "isolatedModules": false,
+    "incremental": false,
+    "jsx": "preserve",
+    "types": ["node"]
+  },
+  "include": ["tests/**/*.ts", "src/lib/converters/image-to-pdf.ts"],
+  "exclude": ["node_modules", ".next", ".test-build"]
+}

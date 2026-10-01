@@ -272,6 +272,22 @@
         "title": "Arkiv (ZIP)",
         "description": "Opprett eller pakk ut ZIP-arkiver"
       },
+      "convert": {
+        "title": "Filkonverterer",
+        "description": "Konverter bilder, dokumenter, video og lyd på ett sted"
+      },
+      "tools": {
+        "title": "Alle verktøy",
+        "description": "Den komplette listen over Multi Convert-verktøy"
+      },
+      "qr": {
+        "title": "QR-kodegenerator",
+        "description": "Lag QR-koder for lenker, tekst, Wi-Fi og kontakter"
+      },
+      "img-to-pdf": {
+        "title": "Bilder til PDF",
+        "description": "Slå sammen flere bilder til ett enkelt PDF-dokument"
+      },
       "pdf-convert": {
         "title": "Konverter et dokument",
         "description": "Konverter enkelt filer til PDF, Word, Excel og mer."
@@ -433,6 +449,8 @@
     "message": "🍪 Vi bruker cookies for å finansiere nettstedet (annonsering) og forbedre opplevelsen din. Les vår <link>personvernerklæring</link>.",
     "accept": "Godta",
     "refuse": "Avslå",
-    "learnMore": "Les mer"
+    "learnMore": "Les mer",
+    "currentChoice": "Ditt nåværende valg:",
+    "notChosen": "Ikke valgt"
   }
 }

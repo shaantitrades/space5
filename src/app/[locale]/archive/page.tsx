@@ -1,5 +1,6 @@
 "use client";
 import { useState } from 'react';
+import { SearchBar } from '@/components/layout/search-bar';
 
 export default function ArchivePage() {
   const [createFiles, setCreateFiles] = useState<File[]>([]);
@@ -46,6 +47,9 @@ export default function ArchivePage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-10 space-y-10">
       <h1 className="text-2xl font-bold">Archive (ZIP)</h1>
+
+      {/* Recherche : trouver un outil depuis cette page */}
+      <SearchBar embedded />
 
       <section className="p-6 border rounded-lg space-y-4">
         <h2 className="text-lg font-semibold">Créer un ZIP</h2>

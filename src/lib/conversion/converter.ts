@@ -5,6 +5,7 @@
  */
 
 import sharp from 'sharp';
+import { ImageToPdfConverter } from '@/lib/converters/image-to-pdf';
 import { PDFDocument } from 'pdf-lib';
 
 /**
@@ -34,6 +35,11 @@ export async function convertFile(
  * Convertit une image vers un autre format
  */
 async function convertImage(inputBuffer: Buffer, outputFormat: string): Promise<Buffer> {
+  // 📄 Image → PDF : chaque image devient une page du document
+  if (outputFormat === 'pdf') {
+    return ImageToPdfConverter.convert([inputBuffer]);
+  }
+
   let sharpInstance = sharp(inputBuffer);
 
   switch (outputFormat) {

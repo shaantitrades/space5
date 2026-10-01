@@ -272,6 +272,22 @@
         "title": "Arkiv (ZIP)",
         "description": "Skapa eller packa upp ZIP-arkiv"
       },
+      "convert": {
+        "title": "Filkonverterare",
+        "description": "Konvertera bilder, dokument, video och ljud på ett ställe"
+      },
+      "tools": {
+        "title": "Alla verktyg",
+        "description": "Den kompletta listan över Multi Converts verktyg"
+      },
+      "qr": {
+        "title": "QR-kodgenerator",
+        "description": "Skapa QR-koder för länkar, text, Wi-Fi och kontakter"
+      },
+      "img-to-pdf": {
+        "title": "Bilder till PDF",
+        "description": "Slå ihop flera bilder till ett enda PDF-dokument"
+      },
       "pdf-convert": {
         "title": "Konvertera ett dokument",
         "description": "Konvertera enkelt filer till PDF, Word, Excel med mera."
@@ -433,6 +449,8 @@
     "message": "🍪 Vi använder cookies för att finansiera webbplatsen (reklam) och förbättra din upplevelse. Läs vår <link>integritetspolicy</link>.",
     "accept": "Acceptera",
     "refuse": "Avböj",
-    "learnMore": "Läs mer"
+    "learnMore": "Läs mer",
+    "currentChoice": "Ditt nuvarande val:",
+    "notChosen": "Inte valt"
   }
 }

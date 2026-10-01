@@ -9,6 +9,7 @@
     "start": "node node_modules/next/dist/bin/next start",
     "lint": "node node_modules/next/dist/bin/next lint",
     "type-check": "tsc --noEmit",
+    "test": "tsc -p tsconfig.test.json && node --test \".test-build/tests/**/*.test.js\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "setup": "node scripts/check-env.js",

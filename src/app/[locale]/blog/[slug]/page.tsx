@@ -3,6 +3,8 @@ export const dynamic = 'force-dynamic';
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { Link } from '@/i18n/routing';
+import { AdSlot } from '@/components/ads/ad-slot';
+import { adsConfig } from '@/config/ads';
 
 export default async function BlogPostPage({
   params,
@@ -37,6 +39,10 @@ export default async function BlogPostPage({
           {/* Contenu Markdown brut (prochaine étape: rendu MDX/Markdown sécurisé) */}
           <pre className="whitespace-pre-wrap font-sans text-base leading-7">{post.content}</pre>
         </article>
+
+        {/* Emplacement dans le contenu : uniquement sur les articles (pages
+            riches en texte, conformes aux règles AdSense de placement). */}
+        <AdSlot slot={adsConfig.slots.inContent} format="rectangle" className="mt-10" />
       </div>
     </div>
   );

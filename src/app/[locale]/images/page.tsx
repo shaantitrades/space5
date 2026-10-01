@@ -16,7 +16,9 @@ import {
   Cloud,
   Link2,
   Edit,
+  ImagePlus,
 } from 'lucide-react';
+import { SearchBar } from '@/components/layout/search-bar';
 import { FileUploadSkeleton } from '@/components/ui/file-upload-skeleton';
 
 // Lazy load ImageEditor pour optimiser le bundle
@@ -24,7 +26,7 @@ const ImageEditor = lazy(() =>
   import('@/components/editors/image-editor').then(mod => ({ default: mod.ImageEditor }))
 );
 
-type ImageTool = 'convert' | 'optimize' | 'resize' | 'filters' | 'watermark' | 'batch' | 'favicon';
+type ImageTool = 'convert' | 'optimize' | 'resize' | 'filters' | 'watermark' | 'batch' | 'favicon' | 'img-to-pdf';
 
 export default function ImagesPage() {
   const searchParams = useSearchParams();
@@ -35,6 +37,12 @@ export default function ImagesPage() {
   const [selectedFaviconFormat, setSelectedFaviconFormat] = useState<string>('ICO');
   const [processedFile, setProcessedFile] = useState<File | null>(null);
   const [showEditor, setShowEditor] = useState(false);
+  /** Taille des pages pour l'assemblage d'images en PDF */
+  const [imagePdfPageSize, setImagePdfPageSize] = useState<'fit' | 'a4' | 'letter'>('fit');
+  /** Orientation des pages PDF (`auto` = selon l'image) */
+  const [imagePdfOrientation, setImagePdfOrientation] = useState<'auto' | 'portrait' | 'landscape'>('auto');
+  /** Marge autour de l'image, en millimètres */
+  const [imagePdfMarginMm, setImagePdfMarginMm] = useState(0);
 
   const tools = [
     {
@@ -92,6 +100,14 @@ export default function ImagesPage() {
       icon: Star,
       color: 'text-yellow-600',
       bgColor: 'bg-yellow-50',
+    },
+    {
+      id: 'img-to-pdf' as ImageTool,
+      name: 'Images en PDF',
+      description: 'Assembler plusieurs images en un seul PDF',
+      icon: ImagePlus,
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-50',
     },
   ];
 
@@ -153,6 +169,12 @@ export default function ImagesPage() {
       if (selectedTool === 'favicon' && selectedFaviconFormat) {
         formData.append('outputFormat', selectedFaviconFormat.toLowerCase());
       }
+      // Options d'assemblage des images en PDF
+      if (selectedTool === 'img-to-pdf') {
+        formData.append('pageSize', imagePdfPageSize);
+        formData.append('orientation', imagePdfOrientation);
+        formData.append('marginMm', String(imagePdfMarginMm));
+      }
 
       const response = await fetch('/api/images/process', {
         method: 'POST',
@@ -164,12 +186,12 @@ export default function ImagesPage() {
       const blob = await response.blob();
       
       // Pour les outils qui génèrent des images, ouvrir l'éditeur
-      // Pour le favicon (ZIP) ou batch, télécharger directement
-      if (selectedTool === 'favicon' || selectedTool === 'batch') {
+      // Favicon (ZIP), lot ou PDF assemblé : aucun éditeur possible, téléchargement direct
+      if (selectedTool === 'favicon' || selectedTool === 'batch' || selectedTool === 'img-to-pdf') {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `result-${selectedTool}.zip`;
+        a.download = selectedTool === 'img-to-pdf' ? 'images.pdf' : `result-${selectedTool}.zip`;
         a.click();
         URL.revokeObjectURL(url);
       } else {
@@ -229,8 +251,13 @@ export default function ImagesPage() {
           </p>
         </div>
 
+        {/* Barre de recherche : trouver un outil depuis cette page */}
+        <div className="max-w-2xl mx-auto mb-12">
+          <SearchBar embedded />
+        </div>
+
         {/* Sélection de l'outil */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
           {tools.map((tool) => {
             const Icon = tool.icon;
             const isSelected = selectedTool === tool.id;
@@ -499,6 +526,81 @@ export default function ImagesPage() {
                     </p>
                   </div>
                 </>
+              )}
+
+              {selectedTool === 'img-to-pdf' && files.length > 0 && (
+                <div className="mb-6 p-4 bg-muted rounded-lg">
+                  <h3 className="font-semibold mb-3">Taille des pages PDF</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    {[
+                      { id: 'fit', label: "Adaptée à l'image" },
+                      { id: 'a4', label: 'A4' },
+                      { id: 'letter', label: 'Letter' },
+                    ].map((option) => (
+                      <button
+                        key={option.id}
+                        onClick={() => setImagePdfPageSize(option.id as 'fit' | 'a4' | 'letter')}
+                        className={`px-4 py-3 border-2 rounded-lg transition-colors font-medium ${
+                          imagePdfPageSize === option.id
+                            ? 'border-primary bg-primary/10'
+                            : 'border-border hover:border-primary'
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* En mode « adaptée », la page épouse l'image : pas d'orientation à choisir */}
+                  {imagePdfPageSize !== 'fit' && (
+                    <div className="mt-4">
+                      <label
+                        htmlFor="image-pdf-orientation"
+                        className="block text-sm font-medium mb-2"
+                      >
+                        Orientation des pages
+                      </label>
+                      <select
+                        id="image-pdf-orientation"
+                        value={imagePdfOrientation}
+                        onChange={(e) =>
+                          setImagePdfOrientation(
+                            e.target.value as 'auto' | 'portrait' | 'landscape'
+                          )
+                        }
+                        className="w-full px-4 py-3 border-2 border-border rounded-lg focus:border-primary focus:outline-none"
+                      >
+                        <option value="auto">Automatique (selon l&apos;image)</option>
+                        <option value="portrait">Portrait</option>
+                        <option value="landscape">Paysage</option>
+                      </select>
+                    </div>
+                  )}
+
+                  <div className="mt-4">
+                    <label htmlFor="image-pdf-margin" className="block text-sm font-medium mb-2">
+                      Marge autour de l&apos;image (mm)
+                    </label>
+                    <input
+                      id="image-pdf-margin"
+                      type="number"
+                      min={0}
+                      max={50}
+                      step={1}
+                      value={imagePdfMarginMm}
+                      onChange={(e) =>
+                        setImagePdfMarginMm(
+                          Math.min(50, Math.max(0, Number(e.target.value) || 0))
+                        )
+                      }
+                      className="w-full px-4 py-3 border-2 border-border rounded-lg focus:border-primary focus:outline-none"
+                    />
+                  </div>
+
+                  <p className="text-xs text-muted-foreground mt-3">
+                    📄 Une image par page, dans l&apos;ordre de sélection
+                  </p>
+                </div>
               )}
 
               {/* Bouton de traitement */}

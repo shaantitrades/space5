@@ -272,6 +272,22 @@
         "title": "Archiv (ZIP)",
         "description": "ZIP-Archive erstellen oder entpacken"
       },
+      "convert": {
+        "title": "Dateikonverter",
+        "description": "Bilder, Dokumente, Videos und Audio an einem Ort umwandeln"
+      },
+      "tools": {
+        "title": "Alle Tools",
+        "description": "Die vollständige Liste der Multi Convert Tools"
+      },
+      "qr": {
+        "title": "QR-Code-Generator",
+        "description": "Erstellen Sie QR-Codes für Links, Texte, WLAN und Kontakte"
+      },
+      "img-to-pdf": {
+        "title": "Bilder zu PDF",
+        "description": "Fügen Sie mehrere Bilder zu einem einzigen PDF-Dokument zusammen"
+      },
       "pdf-convert": {
         "title": "Dokument konvertieren",
         "description": "Konvertieren Sie Dateien einfach in PDF, Word, Excel und mehr."
@@ -433,6 +449,8 @@
     "message": "🍪 Wir verwenden Cookies, um die Website zu finanzieren (Werbung) und Ihr Erlebnis zu verbessern. Lesen Sie unsere <link>Datenschutzerklärung</link>.",
     "accept": "Akzeptieren",
     "refuse": "Ablehnen",
-    "learnMore": "Mehr erfahren"
+    "learnMore": "Mehr erfahren",
+    "currentChoice": "Ihre aktuelle Auswahl:",
+    "notChosen": "Nicht festgelegt"
   }
 }

@@ -132,6 +132,17 @@ export const toolsConfig: Tool[] = [
     bgColor: 'bg-green-50',
   },
   {
+    id: 'images-to-pdf',
+    name: 'Images en PDF',
+    description: 'Assemblez plusieurs images (JPG, PNG, WebP) en un seul PDF, une image par page',
+    icon: ImagePlus,
+    href: '/images?tool=img-to-pdf',
+    category: 'assemblage',
+    color: 'text-amber-600',
+    bgColor: 'bg-amber-50',
+    new: true,
+  },
+  {
     id: 'pdf-split-multi',
     name: 'Scinder PDF',
     description: 'Séparez votre PDF en plusieurs fichiers distincts selon vos besoins',

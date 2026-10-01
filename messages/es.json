@@ -272,6 +272,22 @@
         "title": "Archivo (ZIP)",
         "description": "Crear o extraer archivos ZIP"
       },
+      "convert": {
+        "title": "Convertidor de archivos",
+        "description": "Convierte imágenes, documentos, vídeo y audio en un solo lugar"
+      },
+      "tools": {
+        "title": "Todas las herramientas",
+        "description": "La lista completa de herramientas de Multi Convert"
+      },
+      "qr": {
+        "title": "Generador de códigos QR",
+        "description": "Crea códigos QR para enlaces, textos, Wi-Fi y contactos"
+      },
+      "img-to-pdf": {
+        "title": "Imágenes a PDF",
+        "description": "Combina varias imágenes en un solo documento PDF"
+      },
       "pdf-convert": {
         "title": "Convertir un documento",
         "description": "Convierte fácilmente archivos a PDF, Word, Excel y más."
@@ -433,6 +449,8 @@
     "message": "🍪 Usamos cookies para financiar el sitio (publicidad) y mejorar tu experiencia. Consulta nuestra <link>política de privacidad</link>.",
     "accept": "Aceptar",
     "refuse": "Rechazar",
-    "learnMore": "Más información"
+    "learnMore": "Más información",
+    "currentChoice": "Su elección actual:",
+    "notChosen": "Sin definir"
   }
 }

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { toolsConfig, categoryLabels, getToolsByCategory, type Tool } from '@/config/tools';
 import { Link } from '@/i18n/routing';
 import { Search, X, Sparkles, Zap, Crown } from 'lucide-react';
+import { SearchBar } from '@/components/layout/search-bar';
 
 export default function ToolsPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -58,6 +59,11 @@ export default function ToolsPage() {
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Conversion rapide et sécurisée. Vos fichiers sont traités à la demande, puis supprimés ; ils ne sont ni conservés ni revendus.
             </p>
+
+            {/* Recherche globale : trouver un outil ou une page */}
+            <div className="pt-2">
+              <SearchBar embedded />
+            </div>
 
             {/* Trust Badges */}
             <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">

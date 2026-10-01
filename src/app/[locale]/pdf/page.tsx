@@ -35,6 +35,7 @@ import {
   Link2
 } from 'lucide-react';
 import { FileUploadSkeleton } from '@/components/ui/file-upload-skeleton';
+import { SearchBar } from '@/components/layout/search-bar';
 import { ConversionProgress } from '@/components/ui/conversion-progress';
 
 // Lazy load PDFEditor (3180 lignes - très lourd)
@@ -58,7 +59,8 @@ type PDFTool =
   | 'watermark'
   | 'rotate'
   | 'crop'
-  | 'delete-pages';
+  | 'delete-pages'
+  | 'img-to-pdf';
 
 export default function PDFToolsPage() {
   const searchParams = useSearchParams();
@@ -78,6 +80,12 @@ export default function PDFToolsPage() {
   // Le navigateur ne connaît pas la taille réelle des pages : des pourcentages
   // sont la seule unité fiable, et ils restent justes en formats mixtes.
   const [cropMargins, setCropMargins] = useState({ top: 0, bottom: 0, left: 0, right: 0 });
+  /** Options d'assemblage images → PDF */
+  const [imagePdfPageSize, setImagePdfPageSize] = useState<'fit' | 'a4' | 'letter'>('a4');
+  /** Orientation des pages PDF (`auto` = selon l'image) */
+  const [imagePdfOrientation, setImagePdfOrientation] = useState<'auto' | 'portrait' | 'landscape'>('auto');
+  /** Marge autour de l'image, en millimètres */
+  const [imagePdfMarginMm, setImagePdfMarginMm] = useState(0);
   const [files, setFiles] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedOutputFormat, setSelectedOutputFormat] = useState<string>('');
@@ -214,6 +222,14 @@ export default function PDFToolsPage() {
       bgColor: 'bg-lime-50',
     },
     {
+      id: 'img-to-pdf' as PDFTool,
+      name: 'Images en PDF',
+      description: 'Assemblez plusieurs images (JPG, PNG, WebP…) en un seul PDF',
+      icon: ImagePlus,
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-50',
+    },
+    {
       id: 'delete-pages' as PDFTool,
       name: 'Supprimer des Pages',
       description: 'Retirez une ou plusieurs pages de votre document en quelques clics',
@@ -315,6 +331,11 @@ export default function PDFToolsPage() {
       } else if (selectedTool === 'protect' || selectedTool === 'unlock') {
         // En production, demander le mot de passe à l'utilisateur
         formData.append('password', 'default-password');
+      } else if (selectedTool === 'img-to-pdf') {
+        // Les images sont assemblées en pages A4 par défaut, une image par page
+        formData.append('pageSize', imagePdfPageSize);
+        formData.append('orientation', imagePdfOrientation);
+        formData.append('marginMm', String(imagePdfMarginMm));
       }
 
       // Démarrer le tracking de progression
@@ -434,6 +455,19 @@ export default function PDFToolsPage() {
 
   const currentTool = tools.find((t) => t.id === selectedTool);
 
+  /** Outils qui acceptent plusieurs fichiers d'un coup */
+  const acceptsMultipleFiles = ['merge', 'organize', 'img-to-pdf'].includes(selectedTool);
+  /** Outils dont la zone d'importation accepte aussi les images */
+  const acceptsImages = ['ocr', 'edit', 'annotate', 'img-to-pdf'].includes(selectedTool);
+  /** Extensions proposées par la boîte de dialogue d'importation */
+  const imageAccept = '.jpg,.jpeg,.png,.webp,.gif,.bmp,.tif,.tiff,.avif';
+  const uploadAccept =
+    selectedTool === 'img-to-pdf'
+      ? imageAccept
+      : acceptsImages
+      ? `.pdf,${imageAccept}`
+      : '.pdf,.docx,.xlsx';
+
   // Gérer la fermeture de l'éditeur
   const handleEditorClose = () => {
     setShowEditor(false);
@@ -495,6 +529,11 @@ export default function PDFToolsPage() {
           <p className="text-xl text-muted-foreground">
             Tous vos besoins PDF en un seul endroit
           </p>
+        </div>
+
+        {/* Barre de recherche : trouver un outil depuis cette page */}
+        <div className="max-w-2xl mx-auto mb-12">
+          <SearchBar embedded />
         </div>
 
         {/* Sélection de l'outil */}
@@ -588,12 +627,8 @@ export default function PDFToolsPage() {
                         </p>
                         <input
                           type="file"
-                          multiple={selectedTool === 'merge' || selectedTool === 'organize'}
-                          accept={
-                            selectedTool === 'ocr' || selectedTool === 'edit' || selectedTool === 'annotate'
-                              ? '.pdf,.jpg,.jpeg,.png'
-                              : '.pdf,.docx,.xlsx'
-                          }
+                          multiple={acceptsMultipleFiles}
+                          accept={uploadAccept}
                           onChange={handleFileSelect}
                           className="hidden"
                           id="file-upload-main"
@@ -605,9 +640,11 @@ export default function PDFToolsPage() {
                           📁 Parcourir fichiers
                         </label>
                         <p className="text-xs text-muted-foreground mt-4">
-                          {selectedTool === 'merge' || selectedTool === 'organize' 
-                            ? 'Plusieurs PDF acceptés' 
-                            : selectedTool === 'ocr' || selectedTool === 'edit' || selectedTool === 'annotate'
+                          {acceptsMultipleFiles 
+                            ? selectedTool === 'img-to-pdf'
+                              ? 'Plusieurs images acceptées, assemblées en un PDF'
+                              : 'Plusieurs PDF acceptés' 
+                            : acceptsImages
                             ? 'PDF ou images acceptés'
                             : 'Jusqu\'à 100 Mo pour les PDF et jusqu\'à 20 Mo pour les formats DOC, DOCX, PPT, PPTX, XLS, XLSX, BMP, JPG, JPEG, GIF, PNG ou TXT'}
                         </p>
@@ -623,10 +660,8 @@ export default function PDFToolsPage() {
                                 e.stopPropagation();
                                 const input = document.createElement('input');
                                 input.type = 'file';
-                                input.multiple = selectedTool === 'merge' || selectedTool === 'organize';
-                                input.accept = selectedTool === 'ocr' || selectedTool === 'edit' || selectedTool === 'annotate'
-                                  ? '.pdf,.jpg,.jpeg,.png'
-                                  : '.pdf,.docx,.xlsx';
+                                input.multiple = acceptsMultipleFiles;
+                                input.accept = uploadAccept;
                                 input.onchange = (evt) => {
                                   const target = evt.target as HTMLInputElement;
                                   if (target.files && target.files.length > 0) {
@@ -653,10 +688,8 @@ export default function PDFToolsPage() {
                                 e.stopPropagation();
                                 const input = document.createElement('input');
                                 input.type = 'file';
-                                input.multiple = selectedTool === 'merge' || selectedTool === 'organize';
-                                input.accept = selectedTool === 'ocr' || selectedTool === 'edit' || selectedTool === 'annotate'
-                                  ? '.pdf,.jpg,.jpeg,.png'
-                                  : '.pdf,.docx,.xlsx';
+                                input.multiple = acceptsMultipleFiles;
+                                input.accept = uploadAccept;
                                 input.onchange = (evt) => {
                                   const target = evt.target as HTMLInputElement;
                                   if (target.files && target.files.length > 0) {
@@ -683,10 +716,8 @@ export default function PDFToolsPage() {
                                 e.stopPropagation();
                                 const input = document.createElement('input');
                                 input.type = 'file';
-                                input.multiple = selectedTool === 'merge' || selectedTool === 'organize';
-                                input.accept = selectedTool === 'ocr' || selectedTool === 'edit' || selectedTool === 'annotate'
-                                  ? '.pdf,.jpg,.jpeg,.png'
-                                  : '.pdf,.docx,.xlsx';
+                                input.multiple = acceptsMultipleFiles;
+                                input.accept = uploadAccept;
                                 input.onchange = (evt) => {
                                   const target = evt.target as HTMLInputElement;
                                   if (target.files && target.files.length > 0) {
@@ -808,12 +839,8 @@ export default function PDFToolsPage() {
                         <div className="mt-6">
                           <input
                             type="file"
-                            multiple={selectedTool === 'merge' || selectedTool === 'organize'}
-                            accept={
-                              selectedTool === 'ocr' || selectedTool === 'edit' || selectedTool === 'annotate'
-                                ? '.pdf,.jpg,.jpeg,.png'
-                                : '.pdf,.docx,.xlsx'
-                            }
+                            multiple={acceptsMultipleFiles}
+                            accept={uploadAccept}
                             onChange={(e) => {
                               if (e.target.files && e.target.files.length > 0) {
                                 const newFiles = Array.from(e.target.files);
@@ -870,6 +897,83 @@ export default function PDFToolsPage() {
                         {level}
                       </button>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedTool === 'img-to-pdf' && files.length > 0 && (
+                <div className="mb-6 p-4 bg-muted rounded-lg">
+                  <h3 className="font-semibold mb-1">Options d&apos;assemblage</h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    📄 Une image par page, dans l&apos;ordre de sélection.
+                  </p>
+
+                  <label
+                    htmlFor="pdf-image-page-size"
+                    className="block text-sm font-medium mb-2"
+                  >
+                    Taille des pages
+                  </label>
+                  <select
+                    id="pdf-image-page-size"
+                    value={imagePdfPageSize}
+                    onChange={(e) =>
+                      setImagePdfPageSize(e.target.value as 'fit' | 'a4' | 'letter')
+                    }
+                    className="w-full px-4 py-3 border-2 border-border rounded-lg focus:border-primary focus:outline-none"
+                  >
+                    <option value="fit">Adaptée à chaque image</option>
+                    <option value="a4">A4 (210 × 297 mm)</option>
+                    <option value="letter">Letter (216 × 279 mm)</option>
+                  </select>
+
+                  {/* En mode « adaptée », la page épouse l'image : pas d'orientation à choisir */}
+                  {imagePdfPageSize !== 'fit' && (
+                    <div className="mt-4">
+                      <label
+                        htmlFor="pdf-image-orientation"
+                        className="block text-sm font-medium mb-2"
+                      >
+                        Orientation des pages
+                      </label>
+                      <select
+                        id="pdf-image-orientation"
+                        value={imagePdfOrientation}
+                        onChange={(e) =>
+                          setImagePdfOrientation(
+                            e.target.value as 'auto' | 'portrait' | 'landscape'
+                          )
+                        }
+                        className="w-full px-4 py-3 border-2 border-border rounded-lg focus:border-primary focus:outline-none"
+                      >
+                        <option value="auto">Automatique (selon l&apos;image)</option>
+                        <option value="portrait">Portrait</option>
+                        <option value="landscape">Paysage</option>
+                      </select>
+                    </div>
+                  )}
+
+                  <div className="mt-4">
+                    <label
+                      htmlFor="pdf-image-margin"
+                      className="block text-sm font-medium mb-2"
+                    >
+                      Marge autour de l&apos;image (mm)
+                    </label>
+                    <input
+                      id="pdf-image-margin"
+                      type="number"
+                      min={0}
+                      max={50}
+                      step={1}
+                      value={imagePdfMarginMm}
+                      onChange={(e) =>
+                        setImagePdfMarginMm(
+                          Math.min(50, Math.max(0, Number(e.target.value) || 0))
+                        )
+                      }
+                      className="w-full px-4 py-3 border-2 border-border rounded-lg focus:border-primary focus:outline-none"
+                    />
                   </div>
                 </div>
               )}

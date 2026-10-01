@@ -14,6 +14,13 @@ import {
   normalizeImageFormat,
 } from '@/lib/client/local-converters';
 
+/** Renomme le résultat avec la vraie extension produite (ex. image.jpg → converted_image.pdf) */
+function buildDownloadName(fileName: string | undefined, format: string): string {
+  const extension = (format || 'bin').toLowerCase() === 'jpeg' ? 'jpg' : (format || 'bin').toLowerCase();
+  const base = fileName?.replace(/\.[^./\\]+$/, '') || 'fichier';
+  return `converted_${base}.${extension}`;
+}
+
 export function Converter() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [outputFormat, setOutputFormat] = useState<string>('');
@@ -349,7 +356,7 @@ export function Converter() {
                     <a
                       key={index}
                       href={url}
-                      download={`converted_${selectedFiles[index]?.name}`}
+                      download={buildDownloadName(selectedFiles[index]?.name, outputFormat)}
                       className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg hover:bg-green-100 dark:hover:bg-green-900 transition-colors"
                     >
                       <span className="text-sm font-medium">

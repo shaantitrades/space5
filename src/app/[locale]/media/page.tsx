@@ -18,6 +18,7 @@ import {
   X,
   CheckCircle2,
 } from 'lucide-react';
+import { SearchBar } from '@/components/layout/search-bar';
 
 type MediaTool = 'video-convert' | 'audio-convert' | 'extract-audio' | 'trim' | 'compress' | 'merge';
 
@@ -251,6 +252,11 @@ export default function MediaPage() {
           <p className="text-xl text-muted-foreground">
             Conversion, découpage et compression vidéo/audio professionnels
           </p>
+        </div>
+
+        {/* Recherche : trouver un outil depuis cette page */}
+        <div className="max-w-2xl mx-auto mb-12">
+          <SearchBar embedded />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-12">

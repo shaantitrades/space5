@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { buildLabeledPageMetadata } from '@/lib/seo';
+import { CookieSettings } from '@/components/consent/cookie-settings';
 
 export async function generateMetadata({
   params,
@@ -62,6 +63,11 @@ export default function CookiesPage() {
               également configurer votre navigateur pour bloquer les cookies, ou effacer les cookies déjà
               déposés.
             </p>
+            <p className="text-muted-foreground mt-2">
+              Vous pouvez modifier votre choix à tout moment ci-dessous : le retrait du consentement est
+              aussi simple que son octroi.
+            </p>
+            <CookieSettings />
           </section>
         </div>
       </div>

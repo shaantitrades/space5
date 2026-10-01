@@ -7,6 +7,7 @@ import { ImageConverter } from '@/lib/converters/image-converter';
 import { ImageOptimizer } from '@/lib/converters/image-optimizer';
 import { ImageBatchProcessor } from '@/lib/converters/image-batch';
 import { FaviconGenerator } from '@/lib/converters/favicon-generator';
+import { ImageToPdfConverter, mmToPt, type ImageToPdfOrientation, type ImageToPdfPageSize } from '@/lib/converters/image-to-pdf';
 import JSZip from 'jszip';
 import {
   assertMonthlyQuotaOrThrow,
@@ -35,7 +36,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const allowedTools = new Set(['convert', 'optimize', 'resize', 'filters', 'watermark', 'batch', 'favicon']);
+    const allowedTools = new Set(['convert', 'optimize', 'resize', 'filters', 'watermark', 'batch', 'favicon', 'img-to-pdf']);
     if (!allowedTools.has(tool)) {
       return NextResponse.json({ error: 'Outil non reconnu' }, { status: 400 });
     }
@@ -207,6 +208,38 @@ export async function POST(request: NextRequest) {
           headers: {
             'Content-Type': 'application/zip',
             'Content-Disposition': 'attachment; filename="favicons.zip"',
+            'X-Usage-Mode': creditsUsed > 0 ? 'credits' : 'quota',
+            'X-Usage-Credits-Used': String(creditsUsed),
+          },
+        });
+      }
+
+      case 'img-to-pdf': {
+        // 📄 Assemble les images déposées en un seul PDF (une image par page)
+        const pageSize = ((formData.get('pageSize') as string) || 'fit') as ImageToPdfPageSize;
+        const orientation = ((formData.get('orientation') as string) || 'auto') as ImageToPdfOrientation;
+        // La marge est fournie par l'interface en millimètres
+        const marginMm = Number(formData.get('marginMm') ?? 0);
+        const pdfBuffer = await ImageToPdfConverter.convert(buffers, {
+          pageSize,
+          orientation,
+          margin: Number.isFinite(marginMm) ? mmToPt(marginMm) : 0,
+        });
+
+        await recordConversion({
+          userId,
+          inputFileName: files[0]?.name || 'image',
+          inputFormat: inferExt(files[0]?.name || '') || 'image',
+          outputFormat: 'pdf',
+          fileSizeBytes: totalBytes,
+          creditsUsed,
+          status: 'COMPLETED',
+        });
+
+        return new NextResponse(pdfBuffer, {
+          headers: {
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': 'attachment; filename="images.pdf"',
             'X-Usage-Mode': creditsUsed > 0 ? 'credits' : 'quota',
             'X-Usage-Credits-Used': String(creditsUsed),
           },

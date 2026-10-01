@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, KeyboardEvent } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter, usePathname } from '@/i18n/routing';
-import { Search, X, Command, FileText, Image as ImageIcon, Video, File, Zap, TrendingUp, Clock, ArrowRight, Star, PenLine, Edit, PenTool, ShieldX, Lock, Unlock, Droplet, Layers, RotateCw, Crop, Trash, Sparkles, Minimize2, Film, Music, Volume2, Scissors, Combine, FileSearch, Maximize2 } from 'lucide-react';
+import { Search, X, Command, FileText, Image as ImageIcon, Video, File, Zap, TrendingUp, Clock, ArrowRight, Star, PenLine, Edit, PenTool, ShieldX, Lock, Unlock, Droplet, Layers, RotateCw, Crop, Trash, Sparkles, Minimize2, Film, Music, Volume2, Scissors, Combine, FileSearch, Maximize2, QrCode, LayoutGrid, ImagePlus } from 'lucide-react';
 
 /** Entree statique de l'index : les libelles viennent du catalogue i18n */
 interface SearchItem {
@@ -12,6 +12,9 @@ interface SearchItem {
   href: string;
   icon: React.ElementType;
   keywords: string[];
+  /** Libellé de secours si la langue n'a pas encore l'entrée du catalogue */
+  fallbackTitle?: string;
+  fallbackDescription?: string;
 }
 
 interface SearchResult extends SearchItem {
@@ -28,6 +31,9 @@ const searchableItems: SearchItem[] = [
   { id: 'images', category: 'page', href: '/images', icon: ImageIcon, keywords: ['image', 'photo', 'logo', 'optimisation', 'filtre', 'resize'] },
   { id: 'media', category: 'page', href: '/media', icon: Video, keywords: ['video', 'audio', 'mp4', 'mp3', 'conversion', 'extraction'] },
   { id: 'archive', category: 'page', href: '/archive', icon: File, keywords: ['zip', 'archive', 'compresser', 'extraire', 'décompresser'] },
+  { id: 'convert', category: 'page', href: '/convert', icon: FileText, keywords: ['convertir', 'conversion', 'convertisseur', 'convertir un fichier', 'tous formats', 'conversion de fichiers', 'file converter'], fallbackTitle: 'Convertisseur de fichiers', fallbackDescription: 'Convertir images, documents, vidéos et audio' },
+  { id: 'tools', category: 'page', href: '/tools', icon: LayoutGrid, keywords: ['outils', 'tools', 'tous les outils', 'catalogue', 'liste des outils', 'index', 'all tools'], fallbackTitle: 'Tous les outils', fallbackDescription: 'La liste complète des outils Multi Convert' },
+  { id: 'qr', category: 'page', href: '/qr', icon: QrCode, keywords: ['qr', 'qr code', 'code qr', 'qrcode', 'flashcode', 'générateur de qr code', 'créer un qr code', 'wifi', 'vcard', 'lien', 'url', 'qrcode generator'], fallbackTitle: 'Générateur de QR Code', fallbackDescription: 'Créez des QR codes pour vos liens, textes, Wi-Fi et contacts' },
   
   // Outils PDF
   { id: 'pdf-convert', category: 'tool', href: '/pdf?tool=convert', icon: FileText, keywords: ['pdf', 'convertir', 'word', 'excel', 'jpg', 'png', 'conversion'] },
@@ -36,13 +42,13 @@ const searchableItems: SearchItem[] = [
   { id: 'pdf-split', category: 'tool', href: '/pdf?tool=split', icon: Scissors, keywords: ['diviser', 'séparer', 'split', 'couper', 'scinder', 'extraire', 'séparer pdf'] },
   { id: 'pdf-compress', category: 'tool', href: '/pdf?tool=compress', icon: Minimize2, keywords: ['compresser', 'réduire', 'compress', 'taille', 'diminuer', 'réduire pdf'] },
   { id: 'pdf-edit', category: 'tool', href: '/pdf?tool=edit', icon: Edit, keywords: ['éditeur', 'edit', 'modifier', 'personnaliser', 'éditeur pdf', 'modifier pdf'] },
-  { id: 'pdf-annotate', category: 'tool', href: '/pdf?tool=annotate', icon: PenTool, keywords: ['annoter', 'notes', 'surlignage', 'dessins', 'annotation', 'commenter'] },
+  { id: 'pdf-annotate', category: 'tool', href: '/pdf?tool=annotate', icon: PenTool, keywords: ['annoter', 'annotate', 'notes', 'surlignage', 'surligner', 'highlight', 'dessins', 'annotation', 'commenter'] },
   { id: 'pdf-fill-sign', category: 'tool', href: '/pdf?tool=sign', icon: PenLine, keywords: ['remplir', 'signer', 'signature', 'formulaire', 'form', 'fill', 'sign', 'électronique', 'remplir et signer', 'remplissage', 'validation', 'signer pdf', 'formulaire pdf'] },
   { id: 'pdf-redact', category: 'tool', href: '/pdf?tool=redact', icon: ShieldX, keywords: ['protéger', 'masquer', 'confidentiel', 'redact', 'caviarder', 'protection données', 'masquer informations'] },
   { id: 'pdf-protect', category: 'tool', href: '/pdf?tool=protect', icon: Lock, keywords: ['sécuriser', 'protéger', 'mot de passe', 'password', 'sécurité', 'sécurisation', 'protéger pdf'] },
   { id: 'pdf-unlock', category: 'tool', href: '/pdf?tool=unlock', icon: Unlock, keywords: ['déverrouiller', 'unlock', 'retirer restrictions', 'débloquer', 'déverrouiller pdf', 'enlever mot de passe', 'débloquer pdf'] },
   { id: 'pdf-watermark', category: 'tool', href: '/pdf?tool=watermark', icon: Droplet, keywords: ['filigrane', 'watermark', 'marquer', 'filigrane personnalisé', 'marque document'] },
-  { id: 'pdf-organize', category: 'tool', href: '/pdf?tool=organize', icon: Layers, keywords: ['réorganiser', 'organiser', 'pages', 'réarranger', 'structure', 'réorganisation'] },
+  { id: 'pdf-organize', category: 'tool', href: '/pdf?tool=organize', icon: Layers, keywords: ['réorganiser', 'organiser', 'organize', 'organise', 'réorganiser pages', 'pages', 'réarranger', 'structure', 'réorganisation', 'mélanger'] },
   { id: 'pdf-rotate', category: 'tool', href: '/pdf?tool=rotate', icon: RotateCw, keywords: ['pivoter', 'rotate', 'rotation', 'orientation', 'portrait', 'paysage', 'tourner'] },
   { id: 'pdf-crop', category: 'tool', href: '/pdf?tool=crop', icon: Crop, keywords: ['recadrer', 'crop', 'découper', 'dimensions', 'redimensionner', 'ajuster'] },
   { id: 'pdf-delete-pages', category: 'tool', href: '/pdf?tool=delete-pages', icon: Trash, keywords: ['supprimer', 'delete', 'retirer', 'pages', 'enlever', 'effacer pages'] },
@@ -55,6 +61,7 @@ const searchableItems: SearchItem[] = [
   { id: 'img-watermark', category: 'tool', href: '/images?tool=watermark', icon: Droplet, keywords: ['filigrane', 'watermark', 'texte', 'logo', 'marquer image'] },
   { id: 'img-batch', category: 'tool', href: '/images?tool=batch', icon: Scissors, keywords: ['batch', 'lot', 'multiple', 'plusieurs', 'traitement par lot', 'plusieurs images'] },
   { id: 'img-favicon', category: 'tool', href: '/images?tool=favicon', icon: Star, keywords: ['favicon', 'icône', 'icon', 'icone', 'favicons', 'générateur', 'créer', 'apple-touch-icon', 'android-chrome'] },
+  { id: 'img-to-pdf', category: 'tool', href: '/images?tool=img-to-pdf', icon: ImagePlus, keywords: ['image vers pdf', 'images en pdf', 'jpg en pdf', 'jpeg en pdf', 'png en pdf', 'webp en pdf', 'photo en pdf', 'photo vers pdf', 'convertir image en pdf', 'assembler images pdf', 'album pdf', 'image to pdf', 'jpg to pdf'], fallbackTitle: 'Images en PDF', fallbackDescription: 'Assemblez plusieurs images en un seul document PDF' },
   
   // Outils Media
   { id: 'media-video-convert', category: 'tool', href: '/media?tool=video-convert', icon: Video, keywords: ['convertir', 'vidéo', 'video', 'mp4', 'avi', 'mov', 'webm', 'mkv', 'flv', 'conversion vidéo'] },
@@ -93,10 +100,14 @@ export function SearchBar({ embedded = false }: { embedded?: boolean }) {
   // Index localise : titre et description resolus dans la langue active
   const items: SearchResult[] = searchableItems.map((item) => ({
     ...item,
-    title: tc(`items.${item.id}.title`),
-    description: tc(`items.${item.id}.description`),
+    title: tc.has(`items.${item.id}.title`) ? tc(`items.${item.id}.title`) : (item.fallbackTitle ?? item.id),
+    description: tc.has(`items.${item.id}.description`) ? tc(`items.${item.id}.description`) : (item.fallbackDescription ?? ''),
   }));
-  const suggestions = SUGGESTED_IDS.map((id) => tc(`items.${id}.title`));
+  const suggestions = SUGGESTED_IDS.map((id) =>
+    tc.has(`items.${id}.title`)
+      ? tc(`items.${id}.title`)
+      : (searchableItems.find((item) => item.id === id)?.fallbackTitle ?? id)
+  );
 
   // Charger les recherches récentes depuis localStorage
   useEffect(() => {

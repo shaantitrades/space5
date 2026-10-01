@@ -17,6 +17,7 @@ import { PDFOrganizer } from '@/lib/converters/pdf-organizer';
 import { PDFSecurity } from '@/lib/converters/pdf-security';
 import { PDFWatermark } from '@/lib/converters/pdf-watermark';
 import { PDFTransform } from '@/lib/converters/pdf-transform';
+import { ImageToPdfConverter, mmToPt, type ImageToPdfOrientation } from '@/lib/converters/image-to-pdf';
 import {
   assertMonthlyQuotaOrThrow,
   assertUploadSizeOrThrow,
@@ -62,6 +63,7 @@ export async function POST(request: NextRequest) {
       'rotate',
       'crop',
       'delete-pages',
+      'img-to-pdf',
     ]);
     if (!allowedTools.has(tool)) {
       return NextResponse.json({ error: `Outil non reconnu: ${tool}` }, { status: 400 });
@@ -470,6 +472,24 @@ export async function POST(request: NextRequest) {
 
         resultBuffer = await PDFOrganizer.removePages(buffers[0], pagesToDelete);
         fileName = 'pages-removed.pdf';
+        break;
+      }
+
+      case 'img-to-pdf': {
+        // 📄 Assemblage d'images (JPG, PNG, WebP…) en un seul PDF, une image par page
+        const pageSize = (formData.get('pageSize') as string) || 'a4';
+        const orientation = ((formData.get('orientation') as string) || 'auto') as ImageToPdfOrientation;
+        // La marge est fournie par l'interface en millimètres
+        const marginMm = Number(formData.get('marginMm') ?? 0);
+
+        resultBuffer = await ImageToPdfConverter.convert(buffers, {
+          pageSize: pageSize as 'fit' | 'a4' | 'letter',
+          orientation,
+          margin: Number.isFinite(marginMm) ? mmToPt(marginMm) : 0,
+        });
+        fileName = 'images.pdf';
+        contentType = 'application/pdf';
+        outputFormat = 'pdf';
         break;
       }
 
